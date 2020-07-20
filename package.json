@@ -7,7 +7,7 @@
     "dev": "nodemon -r dotenv/config src/server.ts",
     "start": "ts-node -r dotenv/config ./src/server.ts",
     "build": "rm -rf ./dist/ && tsc",
-    "prod": "npm run build && npm start"
+    "prod": "npm start"
   },
   "author": "chinedu ebinim",
   "license": "ISC",
