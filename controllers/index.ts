@@ -4,3 +4,4 @@ export * from "./RequestController";
 export * from "./ReviewController";
 export * from "./RedemptionItemController";
 export * from "./SortingController";
+export * from "./NotificationController";

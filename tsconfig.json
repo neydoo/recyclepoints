@@ -2,7 +2,7 @@
   "compilerOptions": {
     "module": "commonjs",
     "strict": true,
-    "baseUrl": "./src",
+    "baseUrl": "./",
     "outDir": "./dist",
     "removeComments": true,
     "experimentalDecorators": true,

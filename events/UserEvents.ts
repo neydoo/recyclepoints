@@ -1,6 +1,6 @@
 import * as EventEmitter from "events";
 import Core from "../service/CoreService";
-import Sms from "../service/Sms/AfricasTalking";
+// import Sms from "../service/Sms/AfricasTalking";
 import Notification from "../service/NotificationsService";
 import { Request } from "express";
 export class UserEvents extends EventEmitter.EventEmitter {
@@ -9,7 +9,7 @@ export class UserEvents extends EventEmitter.EventEmitter {
     constructor() {
         super();
         this.user = process.env.user;
-        this.sms = new Sms();
+        // this.sms = new Sms();
         this.core = new Core();
         this.notification = new Notification();
         // Become eaten when gator emits 'gatorEat'

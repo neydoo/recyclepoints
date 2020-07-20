@@ -7,3 +7,4 @@ tslib_1.__exportStar(require("./RequestController"), exports);
 tslib_1.__exportStar(require("./ReviewController"), exports);
 tslib_1.__exportStar(require("./RedemptionItemController"), exports);
 tslib_1.__exportStar(require("./SortingController"), exports);
+tslib_1.__exportStar(require("./NotificationController"), exports);
