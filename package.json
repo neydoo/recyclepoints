@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon -r dotenv/config src/server.ts",
     "start": "ts-node -r dotenv/config ./src/server.ts",
-    "prod": "npm run build && npm start"
+    "prod": "npm start"
   },
   "author": "adedotun bashorun",
   "license": "ISC",
