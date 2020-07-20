@@ -3,4 +3,12 @@ node_modules
 package-lock.json
 nodemon
 yarn.lock
-# dist
+src
+Abstract
+config
+controllers
+events
+middleware
+service
+uploads
+utilities

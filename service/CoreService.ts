@@ -1,16 +1,16 @@
 import { ActivityLog } from "../models/ActivityLog";
-import request = require("request");
+import axios, { AxiosRequestConfig } from "axios";
 
 import * as nodemailer from "nodemailer";
 import { Logger } from "@overnightjs/logger";
 import { config } from "../config/app";
 
-export type Options = {
-  method: string;
-  url: string;
-  headers?: object;
-  body?: string;
-};
+// export type Options = {
+//   method: string;
+//   url: string;
+//   headers?: object;
+//   data?: string;
+// };
 
 export type SmsData = {
   to: string;
@@ -22,7 +22,7 @@ export type SmsData = {
 };
 
 export default class CoreService {
-  protected options: Options;
+  protected options: AxiosRequestConfig;
   protected client: any;
 
   constructor() {
@@ -100,10 +100,10 @@ export default class CoreService {
     };
 
     const options = this.options;
-    options.body = JSON.stringify(data);
+    options.data = JSON.stringify(data);
 
-    const response = request(options);
+    const response = await axios(options);
 
-    console.log(response.body);
+    console.log(response.data);
   }
 }

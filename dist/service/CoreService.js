@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const ActivityLog_1 = require("../models/ActivityLog");
-const request = require("request");
+const axios_1 = require("axios");
 const nodemailer = require("nodemailer");
 const logger_1 = require("@overnightjs/logger");
 const app_1 = require("../config/app");
@@ -79,9 +79,9 @@ class CoreService {
                 api_key: app_1.config.sms.termii.apiKey,
             };
             const options = this.options;
-            options.body = JSON.stringify(data);
-            const response = request(options);
-            console.log(response.body);
+            options.data = JSON.stringify(data);
+            const response = yield axios_1.default(options);
+            console.log(response.data);
         });
     }
 }
