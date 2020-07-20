@@ -9,7 +9,7 @@ const RecyclePoint_1 = require("../models/RecyclePoint");
 const RecycleItem_1 = require("../models/RecycleItem");
 const RecyclePointRecord_1 = require("../models/RecyclePointRecord");
 const RequestRepository_1 = require("../abstract/RequestRepository");
-const user_1 = require("../models/user");
+const user_1 = require("../models/User");
 const RedemptionItem_1 = require("../models/RedemptionItem");
 class RequestService {
     constructor() {

@@ -2,7 +2,7 @@ import Core from "./CoreService";
 import Notification from "./NotificationsService";
 import { ReviewM } from "../models/Review";
 import { RequestRepository as Repository } from "../Abstract/RequestRepository";
-import { User } from "../models/user";
+import { User } from "../models/User";
 
 export class RecycleRequestService {
   protected repository: Repository;

@@ -1,7 +1,7 @@
 import * as passport from "passport";
 import * as passportLocal from "passport-local";
 import * as passportJwt from "passport-jwt";
-import { User } from "../models/user";
+import { User } from "../models/User";
 import { config } from "../config/app";
 
 // tslint:disable-next-line: variable-name

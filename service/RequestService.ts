@@ -5,7 +5,7 @@ import { RecyclePoint, RecyclePointM } from "../models/RecyclePoint";
 import { RecycleItem, RecycleItemM } from "../models/RecycleItem";
 import { RecyclePointRecord } from "../models/RecyclePointRecord";
 import { RequestRepository as Repository } from "../abstract/RequestRepository";
-import { User, IUserM } from "../models/user";
+import { User, IUserM } from "../models/User";
 import { RedemptionItem } from "../models/RedemptionItem";
 
 export class RequestService {
