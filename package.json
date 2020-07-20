@@ -5,9 +5,7 @@
   "main": "dist/src/server.js",
   "scripts": {
     "dev": "nodemon -r dotenv/config src/server.ts",
-    "start": "ts-node -r dotenv/config ./dist/src/server.js",
-    "build": "tsc",
-    "prod": "npm run build && npm start"
+    "start": "ts-node -r dotenv/config ./dist/src/server.js"
   },
   "author": "chinedu ebinim",
   "license": "ISC",
