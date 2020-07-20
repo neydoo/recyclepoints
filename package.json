@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon -r dotenv/config src/server.ts",
     "start": "ts-node -r dotenv/config ./dist/src/server.js",
-    "build": "rm -rf ./dist/ && tsc",
+    "build": "tsc",
     "prod": "npm run build && npm start"
   },
   "author": "chinedu ebinim",
