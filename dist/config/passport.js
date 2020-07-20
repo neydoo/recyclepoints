@@ -39,8 +39,8 @@ exports.__esModule = true;
 var passport = require("passport");
 var passportLocal = require("passport-local");
 var passportJwt = require("passport-jwt");
-var User_1 = require("../../models/User");
-var app_1 = require("../../config/app");
+var User_1 = require("../models/User");
+var app_1 = require("../config/app");
 // tslint:disable-next-line: variable-name
 var LocalStrategy = passportLocal.Strategy;
 var JwtStrategy = passportJwt.Strategy;
