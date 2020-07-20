@@ -8,7 +8,7 @@ import {
   Delete,
 } from "@overnightjs/core";
 import { AbstractController } from "./AbstractController";
-import { RequestRepository as Repository } from "../Abstract/RequestRepository";
+import { RequestRepository as Repository } from "../abstract/RequestRepository";
 import { checkJwt } from "../middleware/auth";
 import { ReviewM } from "../models/Review";
 import { RequestService } from "../service/RequestService";
