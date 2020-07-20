@@ -9,23 +9,41 @@ const LocalStrategy = passportLocal.Strategy;
 const JwtStrategy = passportJwt.Strategy;
 const ExtractJwt = passportJwt.ExtractJwt;
 
-passport.use(new LocalStrategy({ usernameField: "email", passwordField: "password" }, (email, password, done) => {
-  User.findOne({ email: email.toLowerCase() }, async (err, user: any) => {
-    if (err) { return done(err); }
-    if (!user) {
-      return done(undefined, false, { message: `user with ${email} not found.` });
+passport.use(
+  new LocalStrategy(
+    { usernameField: "email", passwordField: "password" },
+    async (email, password, done) => {
+      try {
+        let user;
+        user = await User.findOne({ email: email.toLowerCase() }).select(
+          "+password"
+        );
+        if (!user) {
+          return done(undefined, false, {
+            message: `user with ${email} not found.`,
+          });
+        }
+
+        if (!user.comparePassword(password)) {
+          return done(null, false, { message: "Incorrect password." });
+        }
+
+        if (user.isDeleted) {
+          return done(null, false, { message: "User has been deactivated." });
+        }
+
+        user = await User.findOne({
+          email: email.toLowerCase(),
+          isDeleted: false,
+        });
+
+        return done(null, user);
+      } catch (err) {
+        return done(err);
+      }
     }
-    const success = await user.comparePassword(password);
-    if (!success) {
-      return done(null, false, { message: "Incorrect password." });
-    }
-    if (user.is_active === false) {
-      return done(null, false, { message: "User Not Activated." });
-    }
-    process.env.user = user;
-    return done(null, user);
-  });
-}));
+  )
+);
 
 passport.serializeUser((user: any, done: any) => {
   done(null, user.id);
@@ -33,21 +51,28 @@ passport.serializeUser((user: any, done: any) => {
 
 passport.deserializeUser((id, done) => {
   User.findById(id, (err, user) => {
-      done(err, user);
+    done(err, user);
   });
 });
 
-passport.use(new JwtStrategy(
+passport.use(
+  new JwtStrategy(
     {
-        jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-        secretOrKey: config.app.JWT_SECRET,
-    },  (jwtToken, done) => {
-    User.findOne({ username: jwtToken.username },  (err, user) => {
-        if (err) { return done(err, false); }
-        if (user) {
-            return done(undefined, user , jwtToken);
-        } else {
-            return done(undefined, false);
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      secretOrKey: config.app.JWT_SECRET,
+    },
+    (jwtToken, done) => {
+      User.findOne({ id: jwtToken.id }, (err, user) => {
+        if (err) {
+          return done(err, false);
         }
-    });
-}));
+        if (user) {
+          return done(undefined, user, jwtToken);
+        } else {
+          return done(undefined, false);
+        }
+      });
+    }
+  )
+);
+module.exports = passport;

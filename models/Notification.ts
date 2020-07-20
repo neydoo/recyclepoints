@@ -5,7 +5,7 @@ export interface INotification extends Document {
     name: string;
     type: string;
     data: object;
-    status: string;
+    status?: string;
 }
 
 export const notificationSchema: Schema = new Schema({

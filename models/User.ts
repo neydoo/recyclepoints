@@ -1,39 +1,73 @@
 import { Document, Schema, Model, model, Error } from "mongoose";
 import * as bcrypt from "bcrypt-nodejs";
 
+enum Designation {
+  Buster = "buster",
+  Sorter = "sorter",
+  Admin = "admin",
+  Dev = "dev",
+  Operator = "operator",
+  Staff = "staff",
+  Client = "client",
+}
 export interface IUserM extends Document {
-    first_name?: string;
-    last_name?: string;
-    username: string;
-    email: string;
-    phone?: string;
-    password: string;
-    profile_image?: string;
-    cloud_image?: string;
-    is_active: boolean;
-    fullName(): string;
-    comparePassword(candidatePassword: any): boolean;
+  firstName: string;
+  lastName: string;
+  address: string;
+  email: string;
+  phone: string;
+  password?: string;
+  profileImage?: string;
+  pay?: number;
+  designation: Designation;
+  cloudImage?: string;
+  firstTimeLogin: boolean;
+  isDeleted: boolean;
+  otp?: string;
+  fullName(): string;
+  comparePassword(candidatePassword: string): boolean;
 }
 
-export const userSchema: Schema = new Schema({
-    first_name: { type: String, default: null },
-    last_name: { type: String, default: null },
-    username: { type: String, required: true, index: { unique: true } },
+export const userSchema: Schema = new Schema(
+  {
+    firstName: { type: String },
+    lastName: { type: String },
+    address: { type: String },
+    otp: { type: String },
     email: {
-        type: String,
-        lowercase: true,
-        required: true,
-        validate: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, "Please fill a valid email address"],
-        match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, "Please fill a valid email address"],
-        index: { unique: true },
+      type: String,
+      lowercase: true,
+      required: true,
+      validate: [
+        /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+        "Please fill a valid email address",
+      ],
+      match: [
+        /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+        "Please fill a valid email address",
+      ],
+      index: { unique: true },
     },
-    phone: { type: String},
-    password: { type: String},
-    profile_image: { type: String, default: null },
-    cloud_image: { type: String, default: null },
-    is_active: { type: Boolean, required: true, default: false },
-    deleted_at: {type: String, default: null },
-}, { timestamps: true });
+    phone: { type: String, unique: true },
+    password: { type: String, select: false },
+    pay: { type: String },
+    target: { type: String },
+    targetType: {
+      type: String,
+      enum: ["daily", "weekly", "monthly", "yearly"],
+    },
+    designation: {
+      type: String,
+      enum: ["buster", "admin", "dev", "sorter", "operator", "staff", "client"],
+    },
+    profileImage: { type: String, default: null },
+    cloudImage: { type: String, default: null },
+    isDeleted: { type: Boolean, required: true, default: false },
+    deletedAt: { type: String, default: null },
+    firstTimeLogin: { type: Boolean, default: true },
+  },
+  { timestamps: true }
+);
 
 // userSchema.pre<IUserM>("save", function save(next) {
 //     const user = this;
@@ -42,12 +76,12 @@ export const userSchema: Schema = new Schema({
 //     next();
 // });
 
-userSchema.methods.comparePassword = function(candidatePassword: string) {
-    return bcrypt.compareSync(candidatePassword, this.password);
+userSchema.methods.comparePassword = function (candidatePassword: string) {
+  return bcrypt.compareSync(candidatePassword, this.password);
 };
 
-userSchema.methods.fullName = function(): string {
-    return (this.firstName.trim() + " " + this.lastName.trim());
+userSchema.methods.fullName = function (): string {
+  return this.firstName.trim() + " " + this.lastName.trim();
 };
 
 export const User: Model<IUserM> = model<IUserM>("User", userSchema);

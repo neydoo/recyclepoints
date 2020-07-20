@@ -25,7 +25,7 @@ export class UserEvents extends EventEmitter.EventEmitter {
 
         this.core.activity_log(this.req, user.id, "Registered");
 
-        this.notification.triggerNotification("notifications", "users", {user, message: {msg: user.last_name + " Just created a new account."}}, this.req);
+        this.notification.triggerNotification("notifications", "users", {user, message: {message: user.last_name + " Just created a new account."}}, this.req);
 
 
     }

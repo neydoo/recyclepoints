@@ -28,6 +28,10 @@ export const config  = {
             apiKey: "",
             username: "",
         },
+        termii:{
+            apiKey: process.env.TERMII_SMS_KEY,
+            url: process.env.TERMII_SMS_URL
+        }
     },
     video: {
         vimeo: {

@@ -1,4 +1,5 @@
 import * as bodyParser from "body-parser";
+import * as express from "express";
 import * as controllers from "./controllers";
 import * as cors from "cors";
 import { Server } from "@overnightjs/core";
@@ -7,7 +8,7 @@ import * as morgan from "morgan";
 import * as mongoose from "mongoose";
 import * as passport from "passport";
 import { config } from "./config/app";
-
+import * as path from 'path';
 class AppServer extends Server {
 
     private readonly SERVER_STARTED = "Example server started on port: ";
@@ -23,6 +24,7 @@ class AppServer extends Server {
         this.app.use(bodyParser.urlencoded({extended: true}));
         this.app.use(cors());
         this.app.use(morgan("dev"));
+        this.app.use('/uploads', express.static(path.join(__dirname,'uploads')))
         require("./config/passport");
         this.mongo();
         this.app.use(passport.initialize());

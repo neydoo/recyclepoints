@@ -14,7 +14,7 @@ export class AbstractController {
             const data = await this.repository.findAll();
             res.status(200).send({ success: true, data });
         } catch (error) {
-            res.status(401).json({ success: false, error, msg: error.message });
+            res.status(401).json({ success: false, error, message: error.message });
         }
     }
 
@@ -22,9 +22,9 @@ export class AbstractController {
     public async destroy(req: Request, res: Response): Promise<void> {
         try {
             this.repository.forceDelete(req.params.id);
-            res.status(200).send({ success: true, msg: "record deleted successfull"});
+            res.status(200).send({ success: true, message: "record deleted successfull"});
         } catch (error) {
-            res.status(401).json({ success: false, error, msg: error.message });
+            res.status(401).json({ success: false, error, message: error.message });
         }
 
     }
@@ -33,9 +33,9 @@ export class AbstractController {
     public async delete(req: Request, res: Response): Promise<void> {
         try {
             this.repository.softDelete(req.params.id);
-            res.status(200).send({ success: true, msg: "record deleted successfull"});
+            res.status(200).send({ success: true, message: "record deleted successfull"});
         } catch (error) {
-            res.status(401).json({ success: false, error, msg: error.message });
+            res.status(401).json({ success: false, error, message: error.message });
         }
 
     }
