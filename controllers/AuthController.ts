@@ -9,51 +9,77 @@ import { UserRepository as Repository } from "../abstract/UserRepository";
 
 @Controller("api/auth")
 export class AuthController {
-    protected auth: any; private repository: any = new Repository();
-    constructor() {
-        this.auth = new UserService();
+  protected auth: any;
+  private repository: any = new Repository();
+  constructor() {
+    this.auth = new UserService();
+  }
+
+  @Post("register")
+  public async registerUser(req: Request, res: Response): Promise<void> {
+    try {
+      const user: IUserM = await this.auth.create(req);
+      const token = jwt.sign(
+        { username: user.designation, email: user.email, userId: user.id },
+        config.app.JWT_SECRET
+      );
+      res.status(200).json({ success: true, user, token });
+    } catch (error) {
+      res.status(401).json({ success: false, error, message: error.message });
     }
+  }
 
-    @Post("register")
-    public async registerUser(req: Request, res: Response): Promise<void> {
-        try {
-            const user: IUserM = await this.auth.create(req);
-            const token = jwt.sign({ username: user.username, email: user.email, userId: user.id }, config.app.JWT_SECRET, { expiresIn: "1h" });
-            res.status(200).json({ success: true, user, token });
-        } catch (error) {
-            res.status(401).json({ success: false, error, msg: error.message });
-        }
+  @Put("activate/:id")
+  public async activateUser(req: Request, res: Response): Promise<void> {
+    try {
+      const user: IUserM = await this.repository.findById(req.params.id);
+      user.isDeleted = false;
+      user.save();
 
+      res
+        .status(200)
+        .json({ success: true, user, message: "user activated successfully" });
+    } catch (error) {
+      res.status(400).json({ success: false, error, message: error.message });
     }
+  }
 
-    @Put("activate/:id")
-    public async activateUser(req: Request, res: Response): Promise<void> {
-        try {
-            const user: IUserM = await this.repository.findById(req.params.id);
-            user.is_active = true;
-            user.save();
+  @Post("login")
+  public authenticateUser(req: Request, res: Response, next: NextFunction) {
+    passport.authenticate("local", { session: false }, (err, user, info) => {
+      // no async/await because passport works only with callback ..
+      if (err) {
+        return next({ err });
+      }
+      if (!user) {
+        const message = info.message ? info.message : "invalid credentials";
+        return res.status(400).json({ success: false, info, message });
+      } else {
+        req.logIn(user, { session: false }, (err) => {
+          if (err) {
+            return res.json(err.message);
+          }
+          const token = jwt.sign(
+            { designation: user.designation, email: user.email, id: user.id },
+            config.app.JWT_SECRET
+          );
+          res.status(200).json({ success: true, user, token });
+        });
+      }
+    })(req, res, next);
+  }
 
-            res.status(200).json({ success: true, user, msg: "user activated successfully" });
-        } catch (error) {
-            res.status(401).json({ success: false, error, msg: error.message });
-        }
+  @Post("verify-token/:phone")
+  public async verifyOTP(req: Request, res: Response): Promise<any> {
+    try {
+      const { phone } = req.params;
+      const user = await this.repository.find({ phone });
+      if (!user) throw new Error("invalid phone number");
+      if (user.otp !== req.body.otp) throw new Error("invalid otp");
+      res.status(200).json({ success: true, user });
 
+    } catch (error) {
+      res.status(401).json({ success: false, error, message: error.message });
     }
-
-    @Post("login")
-    public authenticateUser(req: Request, res: Response, next: NextFunction) {
-        passport.authenticate("local", { session: false },  (err, user, info) => {
-            // no async/await because passport works only with callback ..
-            if (err) { return next({err}); }
-            if (!user) {
-                return res.status(401).json({ success: false, info, msg: "unauthorized" });
-            } else {
-                req.logIn(user, { session: false }, (err) => {
-                    if (err) { return res.json(err.message); }
-                    const token = jwt.sign({ username: user.username, email: user.email, userId: user.id }, config.app.JWT_SECRET, { expiresIn: "1h" });
-                    res.status(200).json({ user, token });
-                });
-            }
-        })(req, res, next);
-    }
+  }
 }
