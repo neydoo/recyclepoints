@@ -4,6 +4,6 @@ import { requestSchema } from '../models/Request';
 export class RequestRepository extends AbstractRepository {
 
     constructor() {
-        super("Request", requestSchema);
+        super("Request");
     }
 }

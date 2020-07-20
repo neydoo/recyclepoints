@@ -5,7 +5,7 @@
   "main": "dist/src/server.js",
   "scripts": {
     "dev": "nodemon -r dotenv/config src/server.ts",
-    "start": "ts-node -r dotenv/config ./src/server.ts",
+    "start": "node ./dist/app",
     "prod": "npm start"
   },
   "author": "chinedu ebinim",
