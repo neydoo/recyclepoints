@@ -9,7 +9,7 @@ const RecyclePoint_1 = require("../models/RecyclePoint");
 const RecycleItem_1 = require("../models/RecycleItem");
 const RecyclePointRecord_1 = require("../models/RecyclePointRecord");
 const RequestRepository_1 = require("../abstract/RequestRepository");
-const user_1 = require("../models/User");
+const User_1 = require("../models/User");
 const RedemptionItem_1 = require("../models/RedemptionItem");
 class RequestService {
     constructor() {
@@ -37,7 +37,7 @@ class RequestService {
                     throw new Error("you need more recycle points to complete this request");
                 payload.points = recyclePoints;
             }
-            const user = (yield user_1.User.findById(req.user.id));
+            const user = (yield User_1.User.findById(req.user.id));
             const request = yield this.repository.createNew(payload);
             if (request.type === "redemption") {
                 const details = "redemption request";
@@ -61,7 +61,7 @@ class RequestService {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const payload = req.body;
             const request = yield this.repository.updateData(req.params.id, payload);
-            const user = yield user_1.User.findById(req.user.id);
+            const user = yield User_1.User.findById(req.user.id);
             this.core.activityLog(req, user.id, "Update request");
             return request;
         });
@@ -78,7 +78,7 @@ class RequestService {
             request.acceptedBy = req.user.id;
             request.status = Request_1.Status.Accepted;
             yield request.save();
-            const user = (yield user_1.User.findById(req.user.id));
+            const user = (yield User_1.User.findById(req.user.id));
             this.core.activityLog(req, user.id, "Update request");
             return request;
         });

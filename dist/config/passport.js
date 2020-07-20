@@ -39,7 +39,7 @@ exports.__esModule = true;
 var passport = require("passport");
 var passportLocal = require("passport-local");
 var passportJwt = require("passport-jwt");
-var user_1 = require("../../models/User");
+var User_1 = require("../../models/User");
 var app_1 = require("../../config/app");
 // tslint:disable-next-line: variable-name
 var LocalStrategy = passportLocal.Strategy;
@@ -52,7 +52,7 @@ passport.use(new LocalStrategy({ usernameField: "email", passwordField: "passwor
             case 0:
                 _a.trys.push([0, 3, , 4]);
                 user = void 0;
-                return [4 /*yield*/, user_1.User.findOne({ email: email.toLowerCase() }).select("+password")];
+                return [4 /*yield*/, User_1.User.findOne({ email: email.toLowerCase() }).select("+password")];
             case 1:
                 user = _a.sent();
                 if (!user) {
@@ -66,7 +66,7 @@ passport.use(new LocalStrategy({ usernameField: "email", passwordField: "passwor
                 if (user.isDeleted) {
                     return [2 /*return*/, done(null, false, { message: "User has been deactivated." })];
                 }
-                return [4 /*yield*/, user_1.User.findOne({
+                return [4 /*yield*/, User_1.User.findOne({
                         email: email.toLowerCase(),
                         isDeleted: false
                     })];
@@ -84,7 +84,7 @@ passport.serializeUser(function (user, done) {
     done(null, user.id);
 });
 passport.deserializeUser(function (id, done) {
-    user_1.User.findById(id, function (err, user) {
+    User_1.User.findById(id, function (err, user) {
         done(err, user);
     });
 });
@@ -92,7 +92,7 @@ passport.use(new JwtStrategy({
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
     secretOrKey: app_1.config.app.JWT_SECRET
 }, function (jwtToken, done) {
-    user_1.User.findOne({ id: jwtToken.id }, function (err, user) {
+    User_1.User.findOne({ id: jwtToken.id }, function (err, user) {
         if (err) {
             return done(err, false);
         }
