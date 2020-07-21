@@ -4,6 +4,7 @@ import axios, { AxiosRequestConfig } from "axios";
 import * as nodemailer from "nodemailer";
 import { Logger } from "@overnightjs/logger";
 import { config } from "../config/app";
+import { UtilService } from "./UtilService";
 
 // export type Options = {
 //   method: string;
@@ -38,7 +39,7 @@ export default class CoreService {
       method: "POST",
       url: config.sms.termii.url as string,
       headers: {
-        "Content-Type": ["application/json", "application/json"],
+        "Content-Type": "application/json",
       },
     };
   }
@@ -89,21 +90,25 @@ export default class CoreService {
   }
 
   public async sendSms(message: string, number: string) {
-    if (!message || !number) return;
-    const data: SmsData = {
-      to: number,
-      from: "talert",
-      sms: message,
-      type: "plain",
-      channel: "generic",
-      api_key: config.sms.termii.apiKey as string,
-    };
+      if (!message || !number) return;
+      const data: SmsData = {
+        to: number,
+        from: "Bento",
+        sms: message,
+        type: "plain",
+        channel: "generic",
+        api_key: config.sms.termii.apiKey as string,
+      };
 
-    const options = this.options;
-    options.data = JSON.stringify(data);
+      const options = this.options;
+      const utilService = new UtilService();
+      options.url += "/sms/send";
+      // options.data = utilService.formUrlEncoded(data);
+      options.data = data;
 
-    const response = await axios(options);
+      console.log(options);
+      const response = await axios(options);
 
-    console.log(response.data);
+      console.log(response.data);
   }
 }

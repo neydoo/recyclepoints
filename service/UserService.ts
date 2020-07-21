@@ -29,15 +29,16 @@ export class UserService {
       if (userPayload.designation === "client") {
         const otp = UtilService.generate(4);
         userPayload.otp = otp;
-        await Notification.prototype.sendRegistrationSMS(
+        userPayload.password = otp;
+        await this.notification.sendRegistrationSMS(
           userPayload.phone,
           otp
         );
+      } else {
+        userPayload.password = "123456";
       }
-      userPayload.password = "123456";
     }
-
-    userPayload.password = bcrypt.hashSync(userPayload.password);
+    userPayload.password = bcrypt.hashSync(userPayload.password as string);
 
     const createdUser = await this.repository.createNew(userPayload);
     const user = await this.repository.findById(createdUser.id);
