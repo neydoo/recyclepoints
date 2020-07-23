@@ -83,7 +83,7 @@ class UserService {
     resetPassword(req) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const user = yield this.repository.findOne({
-                or: [{ phone: req.body.email, email: req.body.email }],
+                or: [{ phone: req.body.email }, { email: req.body.email }],
             });
             const password = UtilService_1.UtilService.generate(5);
             user.password = bcrypt.hashSync(password);

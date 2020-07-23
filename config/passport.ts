@@ -11,25 +11,29 @@ const ExtractJwt = passportJwt.ExtractJwt;
 
 passport.use(
   new LocalStrategy(
-    { usernameField: "email", passwordField: "password" },
-    async (email, password, done) => {
+    { usernameField: "username", passwordField: "password" },
+    async (username, password, done) => {
+      // console.log(username);
       try {
         let user;
         user = await User.findOne({
-          or: [
+          $or: [
             {
-              email: email.toLowerCase(),
-              phone: email.toLowerCase(),
+              email: username.toLowerCase(),
+            },
+            {
+              phone: username,
             },
           ],
         }).select("+password");
+
         if (!user) {
           return done(undefined, false, {
-            message: `user with ${email} not found.`,
+            message: `user with ${username} not found.`,
           });
         }
 
-        if (!user.comparePassword(password) || !user.compareOtp(password)) {
+        if (!user.comparePassword(password) && !user.compareOtp(password)) {
           return done(null, false, { message: "Incorrect password." });
         }
 
@@ -38,10 +42,18 @@ passport.use(
         }
 
         user = await User.findOne({
-          email: email.toLowerCase(),
-          isDeleted: false,
+          $or: [
+            {
+              email: username.toLowerCase(),
+              isDeleted: false,
+            },
+            {
+              phone: username.toLowerCase(),
+              isDeleted: false,
+            },
+          ],
         });
-
+        console.log(JSON.stringify(user));
         return done(null, user);
       } catch (err) {
         return done(err);

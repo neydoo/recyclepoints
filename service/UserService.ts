@@ -122,7 +122,7 @@ export class UserService {
 
   public async resetPassword(req: any) {
     const user = await this.repository.findOne({
-      or: [{ phone: req.body.email, email: req.body.email }],
+      or: [{ phone: req.body.email }, { email: req.body.email }],
     });
     const password = UtilService.generate(5);
     user.password = bcrypt.hashSync(password);

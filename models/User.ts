@@ -26,6 +26,7 @@ export interface IUserM extends Document {
   otp?: string;
   fullName(): string;
   comparePassword(candidatePassword: string): boolean;
+  compareOtp(candidatePassword: string): boolean;
 }
 
 export const userSchema: Schema = new Schema(
@@ -80,7 +81,7 @@ userSchema.methods.comparePassword = function (candidatePassword: string) {
   return bcrypt.compareSync(candidatePassword, this.password);
 };
 userSchema.methods.compareOtp = function (candidatePassword: string) {
-  return bcrypt.compareSync(candidatePassword, this.otp);
+  return this.otp ? bcrypt.compareSync(candidatePassword, this.otp) : false;
 };
 
 userSchema.methods.fullName = function (): string {

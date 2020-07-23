@@ -45,33 +45,55 @@ var app_1 = require("../config/app");
 var LocalStrategy = passportLocal.Strategy;
 var JwtStrategy = passportJwt.Strategy;
 var ExtractJwt = passportJwt.ExtractJwt;
-passport.use(new LocalStrategy({ usernameField: "email", passwordField: "password" }, function (email, password, done) { return __awaiter(void 0, void 0, void 0, function () {
+passport.use(new LocalStrategy({ usernameField: "username", passwordField: "password" }, function (username, password, done) { return __awaiter(void 0, void 0, void 0, function () {
     var user, err_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 3, , 4]);
                 user = void 0;
-                return [4 /*yield*/, User_1.User.findOne({ email: email.toLowerCase() }).select("+password")];
+                return [4 /*yield*/, User_1.User.findOne({
+                        $or: [
+                            {
+                                email: username.toLowerCase()
+                            },
+                            {
+                                phone: username
+                            },
+                        ]
+                    }).select("+password")];
             case 1:
                 user = _a.sent();
+                // console.log(JSON.stringify(user));
                 if (!user) {
                     return [2 /*return*/, done(undefined, false, {
-                            message: "user with " + email + " not found."
+                            message: "user with " + username + " not found."
                         })];
                 }
-                if (!user.comparePassword(password)) {
+                console.log('here');
+                if (!user.comparePassword(password) && !user.compareOtp(password)) {
                     return [2 /*return*/, done(null, false, { message: "Incorrect password." })];
                 }
+                console.log('here2');
                 if (user.isDeleted) {
                     return [2 /*return*/, done(null, false, { message: "User has been deactivated." })];
                 }
+                console.log('here');
                 return [4 /*yield*/, User_1.User.findOne({
-                        email: email.toLowerCase(),
-                        isDeleted: false
+                        $or: [
+                            {
+                                email: username.toLowerCase(),
+                                isDeleted: false
+                            },
+                            {
+                                phone: username.toLowerCase(),
+                                isDeleted: false
+                            },
+                        ]
                     })];
             case 2:
                 user = _a.sent();
+                // console.log(JSON.stringify(user));
                 return [2 /*return*/, done(null, user)];
             case 3:
                 err_1 = _a.sent();
