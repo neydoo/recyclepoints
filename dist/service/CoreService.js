@@ -73,7 +73,7 @@ class CoreService {
                 return;
             const data = {
                 to: number,
-                from: "Bento",
+                from: "Recycle",
                 sms: message,
                 type: "plain",
                 channel: "generic",

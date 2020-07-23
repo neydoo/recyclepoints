@@ -93,7 +93,7 @@ export default class CoreService {
       if (!message || !number) return;
       const data: SmsData = {
         to: number,
-        from: "Bento",
+        from: "Recycle",
         sms: message,
         type: "plain",
         channel: "generic",
