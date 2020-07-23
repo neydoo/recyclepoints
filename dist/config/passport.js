@@ -61,7 +61,7 @@ passport.use(new LocalStrategy({ usernameField: "username", passwordField: "pass
                                 phone: username
                             },
                         ]
-                    }).select("+password")];
+                    }).select("+password +otp")];
             case 1:
                 user = _a.sent();
                 // console.log(JSON.stringify(user));

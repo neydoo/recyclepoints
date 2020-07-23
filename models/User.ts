@@ -34,7 +34,7 @@ export const userSchema: Schema = new Schema(
     firstName: { type: String },
     lastName: { type: String },
     address: { type: String },
-    otp: { type: String },
+    otp: { type: String, select: false },
     email: {
       type: String,
       lowercase: true,

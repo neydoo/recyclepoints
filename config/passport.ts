@@ -25,7 +25,7 @@ passport.use(
               phone: username,
             },
           ],
-        }).select("+password");
+        }).select("+password +otp");
 
         if (!user) {
           return done(undefined, false, {
