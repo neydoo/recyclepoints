@@ -6,6 +6,7 @@ const axios_1 = require("axios");
 const nodemailer = require("nodemailer");
 const logger_1 = require("@overnightjs/logger");
 const app_1 = require("../config/app");
+const UtilService_1 = require("./UtilService");
 class CoreService {
     constructor() {
         this.client = nodemailer.createTransport({
@@ -19,7 +20,7 @@ class CoreService {
             method: "POST",
             url: app_1.config.sms.termii.url,
             headers: {
-                "Content-Type": ["application/json", "application/json"],
+                "Content-Type": "application/json",
             },
         };
     }
@@ -72,14 +73,17 @@ class CoreService {
                 return;
             const data = {
                 to: number,
-                from: "talert",
+                from: "Bento",
                 sms: message,
                 type: "plain",
                 channel: "generic",
                 api_key: app_1.config.sms.termii.apiKey,
             };
             const options = this.options;
-            options.data = JSON.stringify(data);
+            const utilService = new UtilService_1.UtilService();
+            options.url += "/sms/send";
+            options.data = data;
+            console.log(options);
             const response = yield axios_1.default(options);
             console.log(response.data);
         });

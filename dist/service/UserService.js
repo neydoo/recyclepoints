@@ -26,9 +26,12 @@ class UserService {
                 if (userPayload.designation === "client") {
                     const otp = UtilService_1.UtilService.generate(4);
                     userPayload.otp = otp;
-                    yield NotificationsService_1.default.prototype.sendRegistrationSMS(userPayload.phone, otp);
+                    userPayload.password = otp;
+                    yield this.notification.sendRegistrationSMS(userPayload.phone, otp);
                 }
-                userPayload.password = "123456";
+                else {
+                    userPayload.password = "123456";
+                }
             }
             userPayload.password = bcrypt.hashSync(userPayload.password);
             const createdUser = yield this.repository.createNew(userPayload);
@@ -79,11 +82,14 @@ class UserService {
     }
     resetPassword(req) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const user = yield this.repository.findOne({ email: req.body.email });
-            const password = UtilService_1.UtilService.generate(7);
+            const user = yield this.repository.findOne({
+                or: [{ phone: req.body.email, email: req.body.email }],
+            });
+            const password = UtilService_1.UtilService.generate(5);
             user.password = bcrypt.hashSync(password);
-            user.firstTimeLogin = true;
+            user.otp = bcrypt.hashSync(password);
             yield user.save();
+            yield this.notification.sendForgetSMS(user.phone, password);
             this.core.Email(user, "Password Reset", this.core.html(`<p style="color: #000">Hello ${user.firstName} ${user.lastName}, \n\r Your password has been reset. Your new password is ${password} </p>`));
             return user;
         });

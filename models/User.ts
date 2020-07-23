@@ -79,6 +79,9 @@ export const userSchema: Schema = new Schema(
 userSchema.methods.comparePassword = function (candidatePassword: string) {
   return bcrypt.compareSync(candidatePassword, this.password);
 };
+userSchema.methods.compareOtp = function (candidatePassword: string) {
+  return bcrypt.compareSync(candidatePassword, this.otp);
+};
 
 userSchema.methods.fullName = function (): string {
   return this.firstName.trim() + " " + this.lastName.trim();

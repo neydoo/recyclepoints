@@ -17,4 +17,12 @@ export class UtilService {
       ''
     );
   }
+
+  formatPhone (phonenumber: any): string {
+    phonenumber.toString();
+    return (phonenumber = phonenumber.startsWith("+")
+      ? phonenumber.slice(1)
+      : phonenumber);
+  };
+
 }

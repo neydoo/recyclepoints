@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const Notification_1 = require("../models/Notification");
 const CoreService_1 = require("./CoreService");
+const UtilService_1 = require("./UtilService");
 class NotificationsService {
     constructor() {
     }
@@ -24,8 +25,20 @@ class NotificationsService {
     }
     sendRegistrationSMS(number, otp) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const message = "Thank you for registering for Recycle Points. Here's your otp: " + otp;
-            yield CoreService_1.default.prototype.sendSms(message, number);
+            const coreService = new CoreService_1.default();
+            const utilService = new UtilService_1.UtilService();
+            number = utilService.formatPhone(number);
+            const message = "Thank you for registering with Recycle Points. Here's your code: " + otp;
+            yield coreService.sendSms(message, number);
+        });
+    }
+    sendForgetSMS(number, otp) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const coreService = new CoreService_1.default();
+            const utilService = new UtilService_1.UtilService();
+            number = utilService.formatPhone(number);
+            const message = "You forgot your password? Here's your code: " + otp;
+            yield coreService.sendSms(message, number);
         });
     }
 }

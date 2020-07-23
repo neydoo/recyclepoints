@@ -53,6 +53,9 @@ exports.userSchema = new mongoose_1.Schema({
 exports.userSchema.methods.comparePassword = function (candidatePassword) {
     return bcrypt.compareSync(candidatePassword, this.password);
 };
+exports.userSchema.methods.compareOtp = function (candidatePassword) {
+    return bcrypt.compareSync(candidatePassword, this.otp);
+};
 exports.userSchema.methods.fullName = function () {
     return this.firstName.trim() + " " + this.lastName.trim();
 };

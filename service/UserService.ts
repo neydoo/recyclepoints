@@ -30,10 +30,7 @@ export class UserService {
         const otp = UtilService.generate(4);
         userPayload.otp = otp;
         userPayload.password = otp;
-        await this.notification.sendRegistrationSMS(
-          userPayload.phone,
-          otp
-        );
+        await this.notification.sendRegistrationSMS(userPayload.phone, otp);
       } else {
         userPayload.password = "123456";
       }
@@ -124,11 +121,15 @@ export class UserService {
   }
 
   public async resetPassword(req: any) {
-    const user = await this.repository.findOne({ email: req.body.email });
-    const password = UtilService.generate(7);
+    const user = await this.repository.findOne({
+      or: [{ phone: req.body.email, email: req.body.email }],
+    });
+    const password = UtilService.generate(5);
     user.password = bcrypt.hashSync(password);
-    user.firstTimeLogin = true;
+    user.otp = bcrypt.hashSync(password);
+
     await user.save();
+    await this.notification.sendForgetSMS(user.phone, password);
 
     this.core.Email(
       user,

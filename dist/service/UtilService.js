@@ -4,7 +4,7 @@ exports.UtilService = void 0;
 class UtilService {
     static generate(length, chars) {
         if (!chars) {
-            chars = "0123456789ABCDEFGHJKLMNOPQRSTUVWXYZ";
+            chars = "0123456789";
         }
         let result = "";
         for (let i = length; i > 0; i -= 1) {
@@ -12,5 +12,15 @@ class UtilService {
         }
         return result;
     }
+    formUrlEncoded(x) {
+        return Object.keys(x).reduce((p, c) => `${p}&${c}=${encodeURIComponent(x[c])}`, '');
+    }
+    formatPhone(phonenumber) {
+        phonenumber.toString();
+        return (phonenumber = phonenumber.startsWith("+")
+            ? phonenumber.slice(1)
+            : phonenumber);
+    }
+    ;
 }
 exports.UtilService = UtilService;

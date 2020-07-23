@@ -1,6 +1,7 @@
 import { Notification } from "../models/Notification";
 
-import core from "./CoreService";
+import Core from "./CoreService";
+import { UtilService } from "./UtilService";
 
 export default class NotificationsService {
   protected pushers: any;
@@ -54,8 +55,21 @@ export default class NotificationsService {
   }
 
   public async sendRegistrationSMS(number: string, otp: string) {
+    const coreService = new Core();
+    const utilService = new UtilService();
+
+    number = utilService.formatPhone(number);
     const message =
-      "Thank you for registering for Recycle Points. Here's your otp: " + otp;
-    await core.prototype.sendSms(message, number);
+      "Thank you for registering with Recycle Points. Here's your code: " + otp;
+    await coreService.sendSms(message, number);
+  }
+
+  public async sendForgetSMS(number: string, otp: string) {
+    const coreService = new Core();
+    const utilService = new UtilService();
+
+    number = utilService.formatPhone(number);
+    const message = "You forgot your password? Here's your code: " + otp;
+    await coreService.sendSms(message, number);
   }
 }

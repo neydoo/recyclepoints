@@ -11,7 +11,8 @@ let NotificationController = class NotificationController {
             try {
                 const message = "hi there";
                 const number = req.params.number;
-                yield CoreService_1.default.prototype.sendSms(message, number);
+                const core = new CoreService_1.default();
+                yield core.sendSms(message, number);
                 res.status(200).send({
                     success: true,
                     message: "message sent",

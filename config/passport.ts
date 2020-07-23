@@ -15,16 +15,21 @@ passport.use(
     async (email, password, done) => {
       try {
         let user;
-        user = await User.findOne({ email: email.toLowerCase() }).select(
-          "+password"
-        );
+        user = await User.findOne({
+          or: [
+            {
+              email: email.toLowerCase(),
+              phone: email.toLowerCase(),
+            },
+          ],
+        }).select("+password");
         if (!user) {
           return done(undefined, false, {
             message: `user with ${email} not found.`,
           });
         }
 
-        if (!user.comparePassword(password)) {
+        if (!user.comparePassword(password) || !user.compareOtp(password)) {
           return done(null, false, { message: "Incorrect password." });
         }
 
