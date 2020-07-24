@@ -91,7 +91,8 @@ passport.use(new LocalStrategy({ usernameField: "username", passwordField: "pass
                             },
                         ]
                     })];
-            case 2:
+                console.log('here3');
+                case 2:
                 user = _a.sent();
                 // console.log(JSON.stringify(user));
                 return [2 /*return*/, done(null, user)];
