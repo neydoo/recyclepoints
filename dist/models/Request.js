@@ -32,8 +32,8 @@ exports.requestSchema = new mongoose_1.Schema({
             "declined",
         ],
         default: "pending",
-        isDeleted: { type: Boolean, default: false },
     },
+    isDeleted: { type: Boolean, default: false },
     points: { type: Number, default: 0 },
 }, { timestamps: true });
 exports.Request = mongoose_1.model("Request", exports.requestSchema);

@@ -1,8 +1,8 @@
 "use strict";
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = exports.userSchema = void 0;
-var mongoose_1 = require("mongoose");
-var bcrypt = require("bcrypt-nodejs");
+const mongoose_1 = require("mongoose");
+const bcrypt = require("bcrypt-nodejs");
 var Designation;
 (function (Designation) {
     Designation["Buster"] = "buster";
@@ -17,7 +17,7 @@ exports.userSchema = new mongoose_1.Schema({
     firstName: { type: String },
     lastName: { type: String },
     address: { type: String },
-    otp: { type: String },
+    otp: { type: String, select: false },
     email: {
         type: String,
         lowercase: true,
@@ -30,7 +30,7 @@ exports.userSchema = new mongoose_1.Schema({
             /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
             "Please fill a valid email address",
         ],
-        index: { unique: true }
+        index: { unique: true },
     },
     phone: { type: String, unique: true },
     password: { type: String, select: false },
@@ -38,24 +38,23 @@ exports.userSchema = new mongoose_1.Schema({
     target: { type: String },
     targetType: {
         type: String,
-        "enum": ["daily", "weekly", "monthly", "yearly"]
+        enum: ["daily", "weekly", "monthly", "yearly"],
     },
     designation: {
         type: String,
-        "enum": ["buster", "admin", "dev", "sorter", "operator", "staff", "client"]
+        enum: ["buster", "admin", "dev", "sorter", "operator", "staff", "client"],
     },
-    profileImage: { type: String, "default": null },
-    cloudImage: { type: String, "default": null },
-    isDeleted: { type: Boolean, required: true, "default": false },
-    deletedAt: { type: String, "default": null },
-    firstTimeLogin: { type: Boolean, "default": true }
+    profileImage: { type: String, default: null },
+    cloudImage: { type: String, default: null },
+    isDeleted: { type: Boolean, required: true, default: false },
+    deletedAt: { type: String, default: null },
+    firstTimeLogin: { type: Boolean, default: true },
 }, { timestamps: true });
-
 exports.userSchema.methods.comparePassword = function (candidatePassword) {
     return bcrypt.compareSync(candidatePassword, this.password);
 };
 exports.userSchema.methods.compareOtp = function (candidatePassword) {
-  return this.otp ? bcrypt.compareSync(candidatePassword, this.otp) : false;
+    return this.otp ? bcrypt.compareSync(candidatePassword, this.otp) : false;
 };
 exports.userSchema.methods.fullName = function () {
     return this.firstName.trim() + " " + this.lastName.trim();

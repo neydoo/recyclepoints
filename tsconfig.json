@@ -10,18 +10,9 @@
     "emitDecoratorMetadata": true,
     "moduleResolution": "node",
     "importHelpers": true,
-    "types": [
-      "node"
-    ],
-    "typeRoots": [
-      "node_modules/@types"
-    ]
+    "types": ["node"],
+    "typeRoots": ["node_modules/@types"]
   },
-  "include": [
-    "*"
-  ],
-  "exclude": [
-    "./src/public/",
-    "node_modules"
-  ]
+  "include": ["src"],
+  "exclude": ["./src/public/", "node_modules"]
 }

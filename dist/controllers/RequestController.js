@@ -148,28 +148,28 @@ let RequestController = class RequestController extends AbstractController_1.Abs
     getUserRecycleRequests(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                console.log(req.user.id);
-                const request = yield Request_1.Request.find({
+                const { startDate, endDate, status, type } = req.query;
+                const criteria = {
                     requestedBy: req.user.id,
                     isDeleted: false,
                     type: "recycle",
-                });
-                res.status(200).json({ success: true, request });
-            }
-            catch (error) {
-                res.status(400).json({ success: false, error, message: error.message });
-            }
-        });
-    }
-    getUserRedemptionRequests(req, res) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            try {
-                console.log(req.user.id);
-                const request = yield Request_1.Request.find({
-                    requestedBy: req.user.id,
-                    isDeleted: false,
-                    type: "redemption",
-                });
+                };
+                if (type) {
+                    criteria.type = type;
+                }
+                if (startDate) {
+                    criteria.createdAt = { ">=": startDate };
+                    if (endDate) {
+                        criteria.createdAt = { "<=": endDate };
+                    }
+                    criteria.createdAt = { "<=": Date.now() };
+                }
+                if (status) {
+                    criteria.status = status;
+                }
+                const request = yield Request_1.Request.find(criteria)
+                    .populate("acceptedBy")
+                    .populate("redemptionItem");
                 res.status(200).json({ success: true, request });
             }
             catch (error) {
@@ -281,17 +281,11 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", Promise)
 ], RequestController.prototype, "approveRequest", null);
 tslib_1.__decorate([
-    core_1.Get("list/user/recycle"),
+    core_1.Get("list/user"),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
 ], RequestController.prototype, "getUserRecycleRequests", null);
-tslib_1.__decorate([
-    core_1.Get("list/user/redemption"),
-    tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [Object, Object]),
-    tslib_1.__metadata("design:returntype", Promise)
-], RequestController.prototype, "getUserRedemptionRequests", null);
 tslib_1.__decorate([
     core_1.Get("buster/accepted"),
     tslib_1.__metadata("design:type", Function),

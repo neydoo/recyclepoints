@@ -4,11 +4,3 @@ package-lock.json
 nodemon
 yarn.lock
 /src
-/abstract
-/config
-/controllers
-/events
-/middleware
-/service
-/uploads
-/utilities
