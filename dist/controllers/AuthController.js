@@ -18,7 +18,7 @@ let AuthController = class AuthController {
             try {
                 const user = yield this.auth.create(req);
                 const token = jwt.sign({ username: user.designation, email: user.email, userId: user.id }, app_1.config.app.JWT_SECRET);
-                res.status(200).json({ success: true, user, token });
+                res.status(200).json({ success: true, data: { user, token } });
             }
             catch (error) {
                 res.status(401).json({ success: false, error, message: error.message });
@@ -55,7 +55,7 @@ let AuthController = class AuthController {
                         return res.json(err.message);
                     }
                     const token = jwt.sign({ designation: user.designation, email: user.email, id: user.id }, app_1.config.app.JWT_SECRET);
-                    res.status(200).json({ success: true, user, token });
+                    res.status(200).json({ success: true, data: { user, token } });
                 });
             }
         })(req, res, next);
@@ -69,7 +69,7 @@ let AuthController = class AuthController {
                     throw new Error("invalid phone number");
                 if (user.otp !== req.body.otp)
                     throw new Error("invalid otp");
-                res.status(200).json({ success: true, user });
+                res.status(200).json({ success: true, data: user });
             }
             catch (error) {
                 res.status(401).json({ success: false, error, message: error.message });

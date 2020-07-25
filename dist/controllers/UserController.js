@@ -6,6 +6,7 @@ const core_1 = require("@overnightjs/core");
 const AbstractController_1 = require("./AbstractController");
 const UserRepository_1 = require("../abstract/UserRepository");
 const auth_1 = require("../middleware/auth");
+const User_1 = require("../models/User");
 const UserService_1 = require("../service/UserService");
 let UserController = class UserController extends AbstractController_1.AbstractController {
     constructor() {
@@ -15,8 +16,35 @@ let UserController = class UserController extends AbstractController_1.AbstractC
     index(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const user = yield this.repository.findAll();
-                res.status(200).send({ success: true, user });
+                const { startDate, endDate, status, designation, search } = req.query;
+                const criteria = {
+                    isDeleted: false,
+                };
+                const searchCriteria = {
+                    isDeleted: false,
+                };
+                if (designation) {
+                    criteria.type = designation;
+                }
+                if (startDate) {
+                    criteria.createdAt = { ">=": startDate };
+                    if (endDate) {
+                        criteria.createdAt = { "<=": endDate };
+                    }
+                    criteria.createdAt = { "<=": Date.now() };
+                }
+                if (status) {
+                    criteria.status = status;
+                }
+                if (search) {
+                    searchCriteria.or = [
+                        { firstName: /search/ },
+                        { address: /search/ },
+                        { phone: /search/ },
+                    ];
+                }
+                const user = yield User_1.User.find(criteria);
+                res.status(200).send({ success: true, data: user });
             }
             catch (error) {
                 res.status(401).json({ success: false, error, message: error.message });
@@ -54,7 +82,7 @@ let UserController = class UserController extends AbstractController_1.AbstractC
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 const user = yield this.repository.findById(req.params.userId);
-                res.status(200).json({ success: true, user });
+                res.status(200).json({ success: true, data: user });
             }
             catch (error) {
                 res.status(401).json({ success: false, error, message: error.message });
@@ -65,7 +93,9 @@ let UserController = class UserController extends AbstractController_1.AbstractC
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 yield this.repository.forceDelete(req.params.id);
-                res.status(200).send({ success: true, message: "user deleted successfull" });
+                res
+                    .status(200)
+                    .send({ success: true, message: "user deleted successfully" });
             }
             catch (error) {
                 res.status(401).json({ success: false, error, message: error.message });

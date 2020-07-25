@@ -16,8 +16,38 @@ let RequestController = class RequestController extends AbstractController_1.Abs
     index(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const request = yield this.repository.findAll();
-                res.status(200).send({ success: true, request });
+                const { startDate, endDate, status, type, search } = req.query;
+                const criteria = {
+                    isDeleted: false,
+                };
+                const searchCriteria = {
+                    isDeleted: false,
+                };
+                if (type) {
+                    criteria.type = type;
+                }
+                if (startDate) {
+                    criteria.createdAt = { ">=": startDate };
+                    if (endDate) {
+                        criteria.createdAt = { "<=": endDate };
+                    }
+                    criteria.createdAt = { "<=": Date.now() };
+                }
+                if (status) {
+                    criteria.status = status;
+                }
+                if (search) {
+                    searchCriteria.or = [
+                        { firstName: /search/ },
+                        { address: /search/ },
+                        { phone: /search/ },
+                    ];
+                }
+                const request = yield Request_1.Request.find(criteria)
+                    .populate("acceptedBy")
+                    .populate({ path: "acceptedBy", match: searchCriteria })
+                    .populate("redemptionItem");
+                res.status(200).send({ success: true, data: request });
             }
             catch (error) {
                 res.status(400).json({ success: false, error, message: error.message });
@@ -30,7 +60,7 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                 const request = yield this.request.create(req);
                 res.status(200).json({
                     success: true,
-                    request,
+                    data: request,
                     message: "request created successfully!",
                 });
             }
@@ -45,7 +75,7 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                 const request = yield this.request.update(req);
                 res.status(200).json({
                     success: true,
-                    request,
+                    data: request,
                     message: "request updated successfully",
                 });
             }
@@ -60,7 +90,7 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                 const request = yield this.request.accept(req);
                 res.status(200).json({
                     success: true,
-                    request,
+                    data: request,
                     message: "request updated successfully",
                 });
             }
@@ -104,7 +134,7 @@ let RequestController = class RequestController extends AbstractController_1.Abs
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 const request = yield this.repository.findById(req.params.requestId);
-                res.status(200).json({ success: true, request });
+                res.status(200).json({ success: true, data: request });
             }
             catch (error) {
                 res.status(400).json({ success: false, error, message: error.message });
@@ -122,7 +152,7 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                 const details = "redemption declined";
                 yield this.request.addPoints(request.points, request.id, request.requestedBy, details);
                 request.save();
-                res.status(200).json({ success: true, request });
+                res.status(200).json({ success: true, data: request });
             }
             catch (error) {
                 res.status(400).json({ success: false, error, message: error.message });
@@ -138,7 +168,7 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                 });
                 request.status = Request_1.Status.Approved;
                 request.save();
-                res.status(200).json({ success: true, request });
+                res.status(200).json({ success: true, data: request });
             }
             catch (error) {
                 res.status(400).json({ success: false, error, message: error.message });
@@ -152,7 +182,6 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                 const criteria = {
                     requestedBy: req.user.id,
                     isDeleted: false,
-                    type: "recycle",
                 };
                 if (type) {
                     criteria.type = type;
@@ -170,7 +199,7 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                 const request = yield Request_1.Request.find(criteria)
                     .populate("acceptedBy")
                     .populate("redemptionItem");
-                res.status(200).json({ success: true, request });
+                res.status(200).json({ success: true, data: request });
             }
             catch (error) {
                 res.status(400).json({ success: false, error, message: error.message });
@@ -183,7 +212,7 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                 const request = yield Request_1.Request.find({
                     acceptedBy: req.user.id,
                 });
-                res.status(200).json({ success: true, request });
+                res.status(200).json({ success: true, data: request });
             }
             catch (error) {
                 res.status(400).json({ success: false, error, message: error.message });
@@ -197,7 +226,7 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                     status: Request_1.Status.Pending,
                     type: "recycle",
                 });
-                res.status(200).json({ success: true, request });
+                res.status(200).json({ success: true, data: request });
             }
             catch (error) {
                 res.status(401).json({ success: false, error, message: error.message });
@@ -211,7 +240,7 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                     status: Request_1.Status.Collected,
                     type: "recycle",
                 });
-                res.status(200).json({ success: true, request });
+                res.status(200).json({ success: true, data: request });
             }
             catch (error) {
                 res.status(401).json({ success: false, error, message: error.message });

@@ -16,7 +16,7 @@ let ReviewController = class ReviewController extends AbstractController_1.Abstr
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 const review = yield this.repository.findAll();
-                res.status(200).send({ success: true, review });
+                res.status(200).send({ success: true, data: review });
             }
             catch (error) {
                 res.status(400).json({ success: false, error, message: error.message });
@@ -29,7 +29,11 @@ let ReviewController = class ReviewController extends AbstractController_1.Abstr
                 const review = yield this.review.create(req);
                 res
                     .status(200)
-                    .json({ success: true, review, message: "review created successfully!" });
+                    .json({
+                    success: true,
+                    review,
+                    message: "review created successfully!",
+                });
             }
             catch (error) {
                 res.status(400).json({ success: false, error, message: error.message });
@@ -42,7 +46,11 @@ let ReviewController = class ReviewController extends AbstractController_1.Abstr
                 const review = yield this.repository.update(req);
                 res
                     .status(200)
-                    .json({ success: true, review, message: "review updated successfully" });
+                    .json({
+                    success: true,
+                    review,
+                    message: "review updated successfully",
+                });
             }
             catch (error) {
                 res.status(400).json({ success: false, error, message: error.message });
@@ -53,7 +61,7 @@ let ReviewController = class ReviewController extends AbstractController_1.Abstr
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 const review = yield this.repository.findById(req.params.reviewId);
-                res.status(200).json({ success: true, review });
+                res.status(200).json({ success: true, data: review });
             }
             catch (error) {
                 res.status(400).json({ success: false, error, message: error.message });
@@ -66,7 +74,7 @@ let ReviewController = class ReviewController extends AbstractController_1.Abstr
                 const review = yield this.repository.findAll({
                     buster: req.params.id,
                 });
-                res.status(200).json({ success: true, review });
+                res.status(200).json({ success: true, data: review });
             }
             catch (error) {
                 res.status(400).json({ success: false, error, message: error.message });
