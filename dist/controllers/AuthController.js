@@ -17,7 +17,7 @@ let AuthController = class AuthController {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 const user = yield this.auth.create(req);
-                const token = jwt.sign({ username: user.designation, email: user.email, userId: user.id }, app_1.config.app.JWT_SECRET);
+                const token = jwt.sign({ designation: user.designation, email: user.email, userId: user.id }, app_1.config.app.JWT_SECRET);
                 res.status(200).json({ success: true, data: { user, token } });
             }
             catch (error) {

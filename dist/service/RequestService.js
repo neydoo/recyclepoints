@@ -68,14 +68,19 @@ class RequestService {
     }
     accept(req) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            if (req.user.designation !== "buster")
-                throw new Error(`you're not allowed to perform this operation`);
             const request = (yield this.repository.findById(req.params.id));
             if (!request)
                 throw new Error("invalid request");
             if (request.status !== "pending")
                 throw new Error(" request has already been accepted");
-            request.acceptedBy = req.user.id;
+            if (req.body.buster)
+                request.acceptedBy = req.body.buster;
+            if (!req.body.buster && req.user.designation !== "buster") {
+                throw new Error(`you're not allowed to perform this operation`);
+            }
+            else {
+                request.acceptedBy = req.user.id;
+            }
             request.status = Request_1.Status.Accepted;
             yield request.save();
             const user = (yield User_1.User.findById(req.user.id));
