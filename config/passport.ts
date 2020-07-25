@@ -11,25 +11,25 @@ const ExtractJwt = passportJwt.ExtractJwt;
 
 passport.use(
   new LocalStrategy(
-    { usernameField: "username", passwordField: "password" },
-    async (username, password, done) => {
-      // console.log(username);
+    { usernameField: "email", passwordField: "password" },
+    async (email, password, done) => {
+      // console.log(email);
       try {
         let user;
         user = await User.findOne({
           $or: [
             {
-              email: username.toLowerCase(),
+              email: email.toLowerCase(),
             },
             {
-              phone: username,
+              phone: email,
             },
           ],
         }).select("+password +otp");
 
         if (!user) {
           return done(undefined, false, {
-            message: `user with ${username} not found.`,
+            message: `user with ${email} not found.`,
           });
         }
 
@@ -44,11 +44,11 @@ passport.use(
         user = await User.findOne({
           $or: [
             {
-              email: username.toLowerCase(),
+              email: email.toLowerCase(),
               isDeleted: false,
             },
             {
-              phone: username.toLowerCase(),
+              phone: email.toLowerCase(),
               isDeleted: false,
             },
           ],
