@@ -198,6 +198,7 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                 }
                 const request = yield Request_1.Request.find(criteria)
                     .populate("acceptedBy")
+                    .populate("requestedBy")
                     .populate("redemptionItem");
                 res.status(200).json({ success: true, data: request });
             }
