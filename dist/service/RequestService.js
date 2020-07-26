@@ -60,8 +60,9 @@ class RequestService {
     update(req) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const payload = req.body;
-            const request = yield this.repository.updateData(req.params.id, payload);
+            const request = yield Request_1.Request.findById(req.params.id).populate("requestedBy");
             const user = yield User_1.User.findById(req.user.id);
+            yield this.repository.updateData(req.params.id, payload);
             this.core.activityLog(req, user.id, "Update request");
             return request;
         });

@@ -3,19 +3,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const ActivityLog_1 = require("../models/ActivityLog");
 const axios_1 = require("axios");
-const nodemailer = require("nodemailer");
+const sgMail = require("@sendgrid/mail");
 const logger_1 = require("@overnightjs/logger");
 const app_1 = require("../config/app");
 const UtilService_1 = require("./UtilService");
+sgMail.setApiKey(app_1.config.mail.sendgrid.api_key);
 class CoreService {
     constructor() {
-        this.client = nodemailer.createTransport({
-            service: "SendGrid",
-            auth: {
-                user: app_1.config.mail.auth.api_user,
-                pass: app_1.config.mail.auth.api_key,
-            },
-        });
         this.options = {
             method: "POST",
             url: app_1.config.sms.termii.url,
@@ -84,8 +78,42 @@ class CoreService {
             options.url += "/sms/send";
             options.data = data;
             console.log(options);
-            const response = yield axios_1.default(options);
-            console.log(response.data);
+            try {
+                const response = yield axios_1.default(options);
+                console.log(response.data);
+                if (Math.abs(response.data.balance) < 50) {
+                    const data = {
+                        email: "enoch4real7@gmail.com",
+                        subject: "low sms balance",
+                        text: "",
+                        html: "",
+                    };
+                    data.text = "We are glad to have you on board";
+                    data.html = `<p> Please top up sms balance- N${Math.abs(response.data.balance)}</p>`;
+                    this.sendMail(data);
+                }
+            }
+            catch (e) {
+                console.log(e);
+                throw e;
+            }
+        });
+    }
+    sendMail(data) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            try {
+                const msg = {
+                    to: data.email,
+                    from: "support@recyclepoints.com",
+                    subject: data.subject,
+                    text: data.text,
+                    html: data.html,
+                };
+                sgMail.send(msg);
+            }
+            catch (error) {
+                throw new Error(error);
+            }
         });
     }
 }

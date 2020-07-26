@@ -8,6 +8,7 @@ const RequestRepository_1 = require("../abstract/RequestRepository");
 const auth_1 = require("../middleware/auth");
 const Request_1 = require("../models/Request");
 const RequestService_1 = require("../service/RequestService");
+const NotificationsService_1 = require("../service/NotificationsService");
 let RequestController = class RequestController extends AbstractController_1.AbstractController {
     constructor() {
         super(new RequestRepository_1.RequestRepository());
@@ -88,6 +89,9 @@ let RequestController = class RequestController extends AbstractController_1.Abs
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 const request = yield this.request.accept(req);
+                const notification = new NotificationsService_1.default();
+                const { requestedBy } = request;
+                yield notification.sendPushNotification("points awarded", `your recycle request has been accepted`, requestedBy.notificationTokens);
                 res.status(200).json({
                     success: true,
                     data: request,
@@ -103,14 +107,19 @@ let RequestController = class RequestController extends AbstractController_1.Abs
     completeRequest(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const itemrequest = (yield Request_1.Request.findById(req.params.id));
+                const notification = new NotificationsService_1.default();
+                const itemrequest = (yield Request_1.Request.findById(req.params.id).populate("reqeustedBy"));
                 let items;
+                const { notificationTokens } = itemrequest.acceptedBy;
                 if (itemrequest.type === "redemption")
                     throw new Error("invalid request selected");
                 if (itemrequest.type === "recycle") {
                     if (itemrequest.status === "completed")
                         throw new Error("request is already completed");
                     items = req.body.items ? req.body.items : itemrequest.items;
+                    if (!items) {
+                        throw new Error("there are no recycle items for this request");
+                    }
                     const points = yield this.request.calculatePoints(items);
                     const details = "recycle";
                     yield this.request.addPoints(points, itemrequest.id, itemrequest.requestedBy, details);
@@ -118,6 +127,7 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                 }
                 itemrequest.status = Request_1.Status.Completed;
                 yield itemrequest.save();
+                yield notification.sendPushNotification("points awarded", `you've recieved ${itemrequest.points} points`, notificationTokens);
                 res.status(200).json({
                     success: true,
                     data: itemrequest,
@@ -144,14 +154,16 @@ let RequestController = class RequestController extends AbstractController_1.Abs
     declineRequest(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
+                const notification = new NotificationsService_1.default();
                 const request = yield Request_1.Request.findOne({
                     _id: req.params.requestId,
                     status: Request_1.Status.Pending,
-                });
+                }).populate("requestedBy");
                 request.status = Request_1.Status.Declined;
                 const details = "redemption declined";
                 yield this.request.addPoints(request.points, request.id, request.requestedBy, details);
                 request.save();
+                yield notification.sendPushNotification("request declined", `your request has been declined`, request.requestedBy.notificationTokens);
                 res.status(200).json({ success: true, data: request });
             }
             catch (error) {
@@ -162,12 +174,14 @@ let RequestController = class RequestController extends AbstractController_1.Abs
     approveRequest(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
+                const notification = new NotificationsService_1.default();
                 const request = yield Request_1.Request.findOne({
                     _id: req.params.requestId,
                     status: Request_1.Status.Pending,
                 });
                 request.status = Request_1.Status.Approved;
                 request.save();
+                yield notification.sendPushNotification("request approved", `your request has been approved`, request.requestedBy.notificationTokens);
                 res.status(200).json({ success: true, data: request });
             }
             catch (error) {

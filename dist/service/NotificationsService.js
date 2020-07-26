@@ -1,6 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
+const expo_server_sdk_1 = require("expo-server-sdk");
+let expo = new expo_server_sdk_1.Expo();
 const Notification_1 = require("../models/Notification");
 const CoreService_1 = require("./CoreService");
 const UtilService_1 = require("./UtilService");
@@ -39,6 +41,29 @@ class NotificationsService {
             number = utilService.formatPhone(number);
             const message = "You forgot your password? Here's your code: " + otp;
             yield coreService.sendSms(message, number);
+        });
+    }
+    sendPushNotification(title, body, tokens) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            try {
+                let notifications = [];
+                for (let pushToken of tokens) {
+                    if (!expo_server_sdk_1.Expo.isExpoPushToken(pushToken)) {
+                        console.error(`Push token ${pushToken} is not a valid Expo push token`);
+                        continue;
+                    }
+                    notifications.push({
+                        to: pushToken,
+                        title: title,
+                        body: body,
+                        data: { body },
+                    });
+                }
+                yield expo.chunkPushNotifications(notifications);
+            }
+            catch (error) {
+                console.log(error);
+            }
         });
     }
 }

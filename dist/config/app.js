@@ -21,6 +21,9 @@ exports.config = {
             api_user: process.env.SENDGRID_USERNAME,
             api_key: process.env.SENDGRID_PASSWORD,
         },
+        sendgrid: {
+            api_key: process.env.SENDGRID_API_KEY,
+        },
     },
     sms: {
         africastalking: {
@@ -33,8 +36,8 @@ exports.config = {
         },
         termii: {
             apiKey: process.env.TERMII_SMS_KEY,
-            url: process.env.TERMII_SMS_URL
-        }
+            url: process.env.TERMII_SMS_URL,
+        },
     },
     video: {
         vimeo: {
