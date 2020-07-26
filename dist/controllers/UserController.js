@@ -70,7 +70,7 @@ let UserController = class UserController extends AbstractController_1.AbstractC
                 const user = yield this.user.update(req);
                 res
                     .status(200)
-                    .json({ success: true, user, message: "user updated successfully" });
+                    .json({ success: true, data: user, message: "user updated successfully" });
             }
             catch (error) {
                 console.log(error);
