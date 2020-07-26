@@ -262,6 +262,25 @@ let RequestController = class RequestController extends AbstractController_1.Abs
             }
         });
     }
+    remindBuster(req, res) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            try {
+                const request = yield Request_1.Request.find({
+                    id: req.params.id,
+                    status: Request_1.Status.Pending,
+                    type: "recycle",
+                })
+                    .populate("requestedBy")
+                    .populate("acceptedBy");
+                const notification = new NotificationsService_1.default();
+                yield notification.sendPushNotification("pickup reminder", `${request.requestedBy.firstName} has sent a pickup reminder`, request.acceptedBy.notificationTokens);
+                res.status(200).json({ success: true, data: request });
+            }
+            catch (error) {
+                res.status(401).json({ success: false, error, message: error.message });
+            }
+        });
+    }
     destroy(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
@@ -348,6 +367,12 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
 ], RequestController.prototype, "fetchCompletedRequests", null);
+tslib_1.__decorate([
+    core_1.Post("remind-buster/:id"),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object, Object]),
+    tslib_1.__metadata("design:returntype", Promise)
+], RequestController.prototype, "remindBuster", null);
 tslib_1.__decorate([
     core_1.Delete("destroy/:id"),
     tslib_1.__metadata("design:type", Function),
