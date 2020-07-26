@@ -6,7 +6,6 @@ const axios_1 = require("axios");
 const sgMail = require("@sendgrid/mail");
 const logger_1 = require("@overnightjs/logger");
 const app_1 = require("../config/app");
-const UtilService_1 = require("./UtilService");
 sgMail.setApiKey(app_1.config.mail.sendgrid.api_key);
 class CoreService {
     constructor() {
@@ -74,7 +73,6 @@ class CoreService {
                 api_key: app_1.config.sms.termii.apiKey,
             };
             const options = this.options;
-            const utilService = new UtilService_1.UtilService();
             options.url += "/sms/send";
             options.data = data;
             console.log(options);

@@ -28,10 +28,7 @@ let NotificationController = class NotificationController {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 const { id } = req.user;
-                const user = yield User_1.User.findOne({ id });
-                const userTokens = [...user.notificationTokens, req.body.token];
-                user.notificationTokens = userTokens;
-                yield user.save();
+                yield User_1.User.updateOne({ _id: id }, { $addToSet: { notificationTokens: req.body.token } });
                 res.status(200).send({
                     success: true,
                     message: "token saved",
@@ -46,7 +43,7 @@ let NotificationController = class NotificationController {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 const { id } = req.user;
-                const user = yield User_1.User.findOne({ id });
+                const user = yield User_1.User.findOne({ _id: id });
                 const userTokens = user.notificationTokens ? user.notificationTokens : [];
                 res.status(200).send({
                     success: true,

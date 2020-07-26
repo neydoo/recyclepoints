@@ -263,20 +263,23 @@ let RequestController = class RequestController extends AbstractController_1.Abs
         });
     }
     remindBuster(req, res) {
+        var _a;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const request = yield Request_1.Request.find({
-                    id: req.params.id,
-                    status: Request_1.Status.Pending,
+                const request = yield Request_1.Request.findOne({
+                    _id: req.params.id,
+                    status: Request_1.Status.Accepted,
                     type: "recycle",
                 })
                     .populate("requestedBy")
                     .populate("acceptedBy");
                 const notification = new NotificationsService_1.default();
-                yield notification.sendPushNotification("pickup reminder", `${request.requestedBy.firstName} has sent a pickup reminder`, request.acceptedBy.notificationTokens);
-                res.status(200).json({ success: true, data: request });
+                if ((_a = request.acceptedBy) === null || _a === void 0 ? void 0 : _a.notificationTokens.length)
+                    yield notification.sendPushNotification("pickup reminder", `${request.requestedBy.firstName} has sent a pickup reminder`, request.acceptedBy.notificationTokens);
+                yield res.status(200).json({ success: true, message: "sent reminder" });
             }
             catch (error) {
+                console.log(error);
                 res.status(401).json({ success: false, error, message: error.message });
             }
         });
