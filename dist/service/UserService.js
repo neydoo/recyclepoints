@@ -71,7 +71,6 @@ class UserService {
                 ? this.file.localUpload(req.body.profileImage, "/images/profile/", ".png")
                 : user.profileImage;
             user.save();
-            this.core.Email(user, "Profile Updated", this.core.html(`<p style="color: #000">Hello ${user.firstName} ${user.lastName}, \n\r Your profile has been updated successfully. </p>`));
             this.core.activityLog(req, user.id, "Update Profile");
             this.notification.triggerNotification("notifications", "users", {
                 user,

@@ -4,7 +4,6 @@ const tslib_1 = require("tslib");
 const ActivityLog_1 = require("../models/ActivityLog");
 const axios_1 = require("axios");
 const sgMail = require("@sendgrid/mail");
-const logger_1 = require("@overnightjs/logger");
 const app_1 = require("../config/app");
 sgMail.setApiKey(app_1.config.mail.sendgrid.api_key);
 class CoreService {
@@ -37,14 +36,6 @@ class CoreService {
                 subject,
                 html: message,
             };
-            this.client.sendMail(email, (err, info) => {
-                if (err) {
-                    logger_1.Logger.Imp(err);
-                }
-                else {
-                    logger_1.Logger.Imp("Message sent: " + info.response);
-                }
-            });
         }
         catch (error) {
             throw new Error(error);
