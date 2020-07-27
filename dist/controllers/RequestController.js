@@ -274,6 +274,8 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                     .populate("requestedBy")
                     .populate("acceptedBy");
                 const notification = new NotificationsService_1.default();
+                if (!request)
+                    throw new Error('invalid request selected for reminder');
                 if ((_a = request.acceptedBy) === null || _a === void 0 ? void 0 : _a.notificationTokens.length)
                     yield notification.sendPushNotification("pickup reminder", `${request.requestedBy.firstName} has sent a pickup reminder`, request.acceptedBy.notificationTokens);
                 yield res.status(200).json({ success: true, message: "sent reminder" });
