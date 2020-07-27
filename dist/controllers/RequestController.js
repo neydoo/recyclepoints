@@ -279,7 +279,8 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                 if ((_b = (_a = request.acceptedBy) === null || _a === void 0 ? void 0 : _a.notificationTokens) === null || _b === void 0 ? void 0 : _b.length)
                     yield notification.sendPushNotification("pickup reminder", `${request.requestedBy.firstName} has sent a pickup reminder`, request.acceptedBy.notificationTokens);
                 if ((_d = (_c = request.requestedBy) === null || _c === void 0 ? void 0 : _c.notificationTokens) === null || _d === void 0 ? void 0 : _d.length)
-                    yield notification.sendPushNotification("pickup reminder", `reminder sent`, request.requestedBy.notificationTokens);
+                    console.log('hi');
+                yield notification.sendPushNotification("pickup reminder", `reminder sent`, request.requestedBy.notificationTokens);
                 res.status(200).json({ success: true, message: "sent reminder" });
             }
             catch (error) {
