@@ -263,7 +263,7 @@ let RequestController = class RequestController extends AbstractController_1.Abs
         });
     }
     remindBuster(req, res) {
-        var _a, _b, _c;
+        var _a, _b, _c, _d, _e;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 const request = yield Request_1.Request.findOne({
@@ -278,7 +278,8 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                     throw new Error('invalid request selected for reminder');
                 if ((_b = (_a = request.acceptedBy) === null || _a === void 0 ? void 0 : _a.notificationTokens) === null || _b === void 0 ? void 0 : _b.length)
                     yield notification.sendPushNotification("pickup reminder", `${request.requestedBy.firstName} has sent a pickup reminder`, request.acceptedBy.notificationTokens);
-                if ((_c = request.requestedBy) === null || _c === void 0 ? void 0 : _c.notificationTokens.length)
+                console.log((_c = request.requestedBy) === null || _c === void 0 ? void 0 : _c.notificationTokens.length);
+                if ((_e = (_d = request.requestedBy) === null || _d === void 0 ? void 0 : _d.notificationTokens) === null || _e === void 0 ? void 0 : _e.length)
                     yield notification.sendPushNotification("pickup reminder", `reminder sent`, request.requestedBy.notificationTokens);
                 res.status(200).json({ success: true, message: "sent reminder" });
             }
