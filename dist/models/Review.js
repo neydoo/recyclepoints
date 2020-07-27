@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Review = exports.reviewsSchema = void 0;
+exports.Review = exports.reviewSchema = void 0;
 const mongoose_1 = require("mongoose");
-exports.reviewsSchema = new mongoose_1.Schema({
+exports.reviewSchema = new mongoose_1.Schema({
     recycle: { type: mongoose_1.Schema.Types.ObjectId, ref: "Request" },
     buster: { type: mongoose_1.Schema.Types.ObjectId, ref: "User" },
     rating: { type: Number, enum: [1, 2, 3, 4, 5] },
@@ -11,4 +11,4 @@ exports.reviewsSchema = new mongoose_1.Schema({
     },
     isDeleted: { type: Boolean, default: false },
 }, { timestamps: true });
-exports.Review = mongoose_1.model("Review", exports.reviewsSchema);
+exports.Review = mongoose_1.model("Review", exports.reviewSchema);

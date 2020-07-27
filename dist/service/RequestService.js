@@ -69,7 +69,7 @@ class RequestService {
     }
     accept(req) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const request = (yield this.repository.findById(req.params.id));
+            const request = (yield Request_1.Request.findById(req.params.id));
             if (!request)
                 throw new Error("invalid request");
             if (request.status !== "pending")

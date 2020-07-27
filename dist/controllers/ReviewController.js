@@ -6,11 +6,11 @@ const core_1 = require("@overnightjs/core");
 const AbstractController_1 = require("./AbstractController");
 const RequestRepository_1 = require("../abstract/RequestRepository");
 const auth_1 = require("../middleware/auth");
-const RequestService_1 = require("../service/RequestService");
+const ReviewService_1 = require("../service/ReviewService");
 let ReviewController = class ReviewController extends AbstractController_1.AbstractController {
     constructor() {
         super(new RequestRepository_1.RequestRepository());
-        this.review = new RequestService_1.RequestService();
+        this.review = new ReviewService_1.ReviewService();
     }
     index(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
