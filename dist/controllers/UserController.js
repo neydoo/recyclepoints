@@ -24,7 +24,7 @@ let UserController = class UserController extends AbstractController_1.AbstractC
                     isDeleted: false,
                 };
                 if (designation) {
-                    criteria.type = designation;
+                    criteria.designation = designation;
                 }
                 if (startDate) {
                     criteria.createdAt = { ">=": startDate };

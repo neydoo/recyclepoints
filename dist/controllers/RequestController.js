@@ -104,7 +104,6 @@ let RequestController = class RequestController extends AbstractController_1.Abs
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 const request = yield this.request.accept(req);
-                const notification = new NotificationsService_1.default();
                 const { requestedBy } = request;
                 yield UserNotification_1.UserNotification.create({
                     body: "your recycle request has been accepted",

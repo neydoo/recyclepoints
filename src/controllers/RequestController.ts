@@ -116,7 +116,6 @@ export class RequestController extends AbstractController {
   public async acceptRequest(req: Request, res: Response): Promise<void> {
     try {
       const request: any = await this.request.accept(req);
-      const notification = new NotificationsService();
 
       const { requestedBy } = request;
 

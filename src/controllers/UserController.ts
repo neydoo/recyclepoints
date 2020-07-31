@@ -32,7 +32,7 @@ export class UserController extends AbstractController {
         isDeleted: false,
       };
       if (designation) {
-        criteria.type = designation;
+        criteria.designation = designation;
       }
       if (startDate) {
         criteria.createdAt = { ">=": startDate };
