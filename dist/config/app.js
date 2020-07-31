@@ -12,6 +12,11 @@ exports.config = {
     db: {
         url: process.env.MONGODB_URI,
     },
+    image: {
+        api_key: process.env.CLOUDINARY_API_KEY,
+        api_secret: process.env.CLOUDINARY_API_SECRET,
+        cloud_name: process.env.CLOUD_NAME,
+    },
     data: {
         limit: "50mb",
         extended: false,
@@ -52,4 +57,7 @@ exports.config = {
         secret: process.env.PUSHER_APP_SECRET,
         cluster: process.env.PUSHER_APP_CLUSTER,
     },
+    recycle: {
+        logoUrl: "https://res.cloudinary.com/dktpvgymr/image/upload/v1596172596/Screen_Shot_2020-07-31_at_6.15.45_AM_hvfnq1.png"
+    }
 };

@@ -30,6 +30,7 @@ class AppServer extends core_1.Server {
         this.app.use(passport.initialize());
         this.app.use(passport.session());
         this.setupControllers();
+        require('./config/cron');
     }
     mongo() {
         const connection = mongoose.connection;

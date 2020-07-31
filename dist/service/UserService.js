@@ -3,12 +3,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserService = void 0;
 const tslib_1 = require("tslib");
 const CoreService_1 = require("./CoreService");
+const cloudinary_1 = require("cloudinary");
+const bcrypt = require("bcrypt-nodejs");
 const NotificationsService_1 = require("./NotificationsService");
 const UserRepository_1 = require("../abstract/UserRepository");
 const UtilService_1 = require("./UtilService");
 const file_1 = require("../utilities/file");
-const bcrypt = require("bcrypt-nodejs");
 const RecyclePoint_1 = require("../models/RecyclePoint");
+const app_1 = require("../config/app");
+cloudinary_1.v2.config({
+    cloud_name: app_1.config.image.cloud_name,
+    api_key: app_1.config.image.api_key,
+    api_secret: app_1.config.image.api_secret,
+});
 class UserService {
     constructor() {
         this.file = new file_1.default();
@@ -39,7 +46,7 @@ class UserService {
             if (createdUser.designation === "client")
                 yield RecyclePoint_1.RecyclePoint.create({ user: createdUser.id });
             user.profileImage = req.body.profileImage
-                ? this.file.localUpload(req.body.profileImage, "/images/profile/", ".png")
+                ? yield this.cloudinaryUploader(req.body.profileImage)
                 : null;
             user.save();
             this.core.Email(user, "New Registration", this.core.html('<p style="color: #000">Hello ' +
@@ -68,7 +75,7 @@ class UserService {
                 userPayload.firstTimeLogin = false;
             const user = yield this.repository.updateData(req.params.userId, userPayload);
             user.profileImage = req.body.profileImage
-                ? this.file.localUpload(req.body.profileImage, "/images/profile/", ".png")
+                ? yield this.cloudinaryUploader(req.body.profileImage)
                 : user.profileImage;
             user.save();
             this.core.activityLog(req, user.id, "Update Profile");
@@ -91,6 +98,17 @@ class UserService {
             yield this.notification.sendForgetSMS(user.phone, password);
             this.core.Email(user, "Password Reset", this.core.html(`<p style="color: #000">Hello ${user.firstName} ${user.lastName}, \n\r Your password has been reset. Your new password is ${password} </p>`));
             return user;
+        });
+    }
+    cloudinaryUploader(image) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            try {
+                const url = yield cloudinary_1.v2.uploader.upload(image);
+                return url.public_id;
+            }
+            catch (error) {
+                console.log(error);
+            }
         });
     }
 }

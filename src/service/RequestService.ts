@@ -5,8 +5,9 @@ import { RecyclePoint, RecyclePointM } from "../models/RecyclePoint";
 import { RecycleItem, RecycleItemM } from "../models/RecycleItem";
 import { RecyclePointRecord } from "../models/RecyclePointRecord";
 import { RequestRepository as Repository } from "../abstract/RequestRepository";
-import { User, IUserM } from "../models/User";
+import { User, IUserM, Designation } from "../models/User";
 import { RedemptionItem } from "../models/RedemptionItem";
+import { UserNotification } from "../models/UserNotification";
 
 export class RequestService {
   protected repository: Repository;
@@ -53,6 +54,38 @@ export class RequestService {
       const details = "redemption request";
       await this.deductPoints(recyclePoints, request.id, user, details);
     }
+
+    if (request.type === "recycle") {
+      const admins = await User.find({
+        isDeleted: false,
+        $or: [
+          { designation: Designation.Admin },
+          { desgnation: Designation.Buster },
+        ],
+      });
+
+      admins.forEach(async (admin) => {
+        await UserNotification.create({
+          title: "New recycle request",
+          userId: admin.id,
+          body: `${user.fullName} just made a recycle request`,
+        });
+      });
+    }
+    if (request.type === "redemption") {
+      const admins = await User.find({
+        isDeleted: false,
+        designation: Designation.Admin,
+      });
+
+      admins.forEach(async (admin) => {
+        await UserNotification.create({
+          title: "New redemption request",
+          userId: admin.id,
+          body: `${user.fullName} just made a recycle request`,
+        });
+      });
+    }
     this.core.Email(
       user,
       "New Request",
@@ -97,7 +130,6 @@ export class RequestService {
   }
 
   public async accept(req: any): Promise<void> {
-
     const request = (await ItemRequest.findById(req.params.id)) as any;
     if (!request) throw new Error("invalid request");
     if (request.status !== "pending")

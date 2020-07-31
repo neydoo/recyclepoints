@@ -1,8 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.User = exports.userSchema = void 0;
+exports.User = exports.userSchema = exports.Designation = void 0;
+const tslib_1 = require("tslib");
 const mongoose_1 = require("mongoose");
 const bcrypt = require("bcrypt-nodejs");
+const UtilService_1 = require("../service/UtilService");
 var Designation;
 (function (Designation) {
     Designation["Buster"] = "buster";
@@ -10,9 +12,9 @@ var Designation;
     Designation["Admin"] = "admin";
     Designation["Dev"] = "dev";
     Designation["Operator"] = "operator";
-    Designation["Staff"] = "staff";
+    Designation["Staff"] = "verification-staff";
     Designation["Client"] = "client";
-})(Designation || (Designation = {}));
+})(Designation = exports.Designation || (exports.Designation = {}));
 exports.userSchema = new mongoose_1.Schema({
     firstName: { type: String },
     lastName: { type: String },
@@ -48,7 +50,7 @@ exports.userSchema = new mongoose_1.Schema({
     },
     designation: {
         type: String,
-        enum: ["buster", "admin", "dev", "sorter", "operator", "staff", "client"],
+        enum: ["buster", "admin", "dev", "sorter", "baler", "verification-staff", "client"],
     },
     profileImage: { type: String, default: null },
     cloudImage: { type: String, default: null },
@@ -65,4 +67,11 @@ exports.userSchema.methods.compareOtp = function (candidatePassword) {
 exports.userSchema.methods.fullName = function () {
     return this.firstName.trim() + " " + this.lastName.trim();
 };
+exports.userSchema.pre("save", function (next) {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const data = this;
+        data.phone = UtilService_1.UtilService.formatPhone(data.phone);
+        next();
+    });
+});
 exports.User = mongoose_1.model("User", exports.userSchema);

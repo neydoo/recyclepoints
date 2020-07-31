@@ -88,10 +88,10 @@ export default class CoreService {
     if (!message || !number) return;
     const data: SmsData = {
       to: number,
-      from: "Recycle",
+      from: "N-Alert",
       sms: message,
       type: "plain",
-      channel: "generic",
+      channel: "dnd",
       api_key: config.sms.termii.apiKey as string,
     };
 

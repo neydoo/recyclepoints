@@ -44,6 +44,21 @@ export class AuthController {
     }
   }
 
+  @Put("deactivate/:id")
+  public async deactivateUser(req: Request, res: Response): Promise<void> {
+    try {
+      const user: IUserM = await this.repository.findById(req.params.id);
+      user.isDeleted = true;
+      user.save();
+
+      res
+        .status(200)
+        .json({ success: true, user, message: "user activated successfully" });
+    } catch (error) {
+      res.status(400).json({ success: false, error, message: error.message });
+    }
+  }
+
   @Post("login")
   public authenticateUser(req: Request, res: Response, next: NextFunction) {
     passport.authenticate("local", { session: false }, (err, user, info) => {

@@ -1,5 +1,4 @@
 export class UtilService {
-
   static generate(length: number, chars?: string) {
     if (!chars) {
       chars = "0123456789";
@@ -11,18 +10,20 @@ export class UtilService {
     return result;
   }
 
-  formUrlEncoded(x: any): any {
+  static formUrlEncoded(x: any): any {
     return Object.keys(x).reduce(
       (p, c) => `${p}&${c}=${encodeURIComponent(x[c])}`,
-      ''
+      ""
     );
   }
 
-  formatPhone (phonenumber: any): string {
+  static formatPhone(phonenumber: any): string {
     phonenumber.toString();
-    return (phonenumber = phonenumber.startsWith("+")
-      ? phonenumber.slice(1)
-      : phonenumber);
-  };
-
+    if (phonenumber.startsWith("07")) phonenumber = phonenumber.slice(1);
+    if (phonenumber.startsWith("08")) phonenumber = phonenumber.slice(1);
+    if (phonenumber.startsWith("09")) phonenumber = phonenumber.slice(1);
+    if (phonenumber.startsWith("+")) phonenumber = phonenumber.slice(1);
+    if (phonenumber.startsWith("234")) return phonenumber;
+    return phonenumber = `234${phonenumber}`
+  }
 }

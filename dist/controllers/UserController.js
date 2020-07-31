@@ -37,8 +37,9 @@ let UserController = class UserController extends AbstractController_1.AbstractC
                     criteria.status = status;
                 }
                 if (search) {
-                    searchCriteria.or = [
+                    criteria.or = [
                         { firstName: /search/ },
+                        { lastName: /search/ },
                         { address: /search/ },
                         { phone: /search/ },
                     ];

@@ -6,3 +6,4 @@ export * from "./RedemptionItemController";
 export * from "./SortingController";
 export * from "./NotificationController";
 export * from "./MobileController";
+export * from "./AdminController";

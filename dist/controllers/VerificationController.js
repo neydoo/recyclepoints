@@ -1,19 +1,27 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SortingController = void 0;
+exports.VerificationController = void 0;
 const tslib_1 = require("tslib");
-const moment = require('moment');
+const moment = require("moment");
 const core_1 = require("@overnightjs/core");
-const auth_1 = require("../middleware/auth");
-const DailySorting_1 = require("../models/DailySorting");
+const AbstractController_1 = require("./AbstractController");
+const RequestRepository_1 = require("../abstract/RequestRepository");
+const Verification_1 = require("../models/Verification");
+const RequestService_1 = require("../service/RequestService");
+const NotificationsService_1 = require("../service/NotificationsService");
+const Request_1 = require("../models/Request");
 const PdfService_1 = require("src/service/PdfService");
-let SortingController = class SortingController {
+let VerificationController = class VerificationController extends AbstractController_1.AbstractController {
+    constructor() {
+        super(new RequestRepository_1.RequestRepository());
+        this.request = new RequestService_1.RequestService();
+    }
     index(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 const { startDate, endDate, search, pay, type, product, arrivalTime, } = req.query;
                 const criteria = { isDeleted: false };
-                const searchCriteria = { designation: "sorter" };
+                const searchCriteria = { designation: "verification-staff" };
                 if (startDate) {
                     criteria.createdAt = { ">=": startDate };
                 }
@@ -33,14 +41,14 @@ let SortingController = class SortingController {
                     criteria.arrivalTime = arrivalTime;
                 }
                 if (search) {
-                    searchCriteria.$or = [
+                    searchCriteria.or = [
                         { firstName: /search/ },
                         { lastName: /search/ },
                         { address: /search/ },
                         { phone: /search/ },
                     ];
                 }
-                const data = yield DailySorting_1.DailySorting.find({ criteria }).populate({
+                const data = yield Verification_1.Verification.find({ criteria }).populate({
                     path: "user",
                     match: searchCriteria,
                 });
@@ -53,52 +61,61 @@ let SortingController = class SortingController {
             }
         });
     }
-    userSortings(req, res) {
+    create(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const { startDate, endDate } = req.query;
-                const user = req.params.id ? req.params.id : req.user.id;
-                const criteria = { user, isDeleted: false };
-                if (startDate) {
-                    criteria.createdAt = { ">=": startDate };
+                const { weight, arrivalTime } = req.body;
+                if (!weight || !arrivalTime)
+                    throw new Error("missing values");
+                const notification = new NotificationsService_1.default();
+                const itemrequest = (yield Request_1.Request.findById(req.params.id).populate("requestedBy"));
+                let items;
+                let points;
+                const { notificationTokens } = itemrequest.acceptedBy;
+                if (itemrequest.type === "redemption")
+                    throw new Error("invalid request selected");
+                if (itemrequest.type === "recycle") {
+                    if (itemrequest.status === "completed")
+                        throw new Error("request is already completed");
+                    items = req.body.items ? req.body.items : itemrequest.items;
+                    if (!items) {
+                        throw new Error("there are no recycle items for this request");
+                    }
+                    points = yield this.request.calculatePoints(items);
+                    const details = "recycle";
+                    yield this.request.addPoints(points, itemrequest.id, itemrequest.requestedBy, details);
+                    itemrequest.points = points;
                 }
-                if (endDate) {
-                    criteria.createdAt = { "<=": endDate };
-                }
-                const data = yield DailySorting_1.DailySorting.find({ criteria });
+                itemrequest.status = Request_1.Status.Completed;
+                itemrequest.items = items;
+                yield itemrequest.save();
+                yield notification.sendPushNotification("points awarded", `you've recieved ${itemrequest.points} points`, notificationTokens);
+                yield Verification_1.Verification.create({
+                    user: req.user.id,
+                    items,
+                    weight,
+                    arrivalTime,
+                    request: itemrequest.id,
+                    points,
+                });
                 res
                     .status(200)
-                    .send({ success: true, message: "data retrieved successfully!", data });
+                    .json({ success: true, message: "saved", data: itemrequest });
             }
             catch (error) {
                 res.status(400).json({ success: false, error, message: error.message });
             }
         });
     }
-    update(req, res) {
+    getAvailableRequests(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                yield DailySorting_1.DailySorting.updateOne({ id: req.params.id }, req.body, {
-                    new: true,
-                });
-                res.status(200).send({
-                    success: true,
-                    message: "item updated successfully!",
-                });
-            }
-            catch (error) {
-                res.status(400).json({ success: false, error, message: error.message });
-            }
-        });
-    }
-    enable(req, res) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            try {
-                yield DailySorting_1.DailySorting.updateOne({ id: req.params.id }, { isDeleted: true });
-                res.status(200).send({
-                    success: true,
-                    message: "item disabled successfully!",
-                });
+                const itemrequest = (yield Request_1.Request.find({
+                    status: Request_1.Status.Collected,
+                }).populate("requestedBy"));
+                res
+                    .status(200)
+                    .json({ success: true, message: "saved", data: itemrequest });
             }
             catch (error) {
                 res.status(400).json({ success: false, error, message: error.message });
@@ -124,7 +141,7 @@ let SortingController = class SortingController {
                 }
                 if (pay)
                     SubCriteria.pay = pay;
-                const sorting = yield DailySorting_1.DailySorting.find(criteria).populate({
+                const sorting = yield Verification_1.Verification.find(criteria).populate({
                     path: "user",
                     match: SubCriteria,
                 });
@@ -173,44 +190,36 @@ let SortingController = class SortingController {
 };
 tslib_1.__decorate([
     core_1.Get(""),
-    core_1.Middleware([auth_1.isAdmin]),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
-], SortingController.prototype, "index", null);
+], VerificationController.prototype, "index", null);
 tslib_1.__decorate([
-    core_1.Get("user/:id"),
+    core_1.Post("save/:id"),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
-], SortingController.prototype, "userSortings", null);
+], VerificationController.prototype, "create", null);
 tslib_1.__decorate([
-    core_1.Post("update/:id"),
+    core_1.Get("collected"),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
-], SortingController.prototype, "update", null);
-tslib_1.__decorate([
-    core_1.Post("remove/:id"),
-    core_1.Middleware([auth_1.isDev]),
-    tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [Object, Object]),
-    tslib_1.__metadata("design:returntype", Promise)
-], SortingController.prototype, "enable", null);
+], VerificationController.prototype, "getAvailableRequests", null);
 tslib_1.__decorate([
     core_1.Get("data"),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
-], SortingController.prototype, "getData", null);
+], VerificationController.prototype, "getData", null);
 tslib_1.__decorate([
     core_1.Post('data/pdf'),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
-], SortingController.prototype, "downloadPdf", null);
-SortingController = tslib_1.__decorate([
-    core_1.Controller("api/sorting"),
-    core_1.ClassMiddleware([auth_1.checkJwt])
-], SortingController);
-exports.SortingController = SortingController;
+], VerificationController.prototype, "downloadPdf", null);
+VerificationController = tslib_1.__decorate([
+    core_1.Controller("api/verification"),
+    tslib_1.__metadata("design:paramtypes", [])
+], VerificationController);
+exports.VerificationController = VerificationController;

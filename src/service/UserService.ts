@@ -1,11 +1,20 @@
 import Core from "./CoreService";
+import { v2 as cloudinary } from "cloudinary";
+import * as bcrypt from "bcrypt-nodejs";
+
 import Notification from "./NotificationsService";
 import { IUserM } from "../models/User";
 import { UserRepository as Repository } from "../abstract/UserRepository";
 import { UtilService } from "./UtilService";
 import File from "../utilities/file";
-import * as bcrypt from "bcrypt-nodejs";
 import { RecyclePoint } from "../models/RecyclePoint";
+import { config } from "../config/app";
+
+cloudinary.config({
+  cloud_name: config.image.cloud_name,
+  api_key: config.image.api_key,
+  api_secret: config.image.api_secret,
+});
 
 export class UserService {
   protected repository: any;
@@ -17,6 +26,8 @@ export class UserService {
     this.repository = new Repository();
     this.core = new Core();
     this.notification = new Notification();
+
+    // set your env variable CLOUDINARY_URL or set the following configuration
   }
 
   public async create(req: any): Promise<void> {
@@ -37,13 +48,15 @@ export class UserService {
     }
     userPayload.password = bcrypt.hashSync(userPayload.password as string);
 
+    // return console.log(userPayload);
+
     const createdUser = await this.repository.createNew(userPayload);
     const user = await this.repository.findById(createdUser.id);
     if (createdUser.designation === "client")
       await RecyclePoint.create({ user: createdUser.id });
 
     user.profileImage = req.body.profileImage
-      ? this.file.localUpload(req.body.profileImage, "/images/profile/", ".png")
+      ? await this.cloudinaryUploader(req.body.profileImage)
       : null;
     user.save();
 
@@ -92,7 +105,7 @@ export class UserService {
     );
 
     user.profileImage = req.body.profileImage
-      ? this.file.localUpload(req.body.profileImage, "/images/profile/", ".png")
+      ? await this.cloudinaryUploader(req.body.profileImage)
       : user.profileImage;
     user.save();
 
@@ -139,5 +152,14 @@ export class UserService {
       )
     );
     return user;
+  }
+
+  private async cloudinaryUploader(image: any) {
+    try {
+      const url = await cloudinary.uploader.upload(image);
+      return url.public_id;
+    } catch (error) {
+      console.log(error);
+    }
   }
 }

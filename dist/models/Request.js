@@ -35,5 +35,6 @@ exports.requestSchema = new mongoose_1.Schema({
     },
     isDeleted: { type: Boolean, default: false },
     points: { type: Number, default: 0 },
+    weight: { type: Number, default: 0 },
 }, { timestamps: true });
 exports.Request = mongoose_1.model("Request", exports.requestSchema);

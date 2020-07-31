@@ -1,3 +1,4 @@
+const moment = require("moment");
 import { NextFunction, Request, Response } from "express";
 import {
   Controller,
@@ -14,6 +15,9 @@ import { RequestM, Request as ItemRequest, Status } from "../models/Request";
 import { RequestService } from "../service/RequestService";
 import NotificationsService from "../service/NotificationsService";
 import PaginationService from "../service/PaginationService";
+import { RecyclePointRecord } from "../models/RecyclePointRecord";
+import { UserNotification } from "../models/UserNotification";
+import { PdfService } from "src/service/PdfService";
 
 @Controller("api/request")
 @ClassMiddleware([checkJwt])
@@ -61,6 +65,19 @@ export class RequestController extends AbstractController {
         .populate({ path: "acceptedBy", match: searchCriteria })
         .populate("redemptionItem");
 
+      if (request.length) {
+        const requestPromise = request.map(async (r: any) => {
+          if (r?.type === "redemption") {
+            const transaction = await RecyclePointRecord.findOne({
+              transactionId: r.id,
+              type: "deduction",
+            });
+            r.transaction = transaction;
+          }
+        });
+        await Promise.all(requestPromise);
+      }
+
       res.status(200).send({ success: true, data: request });
     } catch (error) {
       res.status(400).json({ success: false, error, message: error.message });
@@ -105,11 +122,11 @@ export class RequestController extends AbstractController {
 
       const { requestedBy } = request;
 
-      await notification.sendPushNotification(
-        "points awarded",
-        `your recycle request has been accepted`,
-        requestedBy.notificationTokens
-      );
+      await UserNotification.create({
+        body: "your recycle request has been accepted",
+        title: "We'll be visiting soon",
+        userId: requestedBy.id,
+      });
 
       res.status(200).json({
         success: true,
@@ -176,9 +193,15 @@ export class RequestController extends AbstractController {
   @Get(":requestId")
   public async findRequest(req: Request, res: Response): Promise<void> {
     try {
-      const request: RequestM = await this.repository.findById(
-        req.params.requestId
-      );
+      const request: any = await ItemRequest.findById(req.params.requestId);
+
+      if (request?.type === "redemption") {
+        const transaction = await RecyclePointRecord.findOne({
+          transactionId: request.id,
+          type: "deduction",
+        });
+        request.transaction = transaction;
+      }
 
       res.status(200).json({ success: true, data: request });
     } catch (error) {
@@ -268,9 +291,9 @@ export class RequestController extends AbstractController {
         .populate("requestedBy")
         .populate("redemptionItem");
 
-        // const pagination = new PaginationService();
+      // const pagination = new PaginationService();
 
-        // pagination.paginate(ItemRequest,res,1,2,criteria)
+      // pagination.paginate(ItemRequest,res,1,2,criteria)
 
       res.status(200).json({ success: true, data: request });
     } catch (error) {
@@ -356,7 +379,7 @@ export class RequestController extends AbstractController {
         .populate("acceptedBy");
       const notification = new NotificationsService();
 
-      if(!request) throw new Error('invalid request selected for reminder')
+      if (!request) throw new Error("invalid request selected for reminder");
 
       if (request.acceptedBy?.notificationTokens?.length)
         await notification.sendPushNotification(
@@ -365,13 +388,12 @@ export class RequestController extends AbstractController {
           request.acceptedBy.notificationTokens
         );
 
-        if(request.requestedBy?.notificationTokens?.length)
-        console.log('hi')
-        await notification.sendPushNotification(
-          "pickup reminder",
-          `reminder sent`,
-          request.requestedBy.notificationTokens
-        );
+      if (request.requestedBy?.notificationTokens?.length) console.log("hi");
+      await notification.sendPushNotification(
+        "pickup reminder",
+        `reminder sent`,
+        request.requestedBy.notificationTokens
+      );
       res.status(200).json({ success: true, message: "sent reminder" });
     } catch (error) {
       console.log(error);

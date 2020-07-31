@@ -40,6 +40,21 @@ let AuthController = class AuthController {
             }
         });
     }
+    deactivateUser(req, res) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            try {
+                const user = yield this.repository.findById(req.params.id);
+                user.isDeleted = true;
+                user.save();
+                res
+                    .status(200)
+                    .json({ success: true, user, message: "user activated successfully" });
+            }
+            catch (error) {
+                res.status(400).json({ success: false, error, message: error.message });
+            }
+        });
+    }
     authenticateUser(req, res, next) {
         passport.authenticate("local", { session: false }, (err, user, info) => {
             if (err) {
@@ -89,6 +104,12 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
 ], AuthController.prototype, "activateUser", null);
+tslib_1.__decorate([
+    core_1.Put("deactivate/:id"),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object, Object]),
+    tslib_1.__metadata("design:returntype", Promise)
+], AuthController.prototype, "deactivateUser", null);
 tslib_1.__decorate([
     core_1.Post("login"),
     tslib_1.__metadata("design:type", Function),

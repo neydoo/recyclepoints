@@ -48,8 +48,9 @@ export class UserController extends AbstractController {
       }
 
       if (search) {
-        searchCriteria.or = [
+        criteria.or = [
           { firstName: /search/ },
+          { lastName: /search/ },
           { address: /search/ },
           { phone: /search/ },
         ];

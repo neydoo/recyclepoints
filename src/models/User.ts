@@ -1,13 +1,14 @@
 import { Document, Schema, Model, model, Error } from "mongoose";
 import * as bcrypt from "bcrypt-nodejs";
+import { UtilService } from '../service/UtilService';
 
-enum Designation {
+export enum Designation {
   Buster = "buster",
   Sorter = "sorter",
   Admin = "admin",
   Dev = "dev",
   Operator = "operator",
-  Staff = "staff",
+  Staff = "verification-staff",
   Client = "client",
 }
 export interface IUserM extends Document {
@@ -19,7 +20,7 @@ export interface IUserM extends Document {
   password?: string;
   profileImage?: string;
   pay?: number;
-  designation: Designation;
+  designation?: Designation;
   cloudImage?: string;
   country?: string;
   state?: string;
@@ -71,7 +72,7 @@ export const userSchema: Schema = new Schema(
     },
     designation: {
       type: String,
-      enum: ["buster", "admin", "dev", "sorter", "operator", "staff", "client"],
+      enum: ["buster", "admin", "dev", "sorter", "baler", "verification-staff", "client"],
     },
     profileImage: { type: String, default: null },
     cloudImage: { type: String, default: null },
@@ -99,5 +100,12 @@ userSchema.methods.compareOtp = function (candidatePassword: string) {
 userSchema.methods.fullName = function (): string {
   return this.firstName.trim() + " " + this.lastName.trim();
 };
+
+
+userSchema.pre("save", async function (next) {
+  const data = this as IUserM
+  data.phone = UtilService.formatPhone(data.phone);
+  next();
+});
 
 export const User: Model<IUserM> = model<IUserM>("User", userSchema);

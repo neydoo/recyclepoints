@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RequestController = void 0;
+exports.AdminController = void 0;
 const tslib_1 = require("tslib");
 const moment = require("moment");
 const core_1 = require("@overnightjs/core");
@@ -10,73 +10,200 @@ const auth_1 = require("../middleware/auth");
 const Request_1 = require("../models/Request");
 const RequestService_1 = require("../service/RequestService");
 const NotificationsService_1 = require("../service/NotificationsService");
-const RecyclePointRecord_1 = require("../models/RecyclePointRecord");
-const UserNotification_1 = require("../models/UserNotification");
-let RequestController = class RequestController extends AbstractController_1.AbstractController {
+const User_1 = require("../models/User");
+const Review_1 = require("../models/Review");
+const Verification_1 = require("../models/Verification");
+const DailySorting_1 = require("../models/DailySorting");
+const Bale_1 = require("../models/Bale");
+const DataHistory_1 = require("../models/DataHistory");
+let AdminController = class AdminController extends AbstractController_1.AbstractController {
     constructor() {
         super(new RequestRepository_1.RequestRepository());
         this.request = new RequestService_1.RequestService();
     }
-    index(req, res) {
+    dashboardInfo(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const { startDate, endDate, status, type, search } = req.query;
-                const criteria = {
-                    isDeleted: false,
+                const data = {
+                    recycler: { total: 0, active: 0 },
+                    buster: { total: 0, active: 0 },
+                    sorter: { total: 0, active: 0 },
+                    operator: { total: 0, active: 0 },
+                    staff: { total: 0, active: 0 },
+                    monthlyRecycle: {
+                        jan: 0,
+                        feb: 0,
+                        mar: 0,
+                        apr: 0,
+                        may: 0,
+                        jun: 0,
+                        jul: 0,
+                        aug: 0,
+                        sep: 0,
+                        oct: 0,
+                        nov: 0,
+                        dec: 0,
+                    },
+                    dataHistory: {},
                 };
-                const searchCriteria = {
-                    isDeleted: false,
-                };
-                if (type) {
-                    criteria.type = type;
-                }
-                if (startDate) {
-                    criteria.createdAt = { ">=": startDate };
-                    if (endDate) {
-                        criteria.createdAt = { "<=": endDate };
+                const allUsers = yield User_1.User.find({});
+                const sorting = allUsers.map((user) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+                    if (user.designation === User_1.Designation.Buster) {
+                        data.buster.total += 1;
+                        const lastBust = yield Request_1.Request.findOne({
+                            isDeleted: false,
+                            acceptedBy: user.id,
+                        }).sort("desc");
+                        if (moment(lastBust === null || lastBust === void 0 ? void 0 : lastBust.createdAt).diff("days") < 30)
+                            data.buster.active += 1;
                     }
-                    criteria.createdAt = { "<=": Date.now() };
-                }
-                if (status) {
-                    criteria.status = status;
-                }
-                if (search) {
-                    searchCriteria.or = [
-                        { firstName: /search/ },
-                        { address: /search/ },
-                        { phone: /search/ },
-                    ];
-                }
-                const request = yield Request_1.Request.find(criteria)
-                    .populate("acceptedBy")
-                    .populate({ path: "acceptedBy", match: searchCriteria })
-                    .populate("redemptionItem");
-                if (request.length) {
-                    const requestPromise = request.map((r) => tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        if ((r === null || r === void 0 ? void 0 : r.type) === "redemption") {
-                            const transaction = yield RecyclePointRecord_1.RecyclePointRecord.findOne({
-                                transactionId: r.id,
-                                type: "deduction",
-                            });
-                            r.transaction = transaction;
-                        }
-                    }));
-                    yield Promise.all(requestPromise);
-                }
-                res.status(200).send({ success: true, data: request });
+                    if (user.designation === User_1.Designation.Sorter) {
+                        data.sorter.total += 1;
+                        const lastOperation = yield DailySorting_1.DailySorting.findOne({
+                            isDeleted: false,
+                            user: user.id,
+                        }).sort("desc");
+                        if (moment(lastOperation === null || lastOperation === void 0 ? void 0 : lastOperation.createdAt).diff("days") < 30)
+                            data.sorter.active += 1;
+                    }
+                    if (user.designation === User_1.Designation.Operator) {
+                        data.operator.total += 1;
+                        const lastOperation = yield Bale_1.Bale.findOne({
+                            isDeleted: false,
+                            user: user.id,
+                        }).sort("desc");
+                        if (moment(lastOperation === null || lastOperation === void 0 ? void 0 : lastOperation.createdAt).diff("days") < 30)
+                            data.operator.active += 1;
+                    }
+                    if (user.designation === User_1.Designation.Staff) {
+                        data.staff.total += 1;
+                        const lastVerification = yield Verification_1.Verification.findOne({
+                            isDeleted: false,
+                            user: user.id,
+                        }).sort("desc");
+                        if (moment(lastVerification === null || lastVerification === void 0 ? void 0 : lastVerification.createdAt).diff("days") < 30)
+                            data.staff.active += 1;
+                    }
+                    if (user.designation === User_1.Designation.Client) {
+                        data.recycler.total += 1;
+                        const lastRequest = yield Request_1.Request.findOne({
+                            type: "recycle",
+                            isDeleted: false,
+                            user: user.id,
+                        }).sort("desc");
+                        if (moment(lastRequest === null || lastRequest === void 0 ? void 0 : lastRequest.createdAt).diff("days") < 120)
+                            data.recycler.active += 1;
+                    }
+                }));
+                let allRecycles = yield Request_1.Request.find({
+                    isDeleted: false,
+                    type: "recycle",
+                });
+                const janStart = moment().startOf("year");
+                const janEnd = janStart.endOf("month");
+                const febStart = janStart.add(1, "month");
+                const febEnd = febStart.endOf("month");
+                const marchStart = febStart.add(1, "month");
+                const marchEnd = marchStart.endOf("month");
+                const aprStart = marchStart.add(1, "month");
+                const aprEnd = aprStart.endOf("month");
+                const mayStart = aprStart.add(1, "month");
+                const mayEnd = mayStart.endOf("month");
+                const junStart = mayStart.add(1, "month");
+                const junEnd = junStart.endOf("month");
+                const julStart = junStart.add(1, "month");
+                const julEnd = julStart.endOf("month");
+                const augStart = julStart.add(1, "month");
+                const augEnd = augStart.endOf("month");
+                const sepStart = augStart.add(1, "month");
+                const sepEnd = sepStart.endOf("month");
+                const octStart = sepStart.add(1, "month");
+                const octEnd = octStart.endOf("month");
+                const novStart = sepStart.add(1, "month");
+                const novEnd = novStart.endOf("month");
+                const decStart = novStart.add(1, "month");
+                const decEnd = decStart.endOf("month");
+                const recycleGraph = allRecycles.map((recycle) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+                    if (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) {
+                        if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= janStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= janEnd)
+                            data.monthlyRecycle.jan += 1;
+                        if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= febStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= febEnd)
+                            data.monthlyRecycle.feb += 1;
+                        if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= marchStart &&
+                            (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= marchEnd)
+                            data.monthlyRecycle.mar += 1;
+                        if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= aprStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= aprEnd)
+                            data.monthlyRecycle.apr += 1;
+                        if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= mayStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= mayEnd)
+                            data.monthlyRecycle.may += 1;
+                        if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= junStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= junEnd)
+                            data.monthlyRecycle.jun += 1;
+                        if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= julStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= julEnd)
+                            data.monthlyRecycle.jul += 1;
+                        if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= augStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= augEnd)
+                            data.monthlyRecycle.aug += 1;
+                        if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= sepStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= sepEnd)
+                            data.monthlyRecycle.sep += 1;
+                        if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= octStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= octEnd)
+                            data.monthlyRecycle.oct += 1;
+                        if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= novStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= novEnd)
+                            data.monthlyRecycle.nov += 1;
+                        if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= decStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= decEnd)
+                            data.monthlyRecycle.dec += 1;
+                    }
+                }));
+                data.dataHistory = yield DataHistory_1.DataHistory.find({}).limit(5);
+                yield Promise.all([sorting, recycleGraph]);
+                res
+                    .status(200)
+                    .send({ success: true, message: "retrieved dashboard data", data });
             }
             catch (error) {
                 res.status(400).json({ success: false, error, message: error.message });
             }
         });
     }
-    createRequest(req, res) {
+    topBusters(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const request = yield this.request.create(req);
+                const { startMonth = moment().startOf("month"), endMonth = moment().endOf("month"), } = req.query;
+                const ratings = [];
+                const allBusters = yield User_1.User.find({
+                    isDeleted: false,
+                    designation: User_1.Designation.Buster,
+                });
+                const reviewPromise = yield allBusters.map((user) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+                    let averageRating = 0;
+                    const reviews = yield Review_1.Review.find({
+                        buster: user.id,
+                        isDeleted: false,
+                        createdAt: { ">=": startMonth, "<=": endMonth },
+                    });
+                    const totalRating = reviews.reduce((acc, review) => {
+                        const { rating } = review;
+                        return acc + rating;
+                    });
+                    averageRating = totalRating / reviews.length;
+                    ratings.push({ user, averageRating });
+                    yield Promise.all(reviewPromise);
+                    function sortRatings(a, b) {
+                        const ratingOne = a.averageRating;
+                        const ratingTwo = b.averageRating;
+                        let comparison = 0;
+                        if (ratingOne > ratingTwo) {
+                            comparison = 1;
+                        }
+                        else if (ratingOne < ratingTwo) {
+                            comparison = -1;
+                        }
+                        return comparison;
+                    }
+                    yield ratings.sort(sortRatings);
+                }));
+                const data = ratings.splice(0, 5);
                 res.status(200).json({
                     success: true,
-                    data: request,
+                    data,
                     message: "request created successfully!",
                 });
             }
@@ -106,11 +233,7 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                 const request = yield this.request.accept(req);
                 const notification = new NotificationsService_1.default();
                 const { requestedBy } = request;
-                yield UserNotification_1.UserNotification.create({
-                    body: "your recycle request has been accepted",
-                    title: "We'll be visiting soon",
-                    userId: requestedBy.id,
-                });
+                yield notification.sendPushNotification("points awarded", `your recycle request has been accepted`, requestedBy.notificationTokens);
                 res.status(200).json({
                     success: true,
                     data: request,
@@ -162,14 +285,7 @@ let RequestController = class RequestController extends AbstractController_1.Abs
     findRequest(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const request = yield Request_1.Request.findById(req.params.requestId);
-                if ((request === null || request === void 0 ? void 0 : request.type) === "redemption") {
-                    const transaction = yield RecyclePointRecord_1.RecyclePointRecord.findOne({
-                        transactionId: request.id,
-                        type: "deduction",
-                    });
-                    request.transaction = transaction;
-                }
+                const request = yield this.repository.findById(req.params.requestId);
                 res.status(200).json({ success: true, data: request });
             }
             catch (error) {
@@ -330,92 +446,92 @@ let RequestController = class RequestController extends AbstractController_1.Abs
     }
 };
 tslib_1.__decorate([
-    core_1.Get(""),
+    core_1.Get("details"),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
-], RequestController.prototype, "index", null);
+], AdminController.prototype, "dashboardInfo", null);
 tslib_1.__decorate([
-    core_1.Post("new"),
+    core_1.Get("top-busters"),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
-], RequestController.prototype, "createRequest", null);
+], AdminController.prototype, "topBusters", null);
 tslib_1.__decorate([
     core_1.Put("update/:id"),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
-], RequestController.prototype, "updateRequest", null);
+], AdminController.prototype, "updateRequest", null);
 tslib_1.__decorate([
     core_1.Post("accept/:id"),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
-], RequestController.prototype, "acceptRequest", null);
+], AdminController.prototype, "acceptRequest", null);
 tslib_1.__decorate([
     core_1.Post("complete/:id"),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
-], RequestController.prototype, "completeRequest", null);
+], AdminController.prototype, "completeRequest", null);
 tslib_1.__decorate([
     core_1.Get(":requestId"),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
-], RequestController.prototype, "findRequest", null);
+], AdminController.prototype, "findRequest", null);
 tslib_1.__decorate([
     core_1.Post("decline/:requestId"),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
-], RequestController.prototype, "declineRequest", null);
+], AdminController.prototype, "declineRequest", null);
 tslib_1.__decorate([
     core_1.Post("approve/:requestId"),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
-], RequestController.prototype, "approveRequest", null);
+], AdminController.prototype, "approveRequest", null);
 tslib_1.__decorate([
     core_1.Get("list/user"),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
-], RequestController.prototype, "getUserRecycleRequests", null);
+], AdminController.prototype, "getUserRecycleRequests", null);
 tslib_1.__decorate([
     core_1.Get("buster/accepted"),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
-], RequestController.prototype, "fetchAcceptedRequests", null);
+], AdminController.prototype, "fetchAcceptedRequests", null);
 tslib_1.__decorate([
     core_1.Get("buster/pending"),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
-], RequestController.prototype, "fetchPendingRequests", null);
+], AdminController.prototype, "fetchPendingRequests", null);
 tslib_1.__decorate([
     core_1.Get("buster/completed"),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
-], RequestController.prototype, "fetchCompletedRequests", null);
+], AdminController.prototype, "fetchCompletedRequests", null);
 tslib_1.__decorate([
     core_1.Post("remind-buster/:id"),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
-], RequestController.prototype, "remindBuster", null);
+], AdminController.prototype, "remindBuster", null);
 tslib_1.__decorate([
     core_1.Delete("destroy/:id"),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
-], RequestController.prototype, "destroy", null);
-RequestController = tslib_1.__decorate([
-    core_1.Controller("api/request"),
+], AdminController.prototype, "destroy", null);
+AdminController = tslib_1.__decorate([
+    core_1.Controller("api/admin"),
     core_1.ClassMiddleware([auth_1.checkJwt]),
     tslib_1.__metadata("design:paramtypes", [])
-], RequestController);
-exports.RequestController = RequestController;
+], AdminController);
+exports.AdminController = AdminController;

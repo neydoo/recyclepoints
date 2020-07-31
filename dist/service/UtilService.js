@@ -12,15 +12,22 @@ class UtilService {
         }
         return result;
     }
-    formUrlEncoded(x) {
-        return Object.keys(x).reduce((p, c) => `${p}&${c}=${encodeURIComponent(x[c])}`, '');
+    static formUrlEncoded(x) {
+        return Object.keys(x).reduce((p, c) => `${p}&${c}=${encodeURIComponent(x[c])}`, "");
     }
-    formatPhone(phonenumber) {
+    static formatPhone(phonenumber) {
         phonenumber.toString();
-        return (phonenumber = phonenumber.startsWith("+")
-            ? phonenumber.slice(1)
-            : phonenumber);
+        if (phonenumber.startsWith("07"))
+            phonenumber = phonenumber.slice(1);
+        if (phonenumber.startsWith("08"))
+            phonenumber = phonenumber.slice(1);
+        if (phonenumber.startsWith("09"))
+            phonenumber = phonenumber.slice(1);
+        if (phonenumber.startsWith("+"))
+            phonenumber = phonenumber.slice(1);
+        if (phonenumber.startsWith("234"))
+            return phonenumber;
+        return phonenumber = `234${phonenumber}`;
     }
-    ;
 }
 exports.UtilService = UtilService;

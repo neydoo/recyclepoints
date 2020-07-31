@@ -5,7 +5,7 @@ const tslib_1 = require("tslib");
 const moment = require('moment');
 const core_1 = require("@overnightjs/core");
 const auth_1 = require("../middleware/auth");
-const DailySorting_1 = require("../models/DailySorting");
+const Bale_1 = require("../models/Bale");
 const PdfService_1 = require("src/service/PdfService");
 let SortingController = class SortingController {
     index(req, res) {
@@ -13,7 +13,7 @@ let SortingController = class SortingController {
             try {
                 const { startDate, endDate, search, pay, type, product, arrivalTime, } = req.query;
                 const criteria = { isDeleted: false };
-                const searchCriteria = { designation: "sorter" };
+                const searchCriteria = { designation: "baler" };
                 if (startDate) {
                     criteria.createdAt = { ">=": startDate };
                 }
@@ -33,14 +33,14 @@ let SortingController = class SortingController {
                     criteria.arrivalTime = arrivalTime;
                 }
                 if (search) {
-                    searchCriteria.$or = [
+                    searchCriteria.or = [
                         { firstName: /search/ },
                         { lastName: /search/ },
                         { address: /search/ },
                         { phone: /search/ },
                     ];
                 }
-                const data = yield DailySorting_1.DailySorting.find({ criteria }).populate({
+                const data = yield Bale_1.Bale.find({ criteria }).populate({
                     path: "user",
                     match: searchCriteria,
                 });
@@ -53,37 +53,34 @@ let SortingController = class SortingController {
             }
         });
     }
-    userSortings(req, res) {
+    create(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const { startDate, endDate } = req.query;
-                const user = req.params.id ? req.params.id : req.user.id;
-                const criteria = { user, isDeleted: false };
-                if (startDate) {
-                    criteria.createdAt = { ">=": startDate };
-                }
-                if (endDate) {
-                    criteria.createdAt = { "<=": endDate };
-                }
-                const data = yield DailySorting_1.DailySorting.find({ criteria });
+                const user = req.user.id;
+                const { arrivalTime, items, amount, weight, type } = req.body;
+                if (!arrivalTime || !items || !amount || !weight || !type)
+                    throw new Error("incomplete items");
+                const newData = req.body;
+                newData.user = user;
+                yield Bale_1.Bale.create(newData);
                 res
                     .status(200)
-                    .send({ success: true, message: "data retrieved successfully!", data });
+                    .send({ success: true, message: "data retrieved successfully!" });
             }
             catch (error) {
                 res.status(400).json({ success: false, error, message: error.message });
             }
         });
     }
-    update(req, res) {
+    getBalings(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                yield DailySorting_1.DailySorting.updateOne({ id: req.params.id }, req.body, {
-                    new: true,
-                });
+                const id = req.params.id ? req.params.id : req.user.id;
+                const data = yield Bale_1.Bale.findById(id);
                 res.status(200).send({
                     success: true,
                     message: "item updated successfully!",
+                    data,
                 });
             }
             catch (error) {
@@ -94,7 +91,7 @@ let SortingController = class SortingController {
     enable(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                yield DailySorting_1.DailySorting.updateOne({ id: req.params.id }, { isDeleted: true });
+                yield Bale_1.Bale.updateOne({ id: req.params.id }, { isDeleted: true });
                 res.status(200).send({
                     success: true,
                     message: "item disabled successfully!",
@@ -108,7 +105,7 @@ let SortingController = class SortingController {
     getData(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const { PET, UBC, ONP, BCC, GBS, PWS, name, arrivalTime, startDate, endDate, pay, } = req.query;
+                const { PET, UBC, ONP, BCC, GBS, PWS, name, arrivalTime, startDate, endDate, pay, type } = req.query;
                 const criteria = {};
                 const SubCriteria = {};
                 if (name) {
@@ -116,6 +113,8 @@ let SortingController = class SortingController {
                 }
                 if (arrivalTime)
                     criteria.arrivalTime = arrivalTime;
+                if (type)
+                    criteria.type = type;
                 if (startDate) {
                     criteria.createdAt = {
                         $gte: startDate,
@@ -124,7 +123,7 @@ let SortingController = class SortingController {
                 }
                 if (pay)
                     SubCriteria.pay = pay;
-                const sorting = yield DailySorting_1.DailySorting.find(criteria).populate({
+                const sorting = yield Bale_1.Bale.find(criteria).populate({
                     path: "user",
                     match: SubCriteria,
                 });
@@ -179,17 +178,17 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", Promise)
 ], SortingController.prototype, "index", null);
 tslib_1.__decorate([
+    core_1.Post("new"),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object, Object]),
+    tslib_1.__metadata("design:returntype", Promise)
+], SortingController.prototype, "create", null);
+tslib_1.__decorate([
     core_1.Get("user/:id"),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
-], SortingController.prototype, "userSortings", null);
-tslib_1.__decorate([
-    core_1.Post("update/:id"),
-    tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [Object, Object]),
-    tslib_1.__metadata("design:returntype", Promise)
-], SortingController.prototype, "update", null);
+], SortingController.prototype, "getBalings", null);
 tslib_1.__decorate([
     core_1.Post("remove/:id"),
     core_1.Middleware([auth_1.isDev]),
@@ -210,7 +209,7 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", Promise)
 ], SortingController.prototype, "downloadPdf", null);
 SortingController = tslib_1.__decorate([
-    core_1.Controller("api/sorting"),
+    core_1.Controller("api/bale"),
     core_1.ClassMiddleware([auth_1.checkJwt])
 ], SortingController);
 exports.SortingController = SortingController;

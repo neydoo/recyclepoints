@@ -9,6 +9,11 @@ export const config = {
   db: {
     url: process.env.MONGODB_URI as string,
   },
+  image: {
+    api_key: process.env.CLOUDINARY_API_KEY as string,
+    api_secret: process.env.CLOUDINARY_API_SECRET as string,
+    cloud_name: process.env.CLOUD_NAME as string,
+  },
   data: {
     limit: "50mb",
     extended: false,
@@ -51,4 +56,7 @@ export const config = {
     secret: process.env.PUSHER_APP_SECRET as string,
     cluster: process.env.PUSHER_APP_CLUSTER as string,
   },
+  recycle:{
+    logoUrl:"https://res.cloudinary.com/dktpvgymr/image/upload/v1596172596/Screen_Shot_2020-07-31_at_6.15.45_AM_hvfnq1.png"
+  }
 };

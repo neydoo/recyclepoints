@@ -19,6 +19,8 @@ export interface RequestM extends Document {
   redemptionItem?: string | RedemptionItemM;
   status: Status;
   points?: number;
+  weight?: number;
+  createdAt?: Date;
 }
 
 export type RecycleItems = {
@@ -54,6 +56,7 @@ export const requestSchema: Schema = new Schema(
     },
     isDeleted: { type: Boolean, default: false },
     points: { type: Number, default: 0 },
+    weight: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

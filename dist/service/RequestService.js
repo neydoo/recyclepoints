@@ -11,6 +11,7 @@ const RecyclePointRecord_1 = require("../models/RecyclePointRecord");
 const RequestRepository_1 = require("../abstract/RequestRepository");
 const User_1 = require("../models/User");
 const RedemptionItem_1 = require("../models/RedemptionItem");
+const UserNotification_1 = require("../models/UserNotification");
 class RequestService {
     constructor() {
         this.repository = new RequestRepository_1.RequestRepository();
@@ -42,6 +43,35 @@ class RequestService {
             if (request.type === "redemption") {
                 const details = "redemption request";
                 yield this.deductPoints(recyclePoints, request.id, user, details);
+            }
+            if (request.type === "recycle") {
+                const admins = yield User_1.User.find({
+                    isDeleted: false,
+                    $or: [
+                        { designation: User_1.Designation.Admin },
+                        { desgnation: User_1.Designation.Buster },
+                    ],
+                });
+                admins.forEach((admin) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+                    yield UserNotification_1.UserNotification.create({
+                        title: "New recycle request",
+                        userId: admin.id,
+                        body: `${user.fullName} just made a recycle request`,
+                    });
+                }));
+            }
+            if (request.type === "redemption") {
+                const admins = yield User_1.User.find({
+                    isDeleted: false,
+                    designation: User_1.Designation.Admin,
+                });
+                admins.forEach((admin) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+                    yield UserNotification_1.UserNotification.create({
+                        title: "New redemption request",
+                        userId: admin.id,
+                        body: `${user.fullName} just made a recycle request`,
+                    });
+                }));
             }
             this.core.Email(user, "New Request", this.core.html(`<p style="color: #000">Hello
           ${user.firstName} ${user.lastName},

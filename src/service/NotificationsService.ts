@@ -60,9 +60,8 @@ export default class NotificationsService {
 
   public async sendRegistrationSMS(number: string, otp: string) {
     const coreService = new Core();
-    const utilService = new UtilService();
 
-    number = utilService.formatPhone(number);
+    number = UtilService.formatPhone(number);
     const message =
       "Thank you for registering with Recycle Points. Here's your code: " + otp;
     await coreService.sendSms(message, number);
@@ -70,9 +69,8 @@ export default class NotificationsService {
 
   public async sendForgetSMS(number: string, otp: string) {
     const coreService = new Core();
-    const utilService = new UtilService();
 
-    number = utilService.formatPhone(number);
+    number = UtilService.formatPhone(number);
     const message = "You forgot your password? Here's your code: " + otp;
     await coreService.sendSms(message, number);
   }

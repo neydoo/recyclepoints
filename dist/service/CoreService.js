@@ -57,10 +57,10 @@ class CoreService {
                 return;
             const data = {
                 to: number,
-                from: "Recycle",
+                from: "N-Alert",
                 sms: message,
                 type: "plain",
-                channel: "generic",
+                channel: "dnd",
                 api_key: app_1.config.sms.termii.apiKey,
             };
             const options = this.options;

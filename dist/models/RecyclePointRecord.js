@@ -11,7 +11,11 @@ exports.recyclePointRecordSchema = new mongoose_1.Schema({
     type: { type: String, enum: ["deduction", "addition"], required: true },
     previousAmount: { type: Number, required: true },
     amount: { type: Number, required: true },
-    transactionId: { type: String, required: true },
+    transactionId: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "Request",
+        required: true,
+    },
     balance: { type: Number, required: true },
     details: { type: String, required: true },
 }, { timestamps: true });

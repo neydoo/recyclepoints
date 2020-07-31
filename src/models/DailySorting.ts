@@ -1,26 +1,28 @@
 import { Document, Schema, Model, model, Error } from "mongoose";
 import { RequestService } from "../service/RequestService";
+import { RecycleItems } from './Request';
 
 export interface DailySortingM extends Document {
-  balance: number;
-  isDeleted: boolean;
+  weight: number;
+  points: number;
+  arrivalTime: any;
+  items: RecycleItems;
   user: string;
+  isDeleted?: boolean;
+  createdAt?: any;
 }
 
 export const dailySortingSchema: Schema = new Schema(
   {
     user: { type: Schema.Types.ObjectId, required: true, ref: "User" },
-    sorts: { type: Number, default: 0 },
+    arrivalTime:{type: Schema.Types.Date, required:true},
+    points: { type: Number, default: 0 },
     items: { type: Schema.Types.Mixed },
-    arrivalTime: { type: Date, default: Date.now() },
+    weight: { type: Number, required: true },
     isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
-
-dailySortingSchema.methods.points = async function (): Promise<number> {
-  return await RequestService.prototype.calculatePoints(this.items);
-};
 
 export const DailySorting: Model<DailySortingM> = model<DailySortingM>(
   "DailySorting",
