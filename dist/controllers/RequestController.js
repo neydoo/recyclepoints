@@ -12,6 +12,7 @@ const RequestService_1 = require("../service/RequestService");
 const NotificationsService_1 = require("../service/NotificationsService");
 const RecyclePointRecord_1 = require("../models/RecyclePointRecord");
 const UserNotification_1 = require("../models/UserNotification");
+const User_1 = require("../models/User");
 let RequestController = class RequestController extends AbstractController_1.AbstractController {
     constructor() {
         super(new RequestRepository_1.RequestRepository());
@@ -48,7 +49,7 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                     ];
                 }
                 const request = yield Request_1.Request.find(criteria)
-                    .populate("acceptedBy")
+                    .populate("requestedBy")
                     .populate({ path: "acceptedBy", match: searchCriteria })
                     .populate("redemptionItem");
                 if (request.length) {
@@ -123,30 +124,34 @@ let RequestController = class RequestController extends AbstractController_1.Abs
             }
         });
     }
-    completeRequest(req, res) {
+    markAsCollected(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const notification = new NotificationsService_1.default();
-                const itemrequest = (yield Request_1.Request.findById(req.params.id).populate("reqeustedBy"));
+                const itemrequest = yield Request_1.Request.findById(req.params.id);
                 let items;
-                const { notificationTokens } = itemrequest.acceptedBy;
                 if (itemrequest.type === "redemption")
                     throw new Error("invalid request selected");
                 if (itemrequest.type === "recycle") {
-                    if (itemrequest.status === "completed")
-                        throw new Error("request is already completed");
+                    if (itemrequest.status === "collected")
+                        throw new Error("request is already collected");
                     items = req.body.items ? req.body.items : itemrequest.items;
                     if (!items) {
                         throw new Error("there are no recycle items for this request");
                     }
-                    const points = yield this.request.calculatePoints(items);
-                    const details = "recycle";
-                    yield this.request.addPoints(points, itemrequest.id, itemrequest.requestedBy, details);
-                    itemrequest.points = points;
                 }
-                itemrequest.status = Request_1.Status.Completed;
+                itemrequest.status = Request_1.Status.Collected;
                 yield itemrequest.save();
-                yield notification.sendPushNotification("points awarded", `you've recieved ${itemrequest.points} points`, notificationTokens);
+                const users = yield User_1.User.find({
+                    designation: User_1.Designation.Staff,
+                    isDeleted: false,
+                });
+                users.forEach((user) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+                    yield UserNotification_1.UserNotification.create({
+                        userId: user.id,
+                        title: "recycle collected",
+                        body: `A recycle request has been collected`,
+                    });
+                }));
                 res.status(200).json({
                     success: true,
                     data: itemrequest,
@@ -189,7 +194,11 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                 const details = "redemption declined";
                 yield this.request.addPoints(request.points, request.id, request.requestedBy, details);
                 request.save();
-                yield notification.sendPushNotification("request declined", `your request has been declined`, request.requestedBy.notificationTokens);
+                yield UserNotification_1.UserNotification.create({
+                    title: "Request declined",
+                    userId: request.requestedBy.id,
+                    body: `your request has been declined`,
+                });
                 res.status(200).json({ success: true, data: request });
             }
             catch (error) {
@@ -200,14 +209,17 @@ let RequestController = class RequestController extends AbstractController_1.Abs
     approveRequest(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const notification = new NotificationsService_1.default();
                 const request = yield Request_1.Request.findOne({
                     _id: req.params.requestId,
                     status: Request_1.Status.Pending,
                 });
                 request.status = Request_1.Status.Approved;
                 request.save();
-                yield notification.sendPushNotification("request approved", `your request has been approved`, request.requestedBy.notificationTokens);
+                yield UserNotification_1.UserNotification.create({
+                    title: "Request approved",
+                    userId: request.requestedBy.id,
+                    body: `your request has been approved`,
+                });
                 res.status(200).json({ success: true, data: request });
             }
             catch (error) {
@@ -289,7 +301,6 @@ let RequestController = class RequestController extends AbstractController_1.Abs
         });
     }
     remindBuster(req, res) {
-        var _a, _b, _c, _d;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 const request = yield Request_1.Request.findOne({
@@ -302,11 +313,11 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                 const notification = new NotificationsService_1.default();
                 if (!request)
                     throw new Error("invalid request selected for reminder");
-                if ((_b = (_a = request.acceptedBy) === null || _a === void 0 ? void 0 : _a.notificationTokens) === null || _b === void 0 ? void 0 : _b.length)
-                    yield notification.sendPushNotification("pickup reminder", `${request.requestedBy.firstName} has sent a pickup reminder`, request.acceptedBy.notificationTokens);
-                if ((_d = (_c = request.requestedBy) === null || _c === void 0 ? void 0 : _c.notificationTokens) === null || _d === void 0 ? void 0 : _d.length)
-                    console.log("hi");
-                yield notification.sendPushNotification("pickup reminder", `reminder sent`, request.requestedBy.notificationTokens);
+                yield UserNotification_1.UserNotification.create({
+                    title: "pickup reminder",
+                    userId: request.acceptedBy.id,
+                    body: `${request.requestedBy.firstName} has sent a pickup reminder`,
+                });
                 res.status(200).json({ success: true, message: "sent reminder" });
             }
             catch (error) {
@@ -354,11 +365,11 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", Promise)
 ], RequestController.prototype, "acceptRequest", null);
 tslib_1.__decorate([
-    core_1.Post("complete/:id"),
+    core_1.Post("collect/:id"),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
-], RequestController.prototype, "completeRequest", null);
+], RequestController.prototype, "markAsCollected", null);
 tslib_1.__decorate([
     core_1.Get(":requestId"),
     tslib_1.__metadata("design:type", Function),

@@ -12,6 +12,7 @@ const RequestService_1 = require("../service/RequestService");
 const NotificationsService_1 = require("../service/NotificationsService");
 const Request_1 = require("../models/Request");
 const PdfService_1 = require("../service/PdfService");
+const UserNotification_1 = require("src/models/UserNotification");
 let VerificationController = class VerificationController extends AbstractController_1.AbstractController {
     constructor() {
         super(new RequestRepository_1.RequestRepository());
@@ -72,7 +73,6 @@ let VerificationController = class VerificationController extends AbstractContro
                 const itemrequest = (yield Request_1.Request.findById(req.params.id).populate("requestedBy"));
                 let items;
                 let points;
-                const { notificationTokens } = itemrequest.acceptedBy;
                 if (itemrequest.type === "redemption")
                     throw new Error("invalid request selected");
                 if (itemrequest.type === "recycle") {
@@ -90,7 +90,11 @@ let VerificationController = class VerificationController extends AbstractContro
                 itemrequest.status = Request_1.Status.Completed;
                 itemrequest.items = items;
                 yield itemrequest.save();
-                yield notification.sendPushNotification("points awarded", `you've recieved ${itemrequest.points} points`, notificationTokens);
+                yield UserNotification_1.UserNotification.create({
+                    userId: itemrequest.requestedBy.id,
+                    title: "points awarded",
+                    body: `you've recieved ${itemrequest.points} points`,
+                });
                 yield Verification_1.Verification.create({
                     user: req.user.id,
                     items,
@@ -166,7 +170,7 @@ let VerificationController = class VerificationController extends AbstractContro
                     if (PET) {
                         item.PET = sort.items.PET;
                     }
-                    return sort.items = item;
+                    return (sort.items = item);
                 });
                 yield Promise.all(sortingPromise);
                 res.status(200).json({ success: true, message: "saved", data: sorting });
@@ -184,8 +188,7 @@ let VerificationController = class VerificationController extends AbstractContro
                 const file = yield pdf.generateStaffDataPdf(data);
                 res.status(200).json({ success: true, message: "saved", data: file });
             }
-            catch (error) {
-            }
+            catch (error) { }
         });
     }
 };
@@ -214,7 +217,7 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", Promise)
 ], VerificationController.prototype, "getData", null);
 tslib_1.__decorate([
-    core_1.Post('data/pdf'),
+    core_1.Post("data/pdf"),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)

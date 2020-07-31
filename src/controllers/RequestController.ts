@@ -17,7 +17,7 @@ import NotificationsService from "../service/NotificationsService";
 import PaginationService from "../service/PaginationService";
 import { RecyclePointRecord } from "../models/RecyclePointRecord";
 import { UserNotification } from "../models/UserNotification";
-import { PdfService } from "src/service/PdfService";
+import { User, Designation } from "../models/User";
 
 @Controller("api/request")
 @ClassMiddleware([checkJwt])
@@ -61,7 +61,7 @@ export class RequestController extends AbstractController {
         ];
       }
       const request = await ItemRequest.find(criteria)
-        .populate("acceptedBy")
+        .populate("requestedBy")
         .populate({ path: "acceptedBy", match: searchCriteria })
         .populate("redemptionItem");
 
@@ -139,45 +139,39 @@ export class RequestController extends AbstractController {
     }
   }
 
-  @Post("complete/:id")
-  public async completeRequest(req: any, res: Response): Promise<void> {
+  @Post("collect/:id")
+  public async markAsCollected(req: any, res: Response): Promise<void> {
     try {
-      const notification = new NotificationsService();
-      const itemrequest: any = (await ItemRequest.findById(
-        req.params.id
-      ).populate("reqeustedBy")) as RequestM;
+      const itemrequest: any = await ItemRequest.findById(req.params.id);
       let items;
 
-      const { notificationTokens }: any = itemrequest.acceptedBy;
       if (itemrequest.type === "redemption")
         throw new Error("invalid request selected");
 
       if (itemrequest.type === "recycle") {
-        if (itemrequest.status === "completed")
-          throw new Error("request is already completed");
+        if (itemrequest.status === "collected")
+          throw new Error("request is already collected");
 
         items = req.body.items ? req.body.items : itemrequest.items;
         if (!items) {
           throw new Error("there are no recycle items for this request");
         }
-        const points = await this.request.calculatePoints(items);
-        const details = "recycle";
-        await this.request.addPoints(
-          points,
-          itemrequest.id,
-          itemrequest.requestedBy,
-          details
-        );
-        itemrequest.points = points;
       }
-      itemrequest.status = Status.Completed;
+      itemrequest.status = Status.Collected;
       await itemrequest.save();
 
-      await notification.sendPushNotification(
-        "points awarded",
-        `you've recieved ${itemrequest.points} points`,
-        notificationTokens
-      );
+      const users = await User.find({
+        designation: Designation.Staff,
+        isDeleted: false,
+      });
+
+      users.forEach(async (user) => {
+        await UserNotification.create({
+          userId: user.id,
+          title: "recycle collected",
+          body: `A recycle request has been collected`,
+        });
+      });
 
       res.status(200).json({
         success: true,
@@ -228,11 +222,11 @@ export class RequestController extends AbstractController {
       );
       request.save();
 
-      await notification.sendPushNotification(
-        "request declined",
-        `your request has been declined`,
-        request.requestedBy.notificationTokens
-      );
+      await UserNotification.create({
+        title: "Request declined",
+        userId: request.requestedBy.id,
+        body: `your request has been declined`,
+      });
 
       res.status(200).json({ success: true, data: request });
     } catch (error) {
@@ -243,7 +237,6 @@ export class RequestController extends AbstractController {
   @Post("approve/:requestId")
   public async approveRequest(req: Request, res: Response): Promise<void> {
     try {
-      const notification = new NotificationsService();
       const request: any = await ItemRequest.findOne({
         _id: req.params.requestId,
         status: Status.Pending,
@@ -252,11 +245,12 @@ export class RequestController extends AbstractController {
 
       request.save();
 
-      await notification.sendPushNotification(
-        "request approved",
-        `your request has been approved`,
-        request.requestedBy.notificationTokens
-      );
+      await UserNotification.create({
+        title: "Request approved",
+        userId: request.requestedBy.id,
+        body: `your request has been approved`,
+      });
+
       res.status(200).json({ success: true, data: request });
     } catch (error) {
       res.status(400).json({ success: false, error, message: error.message });
@@ -381,19 +375,13 @@ export class RequestController extends AbstractController {
 
       if (!request) throw new Error("invalid request selected for reminder");
 
-      if (request.acceptedBy?.notificationTokens?.length)
-        await notification.sendPushNotification(
-          "pickup reminder",
-          `${request.requestedBy.firstName} has sent a pickup reminder`,
-          request.acceptedBy.notificationTokens
-        );
 
-      if (request.requestedBy?.notificationTokens?.length) console.log("hi");
-      await notification.sendPushNotification(
-        "pickup reminder",
-        `reminder sent`,
-        request.requestedBy.notificationTokens
-      );
+      await UserNotification.create({
+        title: "pickup reminder",
+        userId: request.acceptedBy.id,
+        body: `${request.requestedBy.firstName} has sent a pickup reminder`,
+      });
+
       res.status(200).json({ success: true, message: "sent reminder" });
     } catch (error) {
       console.log(error);
