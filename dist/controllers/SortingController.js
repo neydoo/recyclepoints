@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SortingController = void 0;
 const tslib_1 = require("tslib");
-const moment = require('moment');
+const moment = require("moment");
 const core_1 = require("@overnightjs/core");
 const auth_1 = require("../middleware/auth");
 const DailySorting_1 = require("../models/DailySorting");
@@ -69,6 +69,26 @@ let SortingController = class SortingController {
                 res
                     .status(200)
                     .send({ success: true, message: "data retrieved successfully!", data });
+            }
+            catch (error) {
+                res.status(400).json({ success: false, error, message: error.message });
+            }
+        });
+    }
+    create(req, res) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            try {
+                const { weight, points, arrivalTime, items } = req.body;
+                if (!weight || !points || !arrivalTime || !items)
+                    throw new Error("incomplete parameters");
+                const sortData = req.body;
+                sortData.user = req.user.id;
+                const data = yield DailySorting_1.DailySorting.create(sortData);
+                res.status(200).send({
+                    success: true,
+                    message: "item saved successfully!",
+                    data,
+                });
             }
             catch (error) {
                 res.status(400).json({ success: false, error, message: error.message });
@@ -148,7 +168,7 @@ let SortingController = class SortingController {
                     if (PET) {
                         item.PET = sort.items.PET;
                     }
-                    return sort.items = item;
+                    return (sort.items = item);
                 });
                 yield Promise.all(sortingPromise);
                 res.status(200).json({ success: true, message: "saved", data: sorting });
@@ -166,8 +186,7 @@ let SortingController = class SortingController {
                 const file = yield pdf.generateStaffDataPdf(data);
                 res.status(200).json({ success: true, message: "saved", data: file });
             }
-            catch (error) {
-            }
+            catch (error) { }
         });
     }
 };
@@ -184,6 +203,12 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
 ], SortingController.prototype, "userSortings", null);
+tslib_1.__decorate([
+    core_1.Post("new"),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object, Object]),
+    tslib_1.__metadata("design:returntype", Promise)
+], SortingController.prototype, "create", null);
 tslib_1.__decorate([
     core_1.Post("update/:id"),
     tslib_1.__metadata("design:type", Function),
@@ -204,7 +229,7 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", Promise)
 ], SortingController.prototype, "getData", null);
 tslib_1.__decorate([
-    core_1.Post('data/pdf'),
+    core_1.Post("data/pdf"),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)

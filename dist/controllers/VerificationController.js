@@ -196,7 +196,7 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", Promise)
 ], VerificationController.prototype, "index", null);
 tslib_1.__decorate([
-    core_1.Post("save/:id"),
+    core_1.Post("new"),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)

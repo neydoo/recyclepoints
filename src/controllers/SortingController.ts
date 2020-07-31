@@ -1,4 +1,4 @@
-const moment = require('moment');
+const moment = require("moment");
 import { NextFunction, Request, Response } from "express";
 import {
   Controller,
@@ -9,7 +9,7 @@ import {
 } from "@overnightjs/core";
 import { checkJwt, isValidUser, isAdmin, isDev } from "../middleware/auth";
 import { DailySorting, DailySortingM } from "../models/DailySorting";
-import { PdfService } from '../service/PdfService';
+import { PdfService } from "../service/PdfService";
 
 @Controller("api/sorting")
 @ClassMiddleware([checkJwt])
@@ -72,12 +72,11 @@ export class SortingController {
     }
   }
 
-
   @Get("user/:id")
   public async userSortings(req: any, res: Response): Promise<void> {
     try {
       const { startDate, endDate } = req.query;
-      const user = req.params.id ? req.params.id : req.user.id
+      const user = req.params.id ? req.params.id : req.user.id;
       const criteria: any = { user, isDeleted: false };
       if (startDate) {
         criteria.createdAt = { ">=": startDate };
@@ -94,6 +93,35 @@ export class SortingController {
     }
   }
 
+  @Post("new")
+  public async create(req: any, res: Response): Promise<void> {
+    try {
+      //     weight: number;
+      // points: number;
+      // arrivalTime: any;
+      // items: RecycleItems;
+      // user: string;
+      // isDeleted?: boolean;
+      // createdAt?: any;
+      const { weight, points, arrivalTime, items } = req.body;
+
+      if (!weight || !points || !arrivalTime || !items)
+        throw new Error("incomplete parameters");
+
+      const sortData = req.body;
+      sortData.user = req.user.id;
+
+      const data = await DailySorting.create(sortData);
+
+      res.status(200).send({
+        success: true,
+        message: "item saved successfully!",
+        data,
+      });
+    } catch (error) {
+      res.status(400).json({ success: false, error, message: error.message });
+    }
+  }
   @Post("update/:id")
   public async update(req: Request, res: Response): Promise<void> {
     try {
@@ -124,7 +152,6 @@ export class SortingController {
       res.status(400).json({ success: false, error, message: error.message });
     }
   }
-
 
   @Get("data")
   public async getData(req: any, res: Response): Promise<void> {
@@ -166,41 +193,39 @@ export class SortingController {
       const sortingPromise = sorting.map((sort) => {
         const item: any = {};
         if (UBC) {
-          item.UBC = sort.items.UBC
+          item.UBC = sort.items.UBC;
         }
         if (PWS) {
-          item.PWS = sort.items.PWS
+          item.PWS = sort.items.PWS;
         }
         if (ONP) {
-          item.ONP = sort.items.ONP
+          item.ONP = sort.items.ONP;
         }
         if (BCC) {
-          item.BCC = sort.items.BCC
+          item.BCC = sort.items.BCC;
         }
         if (GBS) {
-          item.GBS = sort.items.GBS
+          item.GBS = sort.items.GBS;
         }
         if (PET) {
-          item.PET = sort.items.PET
+          item.PET = sort.items.PET;
         }
-        return sort.items = item;
+        return (sort.items = item);
       });
-      await Promise.all(sortingPromise)
-      res.status(200).json({ success: true, message: "saved", data:sorting });
+      await Promise.all(sortingPromise);
+      res.status(200).json({ success: true, message: "saved", data: sorting });
     } catch (error) {
       res.status(400).json({ success: false, error, message: error.message });
     }
   }
 
-  @Post('data/pdf')
+  @Post("data/pdf")
   async downloadPdf(req: Request, res: Response) {
     try {
       const data = req.body;
-      const pdf =  new PdfService();
+      const pdf = new PdfService();
       const file = await pdf.generateStaffDataPdf(data);
-      res.status(200).json({ success: true, message: "saved", data:file });
-    } catch (error) {
-
-    }
+      res.status(200).json({ success: true, message: "saved", data: file });
+    } catch (error) {}
   }
 }
