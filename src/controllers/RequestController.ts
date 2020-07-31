@@ -185,7 +185,9 @@ export class RequestController extends AbstractController {
   @Get(":requestId")
   public async findRequest(req: Request, res: Response): Promise<void> {
     try {
-      const request: any = await ItemRequest.findById(req.params.requestId);
+      const request: any = await ItemRequest.findById(req.params.requestId)
+        .populate("requestedBy")
+        .populate("acceptedBy");
 
       if (request?.type === "redemption") {
         const transaction = await RecyclePointRecord.findOne({

@@ -166,7 +166,9 @@ let RequestController = class RequestController extends AbstractController_1.Abs
     findRequest(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const request = yield Request_1.Request.findById(req.params.requestId);
+                const request = yield Request_1.Request.findById(req.params.requestId)
+                    .populate("requestedBy")
+                    .populate("acceptedBy");
                 if ((request === null || request === void 0 ? void 0 : request.type) === "redemption") {
                     const transaction = yield RecyclePointRecord_1.RecyclePointRecord.findOne({
                         transactionId: request.id,
