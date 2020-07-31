@@ -6,11 +6,12 @@ const moment = require("moment");
 const core_1 = require("@overnightjs/core");
 const AbstractController_1 = require("./AbstractController");
 const RequestRepository_1 = require("../abstract/RequestRepository");
+const auth_1 = require("../middleware/auth");
 const Verification_1 = require("../models/Verification");
 const RequestService_1 = require("../service/RequestService");
 const NotificationsService_1 = require("../service/NotificationsService");
 const Request_1 = require("../models/Request");
-const PdfService_1 = require("src/service/PdfService");
+const PdfService_1 = require("../service/PdfService");
 let VerificationController = class VerificationController extends AbstractController_1.AbstractController {
     constructor() {
         super(new RequestRepository_1.RequestRepository());
@@ -220,6 +221,7 @@ tslib_1.__decorate([
 ], VerificationController.prototype, "downloadPdf", null);
 VerificationController = tslib_1.__decorate([
     core_1.Controller("api/verification"),
+    core_1.ClassMiddleware([auth_1.checkJwt]),
     tslib_1.__metadata("design:paramtypes", [])
 ], VerificationController);
 exports.VerificationController = VerificationController;

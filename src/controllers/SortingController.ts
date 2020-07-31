@@ -9,7 +9,7 @@ import {
 } from "@overnightjs/core";
 import { checkJwt, isValidUser, isAdmin, isDev } from "../middleware/auth";
 import { DailySorting, DailySortingM } from "../models/DailySorting";
-import { PdfService } from 'src/service/PdfService';
+import { PdfService } from '../service/PdfService';
 
 @Controller("api/sorting")
 @ClassMiddleware([checkJwt])

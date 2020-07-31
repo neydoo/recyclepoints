@@ -6,7 +6,7 @@ const moment = require('moment');
 const core_1 = require("@overnightjs/core");
 const auth_1 = require("../middleware/auth");
 const Bale_1 = require("../models/Bale");
-const PdfService_1 = require("src/service/PdfService");
+const PdfService_1 = require("../service/PdfService");
 let SortingController = class SortingController {
     index(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
