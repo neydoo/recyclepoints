@@ -15,10 +15,10 @@ let SortingController = class SortingController {
                 const criteria = { isDeleted: false };
                 const searchCriteria = { designation: "sorter" };
                 if (startDate) {
-                    criteria.createdAt = { ">=": startDate };
-                }
-                if (endDate) {
-                    criteria.createdAt = { "<=": endDate };
+                    criteria.createdAt = {
+                        $lte: endDate ? endDate : moment(),
+                        $gte: startDate,
+                    };
                 }
                 if (pay) {
                     searchCriteria.pay = pay;
@@ -60,10 +60,10 @@ let SortingController = class SortingController {
                 const user = req.params.id ? req.params.id : req.user.id;
                 const criteria = { user, isDeleted: false };
                 if (startDate) {
-                    criteria.createdAt = { ">=": startDate };
-                }
-                if (endDate) {
-                    criteria.createdAt = { "<=": endDate };
+                    criteria.createdAt = {
+                        $lte: endDate ? endDate : moment(),
+                        $gte: startDate,
+                    };
                 }
                 const data = yield DailySorting_1.DailySorting.find({ criteria });
                 res

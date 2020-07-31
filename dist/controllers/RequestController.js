@@ -32,11 +32,10 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                     criteria.type = type;
                 }
                 if (startDate) {
-                    criteria.createdAt = { ">=": startDate };
-                    if (endDate) {
-                        criteria.createdAt = { "<=": endDate };
-                    }
-                    criteria.createdAt = { "<=": Date.now() };
+                    criteria.createdAt = {
+                        $gte: startDate,
+                        $lte: endDate ? endDate : moment(),
+                    };
                 }
                 if (status) {
                     criteria.status = status;
@@ -239,11 +238,10 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                     criteria.type = type;
                 }
                 if (startDate) {
-                    criteria.createdAt = { ">=": startDate };
-                    if (endDate) {
-                        criteria.createdAt = { "<=": endDate };
-                    }
-                    criteria.createdAt = { "<=": Date.now() };
+                    criteria.createdAt = {
+                        $lte: endDate ? endDate : moment(),
+                        $gte: startDate,
+                    };
                 }
                 if (status) {
                     criteria.status = status;

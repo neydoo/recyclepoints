@@ -41,12 +41,10 @@ export class RequestController extends AbstractController {
         criteria.type = type;
       }
       if (startDate) {
-        criteria.createdAt = { ">=": startDate };
-
-        if (endDate) {
-          criteria.createdAt = { "<=": endDate };
-        }
-        criteria.createdAt = { "<=": Date.now() };
+        criteria.createdAt = {
+          $gte: startDate,
+          $lte: endDate ? endDate : moment(),
+        };
       }
 
       if (status) {
@@ -268,13 +266,12 @@ export class RequestController extends AbstractController {
       if (type) {
         criteria.type = type;
       }
-      if (startDate) {
-        criteria.createdAt = { ">=": startDate };
 
-        if (endDate) {
-          criteria.createdAt = { "<=": endDate };
-        }
-        criteria.createdAt = { "<=": Date.now() };
+      if (startDate) {
+        criteria.createdAt = {
+          $lte: endDate ? endDate : moment(),
+          $gte: startDate,
+        };
       }
 
       if (status) {
@@ -374,7 +371,6 @@ export class RequestController extends AbstractController {
       const notification = new NotificationsService();
 
       if (!request) throw new Error("invalid request selected for reminder");
-
 
       await UserNotification.create({
         title: "pickup reminder",

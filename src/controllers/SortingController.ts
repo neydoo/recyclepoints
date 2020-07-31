@@ -31,12 +31,14 @@ export class SortingController {
       const criteria: any = { isDeleted: false };
       const searchCriteria: any = { designation: "sorter" };
 
+
       if (startDate) {
-        criteria.createdAt = { ">=": startDate };
+        criteria.createdAt = {
+          $lte: endDate ? endDate : moment(),
+          $gte: startDate,
+        };
       }
-      if (endDate) {
-        criteria.createdAt = { "<=": endDate };
-      }
+
       if (pay) {
         searchCriteria.pay = pay;
       }
@@ -78,12 +80,14 @@ export class SortingController {
       const { startDate, endDate } = req.query;
       const user = req.params.id ? req.params.id : req.user.id;
       const criteria: any = { user, isDeleted: false };
+
       if (startDate) {
-        criteria.createdAt = { ">=": startDate };
+        criteria.createdAt = {
+          $lte: endDate ? endDate : moment(),
+          $gte: startDate,
+        };
       }
-      if (endDate) {
-        criteria.createdAt = { "<=": endDate };
-      }
+
       const data: DailySortingM[] = await DailySorting.find({ criteria });
       res
         .status(200)

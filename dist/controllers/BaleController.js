@@ -15,10 +15,10 @@ let SortingController = class SortingController {
                 const criteria = { isDeleted: false };
                 const searchCriteria = { designation: "baler" };
                 if (startDate) {
-                    criteria.createdAt = { ">=": startDate };
-                }
-                if (endDate) {
-                    criteria.createdAt = { "<=": endDate };
+                    criteria.createdAt = {
+                        $lte: endDate ? endDate : moment(),
+                        $gte: startDate,
+                    };
                 }
                 if (pay) {
                     searchCriteria.pay = pay;

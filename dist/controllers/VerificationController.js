@@ -25,10 +25,10 @@ let VerificationController = class VerificationController extends AbstractContro
                 const criteria = { isDeleted: false };
                 const searchCriteria = { designation: "verification-staff" };
                 if (startDate) {
-                    criteria.createdAt = { ">=": startDate };
-                }
-                if (endDate) {
-                    criteria.createdAt = { "<=": endDate };
+                    criteria.createdAt = {
+                        $lte: endDate ? endDate : moment(),
+                        $gte: startDate,
+                    };
                 }
                 if (pay) {
                     searchCriteria.pay = pay;
