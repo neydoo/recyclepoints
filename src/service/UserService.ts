@@ -1,6 +1,9 @@
 import Core from "./CoreService";
-// import { v2 as cloudinary } from "cloudinary";
-const cloudinary = require("cloudinary");
+import { v2 as cloudinary } from "cloudinary";
+// const cloudinary = require("cloudinary");
+
+const cloudinaryStorage = require("multer-storage-cloudinary");
+const multer = require("multer");
 import * as bcrypt from "bcrypt-nodejs";
 
 import Notification from "./NotificationsService";
@@ -15,7 +18,7 @@ const clodConfig = {
   cloud_name: config.image.cloud_name,
   api_key: config.image.api_key,
   api_secret: config.image.api_secret,
-}
+};
 
 export class UserService {
   protected repository: any;
@@ -57,7 +60,7 @@ export class UserService {
     if (createdUser.designation === "client")
       await RecyclePoint.create({ user: createdUser.id });
 
-    user.profileImage = req.body.profileImage
+    user.profileImage = req.file.profileImage
       ? await this.cloudinaryUploader(req.body.profileImage)
       : null;
     user.save();
@@ -106,8 +109,8 @@ export class UserService {
       userPayload
     );
 
-    user.profileImage = req.body.profileImage
-      ? await this.cloudinaryUploader(req.body.profileImage)
+    user.profileImage = req.file['profileImage']
+      ? await this.cloudinaryUploader(req.file['profileImage'])
       : user.profileImage;
     user.save();
 
@@ -176,7 +179,6 @@ export class UserService {
 
   public async cloudinaryUploader(image: any) {
     try {
-      cloudinary.config(clodConfig);
       const url = await cloudinary.uploader.upload(image);
       console.log(url);
       return url.public_id;

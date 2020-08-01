@@ -3,7 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserService = void 0;
 const tslib_1 = require("tslib");
 const CoreService_1 = require("./CoreService");
-const cloudinary = require("cloudinary");
+const cloudinary_1 = require("cloudinary");
+const cloudinaryStorage = require("multer-storage-cloudinary");
+const multer = require("multer");
 const bcrypt = require("bcrypt-nodejs");
 const NotificationsService_1 = require("./NotificationsService");
 const UserRepository_1 = require("../abstract/UserRepository");
@@ -46,7 +48,7 @@ class UserService {
             const user = yield this.repository.findById(createdUser.id);
             if (createdUser.designation === "client")
                 yield RecyclePoint_1.RecyclePoint.create({ user: createdUser.id });
-            user.profileImage = req.body.profileImage
+            user.profileImage = req.file.profileImage
                 ? yield this.cloudinaryUploader(req.body.profileImage)
                 : null;
             user.save();
@@ -75,8 +77,8 @@ class UserService {
             if (existingUser.firstTimeLogin)
                 userPayload.firstTimeLogin = false;
             const user = yield this.repository.updateData(req.params.userId, userPayload);
-            user.profileImage = req.body.profileImage
-                ? yield this.cloudinaryUploader(req.body.profileImage)
+            user.profileImage = req.file['profileImage']
+                ? yield this.cloudinaryUploader(req.file['profileImage'])
                 : user.profileImage;
             user.save();
             this.core.activityLog(req, user.id, "Update Profile");
@@ -116,8 +118,7 @@ class UserService {
     cloudinaryUploader(image) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                cloudinary.config(clodConfig);
-                const url = yield cloudinary.uploader.upload(image);
+                const url = yield cloudinary_1.v2.uploader.upload(image);
                 console.log(url);
                 return url.public_id;
             }
