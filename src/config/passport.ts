@@ -39,7 +39,7 @@ passport.use(
 
         if (
           user.designation === Designation.Client &&
-          user.unverified &&
+          user!.unverified &&
           !user.compareOtp(password)
         ) {
           return done(null, false, { message: "verify phonenumber." });
