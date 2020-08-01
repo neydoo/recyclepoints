@@ -1,5 +1,6 @@
 import Core from "./CoreService";
-import { v2 as cloudinary } from "cloudinary";
+// import { v2 as cloudinary } from "cloudinary";
+const cloudinary = require("cloudinary");
 import * as bcrypt from "bcrypt-nodejs";
 
 import Notification from "./NotificationsService";
@@ -10,12 +11,12 @@ import File from "../utilities/file";
 import { RecyclePoint } from "../models/RecyclePoint";
 import { config } from "../config/app";
 
-// const clodConfig = {
-//   cloud_name: config.image.cloud_name,
-//   api_key: config.image.api_key,
-//   api_secret: config.image.api_secret,
-// }
-// cloudinary.config(clodConfig);
+const clodConfig = {
+  cloud_name: config.image.cloud_name,
+  api_key: config.image.api_key,
+  api_secret: config.image.api_secret,
+}
+cloudinary.config(clodConfig);
 
 export class UserService {
   protected repository: any;
