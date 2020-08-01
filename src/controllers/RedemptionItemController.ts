@@ -33,15 +33,13 @@ export class RedemptionItemController {
 
   @Post("new")
   @Middleware([isDev])
-  public async create(req: Request, res: Response): Promise<void> {
+  public async create(req: any, res: Response): Promise<void> {
     try {
       const data: RedemptionItemM = req.body;
       const { image, name, recyclePoints } = data;
       if (!name || !recyclePoints) throw new Error(" incomplete data");
 
-      data.image = data.image
-        ? new UserService().cloudinaryUploader(req.body.image)
-        : null;
+      data.image = req.file.profileImage ? req.file.profileImage : null;
 
       const newData = await RedemptionItem.create(data);
 

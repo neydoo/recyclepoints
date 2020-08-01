@@ -7,11 +7,13 @@ import {
   Get,
   Put,
   Post,
+  Middleware,
   Delete,
 } from "@overnightjs/core";
 import { AbstractController } from "./AbstractController";
 import { UserRepository as Repository } from "../abstract/UserRepository";
 import { checkJwt } from "../middleware/auth";
+import { upload } from "../middleware/multer";
 import { IUserM, User, Designation } from "../models/User";
 import { UserService } from "../service/UserService";
 import { UtilService } from "../service/UtilService";
@@ -105,6 +107,7 @@ export class UserController extends AbstractController {
   }
 
   @Post("register")
+  @Middleware([upload])
   public async registerUser(req: Request, res: Response): Promise<void> {
     try {
       const user: IUserM = await this.user.create(req);
@@ -118,6 +121,7 @@ export class UserController extends AbstractController {
   }
 
   @Put("update/:userId")
+  @Middleware([upload])
   public async updateUser(req: Request, res: Response): Promise<void> {
     try {
       const user: IUserM = await this.user.update(req);

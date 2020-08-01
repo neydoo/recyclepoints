@@ -1,9 +1,5 @@
 import Core from "./CoreService";
-import { v2 as cloudinary } from "cloudinary";
 // const cloudinary = require("cloudinary");
-
-const cloudinaryStorage = require("multer-storage-cloudinary");
-const multer = require("multer");
 import * as bcrypt from "bcrypt-nodejs";
 
 import Notification from "./NotificationsService";
@@ -12,14 +8,6 @@ import { UserRepository as Repository } from "../abstract/UserRepository";
 import { UtilService } from "./UtilService";
 import File from "../utilities/file";
 import { RecyclePoint } from "../models/RecyclePoint";
-import { config } from "../config/app";
-
-const clodConfig = {
-  cloud_name: config.image.cloud_name,
-  api_key: config.image.api_key,
-  api_secret: config.image.api_secret,
-};
-
 export class UserService {
   protected repository: any;
   protected sms: any;
@@ -60,9 +48,7 @@ export class UserService {
     if (createdUser.designation === "client")
       await RecyclePoint.create({ user: createdUser.id });
 
-    user.profileImage = req.file.profileImage
-      ? await this.cloudinaryUploader(req.body.profileImage)
-      : null;
+    user.profileImage = req.file.profileImage ? req.file.profileImage : null;
     user.save();
 
     this.core.Email(
@@ -109,9 +95,10 @@ export class UserService {
       userPayload
     );
 
-    user.profileImage = req.file['profileImage']
-      ? await this.cloudinaryUploader(req.file['profileImage'])
+    user.profileImage = req.file.profileImage
+      ? req.file.profileImage
       : user.profileImage;
+
     user.save();
 
     // this.core.Email(
@@ -177,13 +164,13 @@ export class UserService {
     return user;
   }
 
-  public async cloudinaryUploader(image: any) {
-    try {
-      const url = await cloudinary.uploader.upload(image);
-      console.log(url);
-      return url.public_id;
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  // public async cloudinaryUploader(image: any) {
+  //   try {
+  //     const url = await cloudinary.uploader.upload(image);
+  //     console.log(url);
+  //     return url.public_id;
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // }
 }

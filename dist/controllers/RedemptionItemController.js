@@ -6,7 +6,6 @@ const core_1 = require("@overnightjs/core");
 const auth_1 = require("../middleware/auth");
 const RedemptionItem_1 = require("../models/RedemptionItem");
 const file_1 = require("../utilities/file");
-const UserService_1 = require("../service/UserService");
 let RedemptionItemController = class RedemptionItemController {
     constructor() {
         this.file = new file_1.default();
@@ -33,9 +32,7 @@ let RedemptionItemController = class RedemptionItemController {
                 const { image, name, recyclePoints } = data;
                 if (!name || !recyclePoints)
                     throw new Error(" incomplete data");
-                data.image = data.image
-                    ? new UserService_1.UserService().cloudinaryUploader(req.body.image)
-                    : null;
+                data.image = req.file.profileImage ? req.file.profileImage : null;
                 const newData = yield RedemptionItem_1.RedemptionItem.create(data);
                 res.status(200).send({
                     success: true,
