@@ -72,7 +72,7 @@ export class UserController extends AbstractController {
             user: user.id,
           }).sort("desc");
 
-          user.active = moment(lastOperation?.createdAt).diff("days") < 30;
+          return user.active = moment(lastOperation?.createdAt).diff("days") < 30;
         }
 
         if (user.designation === Designation.Operator) {
@@ -82,7 +82,7 @@ export class UserController extends AbstractController {
             user: user.id,
           }).sort("desc");
 
-          user.active = moment(lastOperation?.createdAt).diff("days") < 30;
+          return user.active = moment(lastOperation?.createdAt).diff("days") < 30;
         }
 
         if (user.designation === Designation.Staff) {
@@ -91,7 +91,7 @@ export class UserController extends AbstractController {
             user: user.id,
           }).sort("desc");
 
-          user.active = moment(lastVerification?.createdAt).diff("days") < 30
+          return user.active = moment(lastVerification?.createdAt).diff("days") < 30
         }
       });
       res.status(200).send({ success: true, data: users });

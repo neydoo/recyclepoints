@@ -58,21 +58,21 @@ let UserController = class UserController extends AbstractController_1.AbstractC
                             isDeleted: false,
                             user: user.id,
                         }).sort("desc");
-                        user.active = moment(lastOperation === null || lastOperation === void 0 ? void 0 : lastOperation.createdAt).diff("days") < 30;
+                        return user.active = moment(lastOperation === null || lastOperation === void 0 ? void 0 : lastOperation.createdAt).diff("days") < 30;
                     }
                     if (user.designation === User_1.Designation.Operator) {
                         const lastOperation = yield Bale_1.Bale.findOne({
                             isDeleted: false,
                             user: user.id,
                         }).sort("desc");
-                        user.active = moment(lastOperation === null || lastOperation === void 0 ? void 0 : lastOperation.createdAt).diff("days") < 30;
+                        return user.active = moment(lastOperation === null || lastOperation === void 0 ? void 0 : lastOperation.createdAt).diff("days") < 30;
                     }
                     if (user.designation === User_1.Designation.Staff) {
                         const lastVerification = yield Verification_1.Verification.findOne({
                             isDeleted: false,
                             user: user.id,
                         }).sort("desc");
-                        user.active = moment(lastVerification === null || lastVerification === void 0 ? void 0 : lastVerification.createdAt).diff("days") < 30;
+                        return user.active = moment(lastVerification === null || lastVerification === void 0 ? void 0 : lastVerification.createdAt).diff("days") < 30;
                     }
                 }));
                 res.status(200).send({ success: true, data: users });
