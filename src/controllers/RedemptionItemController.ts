@@ -11,6 +11,7 @@ import {
 import { checkJwt, isValidUser, isAdmin, isDev } from "../middleware/auth";
 import { RedemptionItem, RedemptionItemM } from "../models/RedemptionItem";
 import File from "../utilities/file";
+import { UserService } from "../service/UserService";
 
 @Controller("api/redemption-item")
 @ClassMiddleware([checkJwt])
@@ -39,11 +40,7 @@ export class RedemptionItemController {
       if (!name || !recyclePoints) throw new Error(" incomplete data");
 
       data.image = data.image
-        ? this.file.localUpload(
-            req.body.image,
-            "/images/redemptionitems/",
-            ".png"
-          )
+        ? new UserService().cloudinaryUploader(req.body.image)
         : null;
 
       const newData = await RedemptionItem.create(data);

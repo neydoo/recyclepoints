@@ -13,6 +13,7 @@ const NotificationsService_1 = require("../service/NotificationsService");
 const RecyclePointRecord_1 = require("../models/RecyclePointRecord");
 const UserNotification_1 = require("../models/UserNotification");
 const User_1 = require("../models/User");
+const RedemptionItem_1 = require("../models/RedemptionItem");
 let RequestController = class RequestController extends AbstractController_1.AbstractController {
     constructor() {
         super(new RequestRepository_1.RequestRepository());
@@ -247,11 +248,19 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                 if (status) {
                     criteria.status = status;
                 }
-                const request = yield Request_1.Request.find(criteria)
+                const data = yield Request_1.Request.find(criteria)
                     .populate("acceptedBy")
-                    .populate("requestedBy")
-                    .populate("redemptionItem");
-                res.status(200).json({ success: true, data: request });
+                    .populate("requestedBy");
+                yield Promise.all(data.map((datum) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+                    var _a;
+                    if (datum.type === "redemption") {
+                        const datumIds = (_a = datum.redemptionItems) === null || _a === void 0 ? void 0 : _a.map((i) => i.id);
+                        datum.redemptionItems = yield RedemptionItem_1.RedemptionItem.find({
+                            _id: datumIds,
+                        });
+                    }
+                })));
+                res.status(200).json({ success: true, data });
             }
             catch (error) {
                 res.status(400).json({ success: false, error, message: error.message });

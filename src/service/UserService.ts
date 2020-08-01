@@ -10,12 +10,12 @@ import File from "../utilities/file";
 import { RecyclePoint } from "../models/RecyclePoint";
 import { config } from "../config/app";
 
-const clodConfig = {
-  cloud_name: config.image.cloud_name,
-  api_key: config.image.api_key,
-  api_secret: config.image.api_secret,
-}
-cloudinary.config(clodConfig);
+// const clodConfig = {
+//   cloud_name: config.image.cloud_name,
+//   api_key: config.image.api_key,
+//   api_secret: config.image.api_secret,
+// }
+// cloudinary.config(clodConfig);
 
 export class UserService {
   protected repository: any;
@@ -174,10 +174,8 @@ export class UserService {
     return user;
   }
 
-  private async cloudinaryUploader(image: any) {
+  public async cloudinaryUploader(image: any) {
     try {
-
-      console.log(clodConfig);
       const url = await cloudinary.uploader.upload(image);
       console.log(url);
       return url.public_id;

@@ -18,6 +18,7 @@ import PaginationService from "../service/PaginationService";
 import { RecyclePointRecord } from "../models/RecyclePointRecord";
 import { UserNotification } from "../models/UserNotification";
 import { User, Designation } from "../models/User";
+import { RedemptionItem } from "../models/RedemptionItem";
 
 @Controller("api/request")
 @ClassMiddleware([checkJwt])
@@ -278,16 +279,26 @@ export class RequestController extends AbstractController {
       if (status) {
         criteria.status = status;
       }
-      const request = await ItemRequest.find(criteria)
+      const data = await ItemRequest.find(criteria)
         .populate("acceptedBy")
-        .populate("requestedBy")
-        .populate("redemptionItem");
+        .populate("requestedBy");
+
+      await Promise.all(
+        data.map(async (datum) => {
+          if (datum.type === "redemption") {
+            const datumIds = datum.redemptionItems?.map((i) => i.id);
+            datum.redemptionItems = await RedemptionItem.find({
+              _id: datumIds,
+            });
+          }
+        })
+      );
 
       // const pagination = new PaginationService();
 
       // pagination.paginate(ItemRequest,res,1,2,criteria)
 
-      res.status(200).json({ success: true, data: request });
+      res.status(200).json({ success: true, data });
     } catch (error) {
       res.status(400).json({ success: false, error, message: error.message });
     }

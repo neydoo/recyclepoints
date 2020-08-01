@@ -29,16 +29,22 @@ export class RequestService {
     let balance: any;
     let recyclePoints: any;
     if (payload.type === "redemption") {
-      if (!payload.redemptionItem)
+      if (!payload.redemptionItems?.length)
         throw new Error("please select an item for redemption");
       ({ balance } = (await RecyclePoint.findOne({
         user: req.user.id,
       })) as any);
 
-      ({ recyclePoints } = (await RedemptionItem.findById(
-        payload.redemptionItem
-      )) as any);
+      // ({ recyclePoints } = (await RedemptionItem.findById(
+      //   payload.redemptionItem
+      // )) as any);
+      const itemIds = payload.redemptionItems?.map((item) => item.id);
+      const requestedItems: any[] = await RedemptionItem.find({ _id: itemIds });
 
+      const recyclePoints = requestedItems.reduce((curr, item) => {
+        const { qty } = payload.redemptionItems?.find((i) => i.id === item.id);
+        return (curr = +(item.recyclePoints * qty));
+      });
       if (balance < recyclePoints)
         throw new Error(
           "you need more recycle points to complete this request"

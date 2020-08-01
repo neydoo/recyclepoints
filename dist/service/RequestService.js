@@ -19,6 +19,7 @@ class RequestService {
         this.notification = new NotificationsService_1.default();
     }
     create(req) {
+        var _a, _b;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const payload = req.body;
             payload.requestedBy = req.user.id;
@@ -28,12 +29,18 @@ class RequestService {
             let balance;
             let recyclePoints;
             if (payload.type === "redemption") {
-                if (!payload.redemptionItem)
+                if (!((_a = payload.redemptionItems) === null || _a === void 0 ? void 0 : _a.length))
                     throw new Error("please select an item for redemption");
                 ({ balance } = (yield RecyclePoint_1.RecyclePoint.findOne({
                     user: req.user.id,
                 })));
-                ({ recyclePoints } = (yield RedemptionItem_1.RedemptionItem.findById(payload.redemptionItem)));
+                const itemIds = (_b = payload.redemptionItems) === null || _b === void 0 ? void 0 : _b.map((item) => item.id);
+                const requestedItems = yield RedemptionItem_1.RedemptionItem.find({ _id: itemIds });
+                const recyclePoints = requestedItems.reduce((curr, item) => {
+                    var _a;
+                    const { qty } = (_a = payload.redemptionItems) === null || _a === void 0 ? void 0 : _a.find((i) => i.id === item.id);
+                    return (curr = +(item.recyclePoints * qty));
+                });
                 if (balance < recyclePoints)
                     throw new Error("you need more recycle points to complete this request");
                 payload.points = recyclePoints;
