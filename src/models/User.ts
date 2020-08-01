@@ -29,6 +29,7 @@ export interface IUserM extends Document {
   lga?: string;
   firstTimeLogin: boolean;
   unverified: boolean;
+  active: boolean;
   isDeleted: boolean;
   notificationTokens?: string[];
   otp?: string;
@@ -86,6 +87,7 @@ export const userSchema: Schema = new Schema(
     cloudImage: { type: String, default: null },
     isDeleted: { type: Boolean, required: true, default: false },
     unverified: { type: Boolean, required: true, default: false },
+    active: { type: Boolean, required: true, default: true },
     deletedAt: { type: String, default: null },
     firstTimeLogin: { type: Boolean, default: true },
   },

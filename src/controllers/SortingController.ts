@@ -62,7 +62,7 @@ export class SortingController {
         ];
       }
 
-      const data = await DailySorting.find({ criteria }).populate({
+      const data = await DailySorting.find(criteria).populate({
         path: "user",
         match: searchCriteria,
       });

@@ -40,7 +40,7 @@ let SortingController = class SortingController {
                         { phone: /search/ },
                     ];
                 }
-                const data = yield DailySorting_1.DailySorting.find({ criteria }).populate({
+                const data = yield DailySorting_1.DailySorting.find(criteria).populate({
                     path: "user",
                     match: searchCriteria,
                 });

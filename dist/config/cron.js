@@ -7,7 +7,8 @@ const Bale_1 = require("../models/Bale");
 const DailySorting_1 = require("../models/DailySorting");
 const Verification_1 = require("../models/Verification");
 const DataHistory_1 = require("../models/DataHistory");
-exports.default = cron.schedule("* 59 23 * * *", () => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+const User_1 = require("../models/User");
+cron.schedule("* 59 23 * * *", () => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
     const today = moment().startOf("day");
     let balingWeight = 0, sortingWeight = 0, totalPoints = 0;
     console.log(`start saving data collated for today ${today}`);
@@ -66,3 +67,41 @@ exports.default = cron.schedule("* 59 23 * * *", () => tslib_1.__awaiter(void 0,
     scheduled: true,
     timezone: "Europe/Zagreb",
 });
+cron.schedule("* 59 23 * * *", () => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    const today = moment().startOf("day");
+    console.log(`mark inactive users`);
+    const users = yield User_1.User.find({});
+    const promise = users.map((user) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+        if (user.designation === User_1.Designation.Sorter) {
+            const lastOperation = yield DailySorting_1.DailySorting.findOne({
+                isDeleted: false,
+                user: user.id,
+            }).sort("desc");
+            if (lastOperation && moment(user === null || user === void 0 ? void 0 : user.createdAt).diff("days") >= 30)
+                user.active = moment(lastOperation === null || lastOperation === void 0 ? void 0 : lastOperation.createdAt).diff("days") < 30;
+        }
+        if (user.designation === User_1.Designation.Operator) {
+            const lastOperation = yield Bale_1.Bale.findOne({
+                isDeleted: false,
+                user: user.id,
+            }).sort("desc");
+            if (lastOperation && moment(user === null || user === void 0 ? void 0 : user.createdAt).diff("days") >= 30)
+                user.active = moment(lastOperation === null || lastOperation === void 0 ? void 0 : lastOperation.createdAt).diff("days") < 30;
+        }
+        if (user.designation === User_1.Designation.Staff) {
+            const lastVerification = yield Verification_1.Verification.findOne({
+                isDeleted: false,
+                user: user.id,
+            }).sort("desc");
+            if (lastVerification && moment(user === null || user === void 0 ? void 0 : user.createdAt).diff("days") >= 30)
+                user.active = moment(lastVerification === null || lastVerification === void 0 ? void 0 : lastVerification.createdAt).diff("days") < 30;
+        }
+        yield user.save();
+    }));
+    yield Promise.all(promise);
+    console.log(`done marking inactive users ${today}`);
+}), {
+    scheduled: true,
+    timezone: "Europe/Zagreb",
+});
+exports.default = cron;

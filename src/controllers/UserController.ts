@@ -65,24 +65,25 @@ export class UserController extends AbstractController {
 
       const users: any[] = await User.find(criteria);
 
-      users.map(async (user) => {
+      const promise = users.map(async (user) => {
         if (user.designation === Designation.Sorter) {
           const lastOperation = await DailySorting.findOne({
             isDeleted: false,
             user: user.id,
           }).sort("desc");
 
-          return user.active = moment(lastOperation?.createdAt).diff("days") < 30;
+          if (lastOperation && moment(user?.createdAt).diff("days") >= 30)
+            user.active = moment(lastOperation?.createdAt).diff("days") < 30;
         }
 
         if (user.designation === Designation.Operator) {
-
           const lastOperation = await Bale.findOne({
             isDeleted: false,
             user: user.id,
           }).sort("desc");
 
-          return user.active = moment(lastOperation?.createdAt).diff("days") < 30;
+          if (lastOperation && moment(user?.createdAt).diff("days") >= 30)
+            user.active = moment(lastOperation?.createdAt).diff("days") < 30;
         }
 
         if (user.designation === Designation.Staff) {
@@ -91,9 +92,12 @@ export class UserController extends AbstractController {
             user: user.id,
           }).sort("desc");
 
-          return user.active = moment(lastVerification?.createdAt).diff("days") < 30
+          if (lastVerification && moment(user?.createdAt).diff("days") >= 30)
+            user.active = moment(lastVerification?.createdAt).diff("days") < 30;
         }
+        return user;
       });
+      await Promise.all(promise);
       res.status(200).send({ success: true, data: users });
     } catch (error) {
       res.status(401).json({ success: false, error, message: error.message });

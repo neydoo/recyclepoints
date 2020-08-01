@@ -52,29 +52,34 @@ let UserController = class UserController extends AbstractController_1.AbstractC
                     ];
                 }
                 const users = yield User_1.User.find(criteria);
-                users.map((user) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+                const promise = users.map((user) => tslib_1.__awaiter(this, void 0, void 0, function* () {
                     if (user.designation === User_1.Designation.Sorter) {
                         const lastOperation = yield DailySorting_1.DailySorting.findOne({
                             isDeleted: false,
                             user: user.id,
                         }).sort("desc");
-                        return user.active = moment(lastOperation === null || lastOperation === void 0 ? void 0 : lastOperation.createdAt).diff("days") < 30;
+                        if (lastOperation && moment(user === null || user === void 0 ? void 0 : user.createdAt).diff("days") >= 30)
+                            user.active = moment(lastOperation === null || lastOperation === void 0 ? void 0 : lastOperation.createdAt).diff("days") < 30;
                     }
                     if (user.designation === User_1.Designation.Operator) {
                         const lastOperation = yield Bale_1.Bale.findOne({
                             isDeleted: false,
                             user: user.id,
                         }).sort("desc");
-                        return user.active = moment(lastOperation === null || lastOperation === void 0 ? void 0 : lastOperation.createdAt).diff("days") < 30;
+                        if (lastOperation && moment(user === null || user === void 0 ? void 0 : user.createdAt).diff("days") >= 30)
+                            user.active = moment(lastOperation === null || lastOperation === void 0 ? void 0 : lastOperation.createdAt).diff("days") < 30;
                     }
                     if (user.designation === User_1.Designation.Staff) {
                         const lastVerification = yield Verification_1.Verification.findOne({
                             isDeleted: false,
                             user: user.id,
                         }).sort("desc");
-                        return user.active = moment(lastVerification === null || lastVerification === void 0 ? void 0 : lastVerification.createdAt).diff("days") < 30;
+                        if (lastVerification && moment(user === null || user === void 0 ? void 0 : user.createdAt).diff("days") >= 30)
+                            user.active = moment(lastVerification === null || lastVerification === void 0 ? void 0 : lastVerification.createdAt).diff("days") < 30;
                     }
+                    return user;
                 }));
+                yield Promise.all(promise);
                 res.status(200).send({ success: true, data: users });
             }
             catch (error) {

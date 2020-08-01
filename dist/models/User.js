@@ -63,6 +63,7 @@ exports.userSchema = new mongoose_1.Schema({
     cloudImage: { type: String, default: null },
     isDeleted: { type: Boolean, required: true, default: false },
     unverified: { type: Boolean, required: true, default: false },
+    active: { type: Boolean, required: true, default: true },
     deletedAt: { type: String, default: null },
     firstTimeLogin: { type: Boolean, default: true },
 }, { timestamps: true });
