@@ -16,7 +16,6 @@ const clodConfig = {
     api_key: app_1.config.image.api_key,
     api_secret: app_1.config.image.api_secret,
 };
-cloudinary.config(clodConfig);
 class UserService {
     constructor() {
         this.file = new file_1.default();
@@ -117,7 +116,7 @@ class UserService {
     cloudinaryUploader(image) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                console.log(cloudinary.config.api_key);
+                cloudinary.config(clodConfig);
                 const url = yield cloudinary.uploader.upload(image);
                 console.log(url);
                 return url.public_id;

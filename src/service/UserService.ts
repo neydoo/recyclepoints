@@ -16,7 +16,6 @@ const clodConfig = {
   api_key: config.image.api_key,
   api_secret: config.image.api_secret,
 }
-cloudinary.config(clodConfig);
 
 export class UserService {
   protected repository: any;
@@ -177,7 +176,7 @@ export class UserService {
 
   public async cloudinaryUploader(image: any) {
     try {
-      console.log(cloudinary.config.api_key);
+      cloudinary.config(clodConfig);
       const url = await cloudinary.uploader.upload(image);
       console.log(url);
       return url.public_id;
