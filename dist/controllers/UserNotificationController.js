@@ -13,7 +13,7 @@ let UserNotificationController = class UserNotificationController {
                 const data = yield UserNotification_1.UserNotification.find({ userId });
                 res.status(200).send({
                     success: true,
-                    message: "message sent",
+                    message: "notifications retreived",
                     data,
                 });
             }

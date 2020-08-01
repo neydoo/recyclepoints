@@ -7,3 +7,4 @@ export * from "./SortingController";
 export * from "./NotificationController";
 export * from "./MobileController";
 export * from "./AdminController";
+export * from "./UserNotificationController";
