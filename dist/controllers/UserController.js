@@ -9,8 +9,8 @@ const UserRepository_1 = require("../abstract/UserRepository");
 const auth_1 = require("../middleware/auth");
 const User_1 = require("../models/User");
 const UserService_1 = require("../service/UserService");
-const UtilService_1 = require("src/service/UtilService");
-const NotificationsService_1 = require("src/service/NotificationsService");
+const UtilService_1 = require("../service/UtilService");
+const NotificationsService_1 = require("../service/NotificationsService");
 let UserController = class UserController extends AbstractController_1.AbstractController {
     constructor() {
         super(new UserRepository_1.UserRepository());

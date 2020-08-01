@@ -13,8 +13,8 @@ import { UserRepository as Repository } from "../abstract/UserRepository";
 import { checkJwt } from "../middleware/auth";
 import { IUserM, User } from "../models/User";
 import { UserService } from "../service/UserService";
-import { UtilService } from "src/service/UtilService";
-import NotificationsService from "src/service/NotificationsService";
+import { UtilService } from "../service/UtilService";
+import NotificationsService from "../service/NotificationsService";
 
 @Controller("api/users")
 @ClassMiddleware([checkJwt])
