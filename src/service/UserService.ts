@@ -177,6 +177,7 @@ export class UserService {
 
   public async cloudinaryUploader(image: any) {
     try {
+      console.log(cloudinary);
       const url = await cloudinary.uploader.upload(image);
       console.log(url);
       return url.public_id;
