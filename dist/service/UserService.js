@@ -119,6 +119,7 @@ class UserService {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 console.log(image);
+                cloudinary_1.v2.config(clodConfig);
                 const url = yield cloudinary_1.v2.uploader.upload(image);
                 console.log(url);
                 return url.public_id;
