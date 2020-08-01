@@ -1,3 +1,4 @@
+const moment = require("moment");
 import * as bcrypt from "bcrypt-nodejs";
 import { NextFunction, Request, Response } from "express";
 import {
@@ -11,10 +12,13 @@ import {
 import { AbstractController } from "./AbstractController";
 import { UserRepository as Repository } from "../abstract/UserRepository";
 import { checkJwt } from "../middleware/auth";
-import { IUserM, User } from "../models/User";
+import { IUserM, User, Designation } from "../models/User";
 import { UserService } from "../service/UserService";
 import { UtilService } from "../service/UtilService";
 import NotificationsService from "../service/NotificationsService";
+import { DailySorting } from "../models/DailySorting";
+import { Bale } from "../models/Bale";
+import { Verification } from "../models/Verification";
 
 @Controller("api/users")
 @ClassMiddleware([checkJwt])
@@ -59,8 +63,38 @@ export class UserController extends AbstractController {
         ];
       }
 
-      const user: IUserM[] = await User.find(criteria);
-      res.status(200).send({ success: true, data: user });
+      const users: any[] = await User.find(criteria);
+
+      users.map(async (user) => {
+        if (user.designation === Designation.Sorter) {
+          const lastOperation = await DailySorting.findOne({
+            isDeleted: false,
+            user: user.id,
+          }).sort("desc");
+
+          user.active = moment(lastOperation?.createdAt).diff("days") < 30;
+        }
+
+        if (user.designation === Designation.Operator) {
+
+          const lastOperation = await Bale.findOne({
+            isDeleted: false,
+            user: user.id,
+          }).sort("desc");
+
+          user.active = moment(lastOperation?.createdAt).diff("days") < 30;
+        }
+
+        if (user.designation === Designation.Staff) {
+          const lastVerification = await Verification.findOne({
+            isDeleted: false,
+            user: user.id,
+          }).sort("desc");
+
+          user.active = moment(lastVerification?.createdAt).diff("days") < 30
+        }
+      });
+      res.status(200).send({ success: true, data: users });
     } catch (error) {
       res.status(401).json({ success: false, error, message: error.message });
     }

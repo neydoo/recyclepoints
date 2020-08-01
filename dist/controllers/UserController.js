@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserController = void 0;
 const tslib_1 = require("tslib");
+const moment = require("moment");
 const bcrypt = require("bcrypt-nodejs");
 const core_1 = require("@overnightjs/core");
 const AbstractController_1 = require("./AbstractController");
@@ -11,6 +12,9 @@ const User_1 = require("../models/User");
 const UserService_1 = require("../service/UserService");
 const UtilService_1 = require("../service/UtilService");
 const NotificationsService_1 = require("../service/NotificationsService");
+const DailySorting_1 = require("../models/DailySorting");
+const Bale_1 = require("../models/Bale");
+const Verification_1 = require("../models/Verification");
 let UserController = class UserController extends AbstractController_1.AbstractController {
     constructor() {
         super(new UserRepository_1.UserRepository());
@@ -47,8 +51,31 @@ let UserController = class UserController extends AbstractController_1.AbstractC
                         { phone: /search/ },
                     ];
                 }
-                const user = yield User_1.User.find(criteria);
-                res.status(200).send({ success: true, data: user });
+                const users = yield User_1.User.find(criteria);
+                users.map((user) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+                    if (user.designation === User_1.Designation.Sorter) {
+                        const lastOperation = yield DailySorting_1.DailySorting.findOne({
+                            isDeleted: false,
+                            user: user.id,
+                        }).sort("desc");
+                        user.active = moment(lastOperation === null || lastOperation === void 0 ? void 0 : lastOperation.createdAt).diff("days") < 30;
+                    }
+                    if (user.designation === User_1.Designation.Operator) {
+                        const lastOperation = yield Bale_1.Bale.findOne({
+                            isDeleted: false,
+                            user: user.id,
+                        }).sort("desc");
+                        user.active = moment(lastOperation === null || lastOperation === void 0 ? void 0 : lastOperation.createdAt).diff("days") < 30;
+                    }
+                    if (user.designation === User_1.Designation.Staff) {
+                        const lastVerification = yield Verification_1.Verification.findOne({
+                            isDeleted: false,
+                            user: user.id,
+                        }).sort("desc");
+                        user.active = moment(lastVerification === null || lastVerification === void 0 ? void 0 : lastVerification.createdAt).diff("days") < 30;
+                    }
+                }));
+                res.status(200).send({ success: true, data: users });
             }
             catch (error) {
                 res.status(401).json({ success: false, error, message: error.message });
