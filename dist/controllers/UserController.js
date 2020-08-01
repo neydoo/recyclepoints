@@ -123,16 +123,21 @@ let UserController = class UserController extends AbstractController_1.AbstractC
     }
     resendOtp(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const user = yield this.repository.findOne({ phone: req.body.phone });
-            const password = UtilService_1.UtilService.generate(5);
-            user.password = bcrypt.hashSync(password);
-            user.otp = bcrypt.hashSync(password);
-            const notification = new NotificationsService_1.default();
-            yield user.save();
-            yield notification.sendForgetSMS(user.phone, password);
-            res
-                .status(200)
-                .send({ success: true, message: "code sent" });
+            try {
+                const user = yield User_1.User.findOne({ phone: req.body.phone });
+                if (user) {
+                    const password = UtilService_1.UtilService.generate(5);
+                    user.password = bcrypt.hashSync(password);
+                    user.otp = bcrypt.hashSync(password);
+                    const notification = new NotificationsService_1.default();
+                    yield user.save();
+                    yield notification.sendForgetSMS(user.phone, password);
+                    res.status(200).send({ success: true, message: "code sent" });
+                }
+            }
+            catch (error) {
+                res.status(401).json({ success: false, error, message: error.message });
+            }
         });
     }
 };
@@ -172,6 +177,12 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
 ], UserController.prototype, "resetPassword", null);
+tslib_1.__decorate([
+    core_1.Post("resend-otp"),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object, Object]),
+    tslib_1.__metadata("design:returntype", Promise)
+], UserController.prototype, "resendOtp", null);
 UserController = tslib_1.__decorate([
     core_1.Controller("api/users"),
     core_1.ClassMiddleware([auth_1.checkJwt]),

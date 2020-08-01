@@ -130,17 +130,22 @@ export class UserController extends AbstractController {
     }
   }
 
+  @Post("resend-otp")
   public async resendOtp(req: any, res: Response) {
-    const user = await this.repository.findOne({ phone: req.body.phone });
-    const password = UtilService.generate(5);
-    user.password = bcrypt.hashSync(password);
-    user.otp = bcrypt.hashSync(password);
-    const notification = new NotificationsService();
-    await user.save();
-    await notification.sendForgetSMS(user.phone, password);
+    try {
+      const user = await User.findOne({ phone: req.body.phone });
+      if (user) {
+        const password = UtilService.generate(5);
+        user.password = bcrypt.hashSync(password);
+        user.otp = bcrypt.hashSync(password);
+        const notification = new NotificationsService();
+        await user.save();
+        await notification.sendForgetSMS(user.phone, password);
 
-    res
-      .status(200)
-      .send({ success: true, message: "code sent" });
+        res.status(200).send({ success: true, message: "code sent" });
+      }
+    } catch (error) {
+      res.status(401).json({ success: false, error, message: error.message });
+    }
   }
 }
