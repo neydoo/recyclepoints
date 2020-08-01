@@ -8,6 +8,7 @@ import { RequestRepository as Repository } from "../abstract/RequestRepository";
 import { User, IUserM, Designation } from "../models/User";
 import { RedemptionItem } from "../models/RedemptionItem";
 import { UserNotification } from "../models/UserNotification";
+import { UtilService } from './UtilService';
 
 export class RequestService {
   protected repository: Repository;
@@ -51,12 +52,15 @@ export class RequestService {
         );
 
       payload.points = recyclePoints;
+
+      payload.redemptionId = `RE${UtilService.generate(6)}`;
     }
 
     const user = (await User.findById(req.user.id)) as IUserM;
     const request: any = await this.repository.createNew(payload);
 
     if (request.type === "redemption") {
+
       const details = "redemption request";
       await this.deductPoints(recyclePoints, request.id, user, details);
     }

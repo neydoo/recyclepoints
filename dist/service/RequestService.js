@@ -12,6 +12,7 @@ const RequestRepository_1 = require("../abstract/RequestRepository");
 const User_1 = require("../models/User");
 const RedemptionItem_1 = require("../models/RedemptionItem");
 const UserNotification_1 = require("../models/UserNotification");
+const UtilService_1 = require("./UtilService");
 class RequestService {
     constructor() {
         this.repository = new RequestRepository_1.RequestRepository();
@@ -44,6 +45,7 @@ class RequestService {
                 if (balance < recyclePoints)
                     throw new Error("you need more recycle points to complete this request");
                 payload.points = recyclePoints;
+                payload.redemptionId = `RE${UtilService_1.UtilService.generate(6)}`;
             }
             const user = (yield User_1.User.findById(req.user.id));
             const request = yield this.repository.createNew(payload);

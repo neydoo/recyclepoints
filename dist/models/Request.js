@@ -18,6 +18,7 @@ exports.requestSchema = new mongoose_1.Schema({
     type: { type: String, enum: ["recycle", "redemption"], required: true },
     items: { type: mongoose_1.Schema.Types.Mixed },
     quantity: { type: Number },
+    redemptionId: { type: String },
     deliveryType: { type: String, enum: ["home", "pickup"] },
     redemptionItems: { type: mongoose_1.Schema.Types.Array },
     status: {

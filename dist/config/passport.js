@@ -30,11 +30,6 @@ passport.use(new LocalStrategy({ usernameField: "email", passwordField: "passwor
         if (user.isDeleted) {
             return done(null, false, { message: "User has been deactivated." });
         }
-        if (user.designation === User_1.Designation.Client &&
-            user.unverified &&
-            !user.compareOtp(password)) {
-            return done(null, false, { message: "verify phonenumber." });
-        }
         if (!user.comparePassword(password) && !user.compareOtp(password)) {
             return done(null, false, { message: "Incorrect password." });
         }

@@ -50,7 +50,7 @@ let VerificationController = class VerificationController extends AbstractContro
                         { phone: /search/ },
                     ];
                 }
-                const data = yield Verification_1.Verification.find({ criteria }).populate({
+                const data = yield Verification_1.Verification.find(criteria).populate({
                     path: "user",
                     match: searchCriteria,
                 });

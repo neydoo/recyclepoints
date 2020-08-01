@@ -16,6 +16,7 @@ const NotificationsService_1 = require("../service/NotificationsService");
 const DailySorting_1 = require("../models/DailySorting");
 const Bale_1 = require("../models/Bale");
 const Verification_1 = require("../models/Verification");
+const RecyclePoint_1 = require("../models/RecyclePoint");
 let UserController = class UserController extends AbstractController_1.AbstractController {
     constructor() {
         super(new UserRepository_1.UserRepository());
@@ -60,7 +61,9 @@ let UserController = class UserController extends AbstractController_1.AbstractC
                             user: user.id,
                         }).sort("desc");
                         if (lastOperation && moment(user === null || user === void 0 ? void 0 : user.createdAt).diff("days") >= 30)
-                            user.active = (moment(lastOperation === null || lastOperation === void 0 ? void 0 : lastOperation.createdAt).diff("days") < 30 && !user.isDeleted);
+                            user.active =
+                                moment(lastOperation === null || lastOperation === void 0 ? void 0 : lastOperation.createdAt).diff("days") < 30 &&
+                                    !user.isDeleted;
                     }
                     if (user.designation === User_1.Designation.Operator) {
                         const lastOperation = yield Bale_1.Bale.findOne({
@@ -68,7 +71,9 @@ let UserController = class UserController extends AbstractController_1.AbstractC
                             user: user.id,
                         }).sort("desc");
                         if (lastOperation && moment(user === null || user === void 0 ? void 0 : user.createdAt).diff("days") >= 30)
-                            user.active = (moment(lastOperation === null || lastOperation === void 0 ? void 0 : lastOperation.createdAt).diff("days") < 30 && !user.isDeleted);
+                            user.active =
+                                moment(lastOperation === null || lastOperation === void 0 ? void 0 : lastOperation.createdAt).diff("days") < 30 &&
+                                    !user.isDeleted;
                     }
                     if (user.designation === User_1.Designation.Staff) {
                         const lastVerification = yield Verification_1.Verification.findOne({
@@ -76,7 +81,9 @@ let UserController = class UserController extends AbstractController_1.AbstractC
                             user: user.id,
                         }).sort("desc");
                         if (lastVerification && moment(user === null || user === void 0 ? void 0 : user.createdAt).diff("days") >= 30)
-                            user.active = (moment(lastVerification === null || lastVerification === void 0 ? void 0 : lastVerification.createdAt).diff("days") < 30 && !user.isDeleted);
+                            user.active =
+                                moment(lastVerification === null || lastVerification === void 0 ? void 0 : lastVerification.createdAt).diff("days") < 30 &&
+                                    !user.isDeleted;
                     }
                     return user;
                 }));
@@ -173,6 +180,23 @@ let UserController = class UserController extends AbstractController_1.AbstractC
             }
         });
     }
+    getUserPoints(req, res) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            try {
+                const points = yield RecyclePoint_1.RecyclePoint.findOne({ user: req.user.id });
+                res
+                    .status(200)
+                    .send({
+                    success: true,
+                    message: "balance fetched",
+                    data: points === null || points === void 0 ? void 0 : points.balance,
+                });
+            }
+            catch (error) {
+                res.status(401).json({ success: false, error, message: error.message });
+            }
+        });
+    }
 };
 tslib_1.__decorate([
     core_1.Get(""),
@@ -217,6 +241,12 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
 ], UserController.prototype, "resendOtp", null);
+tslib_1.__decorate([
+    core_1.Get("points"),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object, Object]),
+    tslib_1.__metadata("design:returntype", Promise)
+], UserController.prototype, "getUserPoints", null);
 UserController = tslib_1.__decorate([
     core_1.Controller("api/users"),
     core_1.ClassMiddleware([auth_1.checkJwt]),

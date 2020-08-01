@@ -21,6 +21,7 @@ import NotificationsService from "../service/NotificationsService";
 import { DailySorting } from "../models/DailySorting";
 import { Bale } from "../models/Bale";
 import { Verification } from "../models/Verification";
+import { RecyclePoint } from "../models/RecyclePoint";
 
 @Controller("api/users")
 @ClassMiddleware([checkJwt])
@@ -75,7 +76,9 @@ export class UserController extends AbstractController {
           }).sort("desc");
 
           if (lastOperation && moment(user?.createdAt).diff("days") >= 30)
-            user.active = (moment(lastOperation?.createdAt).diff("days") < 30 && !user.isDeleted);
+            user.active =
+              moment(lastOperation?.createdAt).diff("days") < 30 &&
+              !user.isDeleted;
         }
 
         if (user.designation === Designation.Operator) {
@@ -85,7 +88,9 @@ export class UserController extends AbstractController {
           }).sort("desc");
 
           if (lastOperation && moment(user?.createdAt).diff("days") >= 30)
-            user.active = (moment(lastOperation?.createdAt).diff("days") < 30 && !user.isDeleted);
+            user.active =
+              moment(lastOperation?.createdAt).diff("days") < 30 &&
+              !user.isDeleted;
         }
 
         if (user.designation === Designation.Staff) {
@@ -95,7 +100,9 @@ export class UserController extends AbstractController {
           }).sort("desc");
 
           if (lastVerification && moment(user?.createdAt).diff("days") >= 30)
-            user.active = (moment(lastVerification?.createdAt).diff("days") < 30 && !user.isDeleted);
+            user.active =
+              moment(lastVerification?.createdAt).diff("days") < 30 &&
+              !user.isDeleted;
         }
         return user;
       });
@@ -186,6 +193,22 @@ export class UserController extends AbstractController {
 
         res.status(200).send({ success: true, message: "code sent" });
       }
+    } catch (error) {
+      res.status(401).json({ success: false, error, message: error.message });
+    }
+  }
+
+  @Get("points")
+  public async getUserPoints(req: any, res: Response) {
+    try {
+      const points = await RecyclePoint.findOne({ user: req.user.id });
+      res
+        .status(200)
+        .send({
+          success: true,
+          message: "balance fetched",
+          data: points?.balance,
+        });
     } catch (error) {
       res.status(401).json({ success: false, error, message: error.message });
     }

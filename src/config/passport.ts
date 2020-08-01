@@ -37,13 +37,13 @@ passport.use(
           return done(null, false, { message: "User has been deactivated." });
         }
 
-        if (
-          user.designation === Designation.Client &&
-          user!.unverified &&
-          !user.compareOtp(password)
-        ) {
-          return done(null, false, { message: "verify phonenumber." });
-        }
+        // if (
+        //   user.designation === Designation.Client &&
+        //   user!.unverified &&
+        //   !user.compareOtp(password)
+        // ) {
+        //   return done(null, false, { message: "verify phonenumber." });
+        // }
 
         if (!user.comparePassword(password) && !user.compareOtp(password)) {
           return done(null, false, { message: "Incorrect password." });

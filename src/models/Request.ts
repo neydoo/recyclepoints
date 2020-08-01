@@ -17,6 +17,7 @@ export interface RequestM extends Document {
   deliveryType: string;
   items?: RecycleItems;
   redemptionItems?: any[];
+  redemptionId?: string;
   status: Status;
   points?: number;
   weight?: number;
@@ -39,6 +40,7 @@ export const requestSchema: Schema = new Schema(
     type: { type: String, enum: ["recycle", "redemption"], required: true },
     items: { type: Schema.Types.Mixed },
     quantity: { type: Number },
+    redemptionId: { type: String },
     deliveryType: { type: String, enum: ["home", "pickup"] },
     redemptionItems: { type: Schema.Types.Array },
     status: {
