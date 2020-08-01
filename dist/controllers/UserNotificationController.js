@@ -28,6 +28,7 @@ let UserNotificationController = class UserNotificationController {
                 const { id: userId } = req.user;
                 const { id } = req.params;
                 const notification = yield UserNotification_1.UserNotification.findById(id);
+                console.log(notification);
                 if ((notification === null || notification === void 0 ? void 0 : notification.userId) !== userId)
                     throw new Error("invaid notification");
                 res.status(200).send({
