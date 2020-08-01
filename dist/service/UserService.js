@@ -11,11 +11,12 @@ const UtilService_1 = require("./UtilService");
 const file_1 = require("../utilities/file");
 const RecyclePoint_1 = require("../models/RecyclePoint");
 const app_1 = require("../config/app");
-cloudinary_1.v2.config({
+const clodConfig = {
     cloud_name: app_1.config.image.cloud_name,
     api_key: app_1.config.image.api_key,
     api_secret: app_1.config.image.api_secret,
-});
+};
+cloudinary_1.v2.config(clodConfig);
 class UserService {
     constructor() {
         this.file = new file_1.default();
@@ -116,6 +117,7 @@ class UserService {
     cloudinaryUploader(image) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
+                console.log(clodConfig);
                 const url = yield cloudinary_1.v2.uploader.upload(image);
                 console.log(url);
                 return url.public_id;
