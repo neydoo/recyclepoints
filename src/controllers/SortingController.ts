@@ -10,6 +10,7 @@ import {
 import { checkJwt, isValidUser, isAdmin, isDev } from "../middleware/auth";
 import { DailySorting, DailySortingM } from "../models/DailySorting";
 import { PdfService } from "../service/PdfService";
+import { User } from "../models/User";
 
 @Controller("api/sorting")
 @ClassMiddleware([checkJwt])
@@ -30,8 +31,7 @@ export class SortingController {
 
       const criteria: any = { isDeleted: false };
       const searchCriteria: any = { designation: "sorter" };
-
-
+      let users: any = [];
       if (startDate) {
         criteria.createdAt = {
           $lte: endDate ? endDate : moment(),
@@ -60,12 +60,15 @@ export class SortingController {
           { address: /search/ },
           { phone: /search/ },
         ];
+        users = await User.find(searchCriteria);
       }
 
-      const data = await DailySorting.find(criteria).populate({
-        path: "user",
-        match: searchCriteria,
-      });
+      if (users?.length) {
+        const userIds = users.map((u: any) => u.id);
+        criteria.user = userIds;
+      }
+
+      const data = await DailySorting.find(criteria).populate("user");
       res
         .status(200)
         .send({ success: true, message: "data retrieved successfully!", data });

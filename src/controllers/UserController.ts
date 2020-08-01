@@ -73,7 +73,7 @@ export class UserController extends AbstractController {
           }).sort("desc");
 
           if (lastOperation && moment(user?.createdAt).diff("days") >= 30)
-            user.active = moment(lastOperation?.createdAt).diff("days") < 30;
+            user.active = (moment(lastOperation?.createdAt).diff("days") < 30 && !user.isDeleted);
         }
 
         if (user.designation === Designation.Operator) {
@@ -83,7 +83,7 @@ export class UserController extends AbstractController {
           }).sort("desc");
 
           if (lastOperation && moment(user?.createdAt).diff("days") >= 30)
-            user.active = moment(lastOperation?.createdAt).diff("days") < 30;
+            user.active = (moment(lastOperation?.createdAt).diff("days") < 30 && !user.isDeleted);
         }
 
         if (user.designation === Designation.Staff) {
@@ -93,7 +93,7 @@ export class UserController extends AbstractController {
           }).sort("desc");
 
           if (lastVerification && moment(user?.createdAt).diff("days") >= 30)
-            user.active = moment(lastVerification?.createdAt).diff("days") < 30;
+            user.active = (moment(lastVerification?.createdAt).diff("days") < 30 && !user.isDeleted);
         }
         return user;
       });

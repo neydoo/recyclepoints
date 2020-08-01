@@ -7,6 +7,7 @@ const core_1 = require("@overnightjs/core");
 const auth_1 = require("../middleware/auth");
 const DailySorting_1 = require("../models/DailySorting");
 const PdfService_1 = require("../service/PdfService");
+const User_1 = require("../models/User");
 let SortingController = class SortingController {
     index(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
@@ -14,6 +15,7 @@ let SortingController = class SortingController {
                 const { startDate, endDate, search, pay, type, product, arrivalTime, } = req.query;
                 const criteria = { isDeleted: false };
                 const searchCriteria = { designation: "sorter" };
+                let users = [];
                 if (startDate) {
                     criteria.createdAt = {
                         $lte: endDate ? endDate : moment(),
@@ -39,11 +41,13 @@ let SortingController = class SortingController {
                         { address: /search/ },
                         { phone: /search/ },
                     ];
+                    users = yield User_1.User.find(searchCriteria);
                 }
-                const data = yield DailySorting_1.DailySorting.find(criteria).populate({
-                    path: "user",
-                    match: searchCriteria,
-                });
+                if (users === null || users === void 0 ? void 0 : users.length) {
+                    const userIds = users.map((u) => u.id);
+                    criteria.user = userIds;
+                }
+                const data = yield DailySorting_1.DailySorting.find(criteria).populate("user");
                 res
                     .status(200)
                     .send({ success: true, message: "data retrieved successfully!", data });

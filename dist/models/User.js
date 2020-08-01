@@ -36,7 +36,7 @@ exports.userSchema = new mongoose_1.Schema({
     phone: { type: String, unique: true },
     password: { type: String, select: false },
     notificationTokens: { type: mongoose_1.Schema.Types.Array, select: false },
-    pay: { type: String },
+    pay: { type: Number, default: 0 },
     target: { type: String },
     country: { type: String },
     state: { type: String },

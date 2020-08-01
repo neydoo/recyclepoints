@@ -59,7 +59,7 @@ let UserController = class UserController extends AbstractController_1.AbstractC
                             user: user.id,
                         }).sort("desc");
                         if (lastOperation && moment(user === null || user === void 0 ? void 0 : user.createdAt).diff("days") >= 30)
-                            user.active = moment(lastOperation === null || lastOperation === void 0 ? void 0 : lastOperation.createdAt).diff("days") < 30;
+                            user.active = (moment(lastOperation === null || lastOperation === void 0 ? void 0 : lastOperation.createdAt).diff("days") < 30 && !user.isDeleted);
                     }
                     if (user.designation === User_1.Designation.Operator) {
                         const lastOperation = yield Bale_1.Bale.findOne({
@@ -67,7 +67,7 @@ let UserController = class UserController extends AbstractController_1.AbstractC
                             user: user.id,
                         }).sort("desc");
                         if (lastOperation && moment(user === null || user === void 0 ? void 0 : user.createdAt).diff("days") >= 30)
-                            user.active = moment(lastOperation === null || lastOperation === void 0 ? void 0 : lastOperation.createdAt).diff("days") < 30;
+                            user.active = (moment(lastOperation === null || lastOperation === void 0 ? void 0 : lastOperation.createdAt).diff("days") < 30 && !user.isDeleted);
                     }
                     if (user.designation === User_1.Designation.Staff) {
                         const lastVerification = yield Verification_1.Verification.findOne({
@@ -75,7 +75,7 @@ let UserController = class UserController extends AbstractController_1.AbstractC
                             user: user.id,
                         }).sort("desc");
                         if (lastVerification && moment(user === null || user === void 0 ? void 0 : user.createdAt).diff("days") >= 30)
-                            user.active = moment(lastVerification === null || lastVerification === void 0 ? void 0 : lastVerification.createdAt).diff("days") < 30;
+                            user.active = (moment(lastVerification === null || lastVerification === void 0 ? void 0 : lastVerification.createdAt).diff("days") < 30 && !user.isDeleted);
                     }
                     return user;
                 }));
