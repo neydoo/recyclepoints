@@ -189,7 +189,6 @@ tslib_1.__decorate([
 ], UserController.prototype, "registerUser", null);
 tslib_1.__decorate([
     core_1.Put("update/:userId"),
-    core_1.Middleware([multer_1.upload]),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)

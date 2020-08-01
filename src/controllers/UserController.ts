@@ -121,7 +121,7 @@ export class UserController extends AbstractController {
   }
 
   @Put("update/:userId")
-  @Middleware([upload])
+  // @Middleware([upload])
   public async updateUser(req: Request, res: Response): Promise<void> {
     try {
       const user: IUserM = await this.user.update(req);
