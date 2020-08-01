@@ -38,9 +38,10 @@ export class UserService {
 
     if (!userPayload.password) {
       if (userPayload.designation === "client") {
-        const otp = UtilService.generate(4);
+        const otp = UtilService.generate(5);
         userPayload.otp = otp;
         userPayload.password = otp;
+        userPayload.unverified = true;
         await this.notification.sendRegistrationSMS(userPayload.phone, otp);
       } else {
         userPayload.password = "123456";
@@ -137,6 +138,24 @@ export class UserService {
     const user = await this.repository.findOne({
       or: [{ phone: req.body.email }, { email: req.body.email }],
     });
+    const password = UtilService.generate(5);
+    user.password = bcrypt.hashSync(password);
+    user.otp = bcrypt.hashSync(password);
+
+    await user.save();
+    await this.notification.sendForgetSMS(user.phone, password);
+
+    this.core.Email(
+      user,
+      "Password Reset",
+      this.core.html(
+        `<p style="color: #000">Hello ${user.firstName} ${user.lastName}, \n\r Your password has been reset. Your new password is ${password} </p>`
+      )
+    );
+    return user;
+  }
+  public async resendOtp(req: any) {
+    const user = await this.repository.findOne({ phone: req.body.phone });
     const password = UtilService.generate(5);
     user.password = bcrypt.hashSync(password);
     user.otp = bcrypt.hashSync(password);

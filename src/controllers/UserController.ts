@@ -1,3 +1,4 @@
+import * as bcrypt from "bcrypt-nodejs";
 import { NextFunction, Request, Response } from "express";
 import {
   Controller,
@@ -12,6 +13,8 @@ import { UserRepository as Repository } from "../abstract/UserRepository";
 import { checkJwt } from "../middleware/auth";
 import { IUserM, User } from "../models/User";
 import { UserService } from "../service/UserService";
+import { UtilService } from "src/service/UtilService";
+import NotificationsService from "src/service/NotificationsService";
 
 @Controller("api/users")
 @ClassMiddleware([checkJwt])
@@ -81,9 +84,11 @@ export class UserController extends AbstractController {
     try {
       const user: IUserM = await this.user.update(req);
 
-      res
-        .status(200)
-        .json({ success: true, data:user, message: "user updated successfully" });
+      res.status(200).json({
+        success: true,
+        data: user,
+        message: "user updated successfully",
+      });
     } catch (error) {
       console.log(error);
       res.status(400).json({ success: false, error, message: error.message });
@@ -123,5 +128,19 @@ export class UserController extends AbstractController {
     } catch (error) {
       res.status(401).json({ success: false, error, message: error.message });
     }
+  }
+
+  public async resendOtp(req: any, res: Response) {
+    const user = await this.repository.findOne({ phone: req.body.phone });
+    const password = UtilService.generate(5);
+    user.password = bcrypt.hashSync(password);
+    user.otp = bcrypt.hashSync(password);
+    const notification = new NotificationsService();
+    await user.save();
+    await notification.sendForgetSMS(user.phone, password);
+
+    res
+      .status(200)
+      .send({ success: true, message: "code sent" });
   }
 }

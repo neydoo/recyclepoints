@@ -2,12 +2,15 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserController = void 0;
 const tslib_1 = require("tslib");
+const bcrypt = require("bcrypt-nodejs");
 const core_1 = require("@overnightjs/core");
 const AbstractController_1 = require("./AbstractController");
 const UserRepository_1 = require("../abstract/UserRepository");
 const auth_1 = require("../middleware/auth");
 const User_1 = require("../models/User");
 const UserService_1 = require("../service/UserService");
+const UtilService_1 = require("src/service/UtilService");
+const NotificationsService_1 = require("src/service/NotificationsService");
 let UserController = class UserController extends AbstractController_1.AbstractController {
     constructor() {
         super(new UserRepository_1.UserRepository());
@@ -69,9 +72,11 @@ let UserController = class UserController extends AbstractController_1.AbstractC
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 const user = yield this.user.update(req);
-                res
-                    .status(200)
-                    .json({ success: true, data: user, message: "user updated successfully" });
+                res.status(200).json({
+                    success: true,
+                    data: user,
+                    message: "user updated successfully",
+                });
             }
             catch (error) {
                 console.log(error);
@@ -114,6 +119,20 @@ let UserController = class UserController extends AbstractController_1.AbstractC
             catch (error) {
                 res.status(401).json({ success: false, error, message: error.message });
             }
+        });
+    }
+    resendOtp(req, res) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const user = yield this.repository.findOne({ phone: req.body.phone });
+            const password = UtilService_1.UtilService.generate(5);
+            user.password = bcrypt.hashSync(password);
+            user.otp = bcrypt.hashSync(password);
+            const notification = new NotificationsService_1.default();
+            yield user.save();
+            yield notification.sendForgetSMS(user.phone, password);
+            res
+                .status(200)
+                .send({ success: true, message: "code sent" });
         });
     }
 };

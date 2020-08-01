@@ -1,7 +1,7 @@
 import * as passport from "passport";
 import * as passportLocal from "passport-local";
 import * as passportJwt from "passport-jwt";
-import { User } from "../models/User";
+import { User, Designation } from "../models/User";
 import { config } from "../config/app";
 
 // tslint:disable-next-line: variable-name
@@ -33,12 +33,20 @@ passport.use(
           });
         }
 
-        if (!user.comparePassword(password) && !user.compareOtp(password)) {
-          return done(null, false, { message: "Incorrect password." });
-        }
-
         if (user.isDeleted) {
           return done(null, false, { message: "User has been deactivated." });
+        }
+
+        if (
+          user.designation === Designation.Client &&
+          user.unverified &&
+          !user.compareOtp(password)
+        ) {
+          return done(null, false, { message: "verify phonenumber." });
+        }
+
+        if (!user.comparePassword(password) && !user.compareOtp(password)) {
+          return done(null, false, { message: "Incorrect password." });
         }
 
         user = await User.findOne({
@@ -53,7 +61,6 @@ passport.use(
             },
           ],
         });
-        console.log(JSON.stringify(user));
         return done(null, user);
       } catch (err) {
         return done(err);

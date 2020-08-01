@@ -27,11 +27,16 @@ passport.use(new LocalStrategy({ usernameField: "email", passwordField: "passwor
                 message: `user with ${email} not found.`,
             });
         }
-        if (!user.comparePassword(password) && !user.compareOtp(password)) {
-            return done(null, false, { message: "Incorrect password." });
-        }
         if (user.isDeleted) {
             return done(null, false, { message: "User has been deactivated." });
+        }
+        if (user.designation === User_1.Designation.Client &&
+            user.unverified &&
+            !user.compareOtp(password)) {
+            return done(null, false, { message: "verify phonenumber." });
+        }
+        if (!user.comparePassword(password) && !user.compareOtp(password)) {
+            return done(null, false, { message: "Incorrect password." });
         }
         user = yield User_1.User.findOne({
             $or: [
@@ -45,7 +50,6 @@ passport.use(new LocalStrategy({ usernameField: "email", passwordField: "passwor
                 },
             ],
         });
-        console.log(JSON.stringify(user));
         return done(null, user);
     }
     catch (err) {

@@ -23,7 +23,6 @@ exports.userSchema = new mongoose_1.Schema({
     email: {
         type: String,
         lowercase: true,
-        required: true,
         validate: [
             /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
             "Please fill a valid email address",
@@ -50,11 +49,20 @@ exports.userSchema = new mongoose_1.Schema({
     },
     designation: {
         type: String,
-        enum: ["buster", "admin", "dev", "sorter", "baler", "verification-staff", "client"],
+        enum: [
+            "buster",
+            "admin",
+            "dev",
+            "sorter",
+            "baler",
+            "verification-staff",
+            "client",
+        ],
     },
     profileImage: { type: String, default: null },
     cloudImage: { type: String, default: null },
     isDeleted: { type: Boolean, required: true, default: false },
+    unverified: { type: Boolean, required: true, default: false },
     deletedAt: { type: String, default: null },
     firstTimeLogin: { type: Boolean, default: true },
 }, { timestamps: true });

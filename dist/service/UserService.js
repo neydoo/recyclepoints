@@ -31,9 +31,10 @@ class UserService {
                 throw new Error("incomplete parameters");
             if (!userPayload.password) {
                 if (userPayload.designation === "client") {
-                    const otp = UtilService_1.UtilService.generate(4);
+                    const otp = UtilService_1.UtilService.generate(5);
                     userPayload.otp = otp;
                     userPayload.password = otp;
+                    userPayload.unverified = true;
                     yield this.notification.sendRegistrationSMS(userPayload.phone, otp);
                 }
                 else {
@@ -91,6 +92,18 @@ class UserService {
             const user = yield this.repository.findOne({
                 or: [{ phone: req.body.email }, { email: req.body.email }],
             });
+            const password = UtilService_1.UtilService.generate(5);
+            user.password = bcrypt.hashSync(password);
+            user.otp = bcrypt.hashSync(password);
+            yield user.save();
+            yield this.notification.sendForgetSMS(user.phone, password);
+            this.core.Email(user, "Password Reset", this.core.html(`<p style="color: #000">Hello ${user.firstName} ${user.lastName}, \n\r Your password has been reset. Your new password is ${password} </p>`));
+            return user;
+        });
+    }
+    resendOtp(req) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const user = yield this.repository.findOne({ phone: req.body.phone });
             const password = UtilService_1.UtilService.generate(5);
             user.password = bcrypt.hashSync(password);
             user.otp = bcrypt.hashSync(password);
