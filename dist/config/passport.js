@@ -11,6 +11,7 @@ const LocalStrategy = passportLocal.Strategy;
 const JwtStrategy = passportJwt.Strategy;
 const ExtractJwt = passportJwt.ExtractJwt;
 passport.use(new LocalStrategy({ usernameField: "email", passwordField: "password" }, (email, password, done) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    email = UtilService_1.UtilService.formatPhone(email);
     try {
         let user;
         user = yield User_1.User.findOne({
@@ -19,7 +20,7 @@ passport.use(new LocalStrategy({ usernameField: "email", passwordField: "passwor
                     email: email.toLowerCase(),
                 },
                 {
-                    phone: UtilService_1.UtilService.formatPhone(email),
+                    phone: email,
                 },
             ],
         }).select("+password +otp");
