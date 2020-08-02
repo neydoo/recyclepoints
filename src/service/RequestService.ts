@@ -24,6 +24,7 @@ export class RequestService {
   public async create(req: any): Promise<void> {
     const payload: RequestM = req.body;
     payload.requestedBy = req.user.id;
+    console.log(payload);
     if (!payload.type) {
       throw new Error("invalid request type");
     }

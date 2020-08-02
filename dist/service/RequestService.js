@@ -24,6 +24,7 @@ class RequestService {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const payload = req.body;
             payload.requestedBy = req.user.id;
+            console.log(payload);
             if (!payload.type) {
                 throw new Error("invalid request type");
             }
