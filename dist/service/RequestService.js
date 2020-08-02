@@ -24,7 +24,7 @@ class RequestService {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const payload = req.body;
             payload.requestedBy = req.user.id;
-            console.log(payload);
+            console.log("start create request");
             if (!payload.type) {
                 throw new Error("invalid request type");
             }
@@ -41,15 +41,20 @@ class RequestService {
                 recyclePoints = requestedItems.reduce((curr, item, i) => {
                     var _a;
                     const { quantity } = (_a = payload.redemptionItems) === null || _a === void 0 ? void 0 : _a.find((i) => i.id === item.id);
-                    return curr += item.recyclePoints * quantity;
+                    return (curr += item.recyclePoints * quantity);
                 }, 0);
+                console.log(`${balance} of user${req.user.id} with recyclepoints ${recyclePoints}`);
                 if (balance < recyclePoints)
                     throw new Error("you need more recycle points to complete this request");
                 payload.points = recyclePoints;
                 payload.redemptionId = `RE${UtilService_1.UtilService.generate(6)}`;
             }
+            console.log(`get user details`);
             const user = (yield User_1.User.findById(req.user.id));
+            console.log(`gotten user details`);
+            console.log(`creating request`);
             const request = yield this.repository.createNew(payload);
+            console.log(`created request`);
             if (request.type === "redemption") {
                 const details = "redemption request";
                 yield this.deductPoints(recyclePoints, request.id, user, details);
