@@ -29,9 +29,6 @@ let UserController = class UserController extends AbstractController_1.AbstractC
                 const criteria = {
                     isDeleted: false,
                 };
-                const searchCriteria = {
-                    isDeleted: false,
-                };
                 if (designation) {
                     criteria.designation = designation;
                 }
@@ -47,10 +44,10 @@ let UserController = class UserController extends AbstractController_1.AbstractC
                 }
                 if (search) {
                     criteria.or = [
-                        { firstName: /search/ },
-                        { lastName: /search/ },
-                        { address: /search/ },
-                        { phone: /search/ },
+                        { firstName: { $regex: search, $options: "i" } },
+                        { lastName: { $regex: search, $options: "i" } },
+                        { address: { $regex: search, $options: "i" } },
+                        { phone: { $regex: search, $options: "i" } },
                     ];
                 }
                 const users = yield User_1.User.find(criteria);
@@ -128,9 +125,7 @@ let UserController = class UserController extends AbstractController_1.AbstractC
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 const points = yield RecyclePoint_1.RecyclePoint.findOne({ user: req.user.id });
-                res
-                    .status(200)
-                    .send({
+                res.status(200).send({
                     success: true,
                     message: "balance fetched",
                     data: points === null || points === void 0 ? void 0 : points.balance,

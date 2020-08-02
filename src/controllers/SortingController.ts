@@ -180,10 +180,25 @@ export class SortingController {
       } = req.query;
 
       const criteria: any = {};
-      const SubCriteria: any = {};
+      const subCriteria: any = {};
 
-      if (name) {
-        SubCriteria.$or = [{ firstName: /search/ }, { lastName: /search/ }];
+      let users: any[] = [];
+      if (pay || name) {
+        if (pay) subCriteria.pay = pay;
+        if (name) {
+          subCriteria.$or = [
+            { firstName: { $regex: name, $options: "i" } },
+            { lastName: { $regex: name, $options: "i" } },
+          ];
+        }
+        users = await User.find(subCriteria);
+      }
+
+      if (users?.length) {
+        const userIds = users.map((u: any) => u.id);
+        criteria.user = userIds;
+      } else if (!users.length && name) {
+        criteria.user = null;
       }
 
       if (arrivalTime) criteria.arrivalTime = arrivalTime;
@@ -193,12 +208,8 @@ export class SortingController {
           $lte: endDate ? endDate : moment(),
         };
       }
-      if (pay) SubCriteria.pay = pay;
 
-      const sorting = await DailySorting.find(criteria).populate({
-        path: "user",
-        match: SubCriteria,
-      });
+      const sorting = await DailySorting.find(criteria).populate("user");
       const sortingPromise = sorting.map((sort) => {
         const item: any = {};
         if (UBC) {

@@ -139,9 +139,25 @@ let VerificationController = class VerificationController extends AbstractContro
             try {
                 const { PET, UBC, ONP, BCC, GBS, PWS, name, arrivalTime, startDate, endDate, pay, } = req.query;
                 const criteria = {};
-                const SubCriteria = {};
-                if (name) {
-                    SubCriteria.$or = [{ firstName: /search/ }, { lastName: /search/ }];
+                const subCriteria = {};
+                let users = [];
+                if (pay || name) {
+                    if (pay)
+                        subCriteria.pay = pay;
+                    if (name) {
+                        subCriteria.$or = [
+                            { firstName: { $regex: name, $options: "i" } },
+                            { lastName: { $regex: name, $options: "i" } },
+                        ];
+                    }
+                    users = yield User_1.User.find(subCriteria);
+                }
+                if (users === null || users === void 0 ? void 0 : users.length) {
+                    const userIds = users.map((u) => u.id);
+                    criteria.user = userIds;
+                }
+                else if (!users.length && name) {
+                    criteria.user = null;
                 }
                 if (arrivalTime)
                     criteria.arrivalTime = arrivalTime;
@@ -151,12 +167,7 @@ let VerificationController = class VerificationController extends AbstractContro
                         $lte: endDate ? endDate : moment(),
                     };
                 }
-                if (pay)
-                    SubCriteria.pay = pay;
-                const sorting = yield Verification_1.Verification.find(criteria).populate({
-                    path: "user",
-                    match: SubCriteria,
-                });
+                const sorting = yield Verification_1.Verification.find(criteria).populate("user");
                 const sortingPromise = sorting.map((sort) => {
                     const item = {};
                     if (UBC) {

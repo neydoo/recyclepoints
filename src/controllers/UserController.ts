@@ -38,9 +38,7 @@ export class UserController extends AbstractController {
       const criteria: any = {
         isDeleted: false,
       };
-      const searchCriteria: any = {
-        isDeleted: false,
-      };
+
       if (designation) {
         criteria.designation = designation;
       }
@@ -59,10 +57,10 @@ export class UserController extends AbstractController {
 
       if (search) {
         criteria.or = [
-          { firstName: /search/ },
-          { lastName: /search/ },
-          { address: /search/ },
-          { phone: /search/ },
+          { firstName: { $regex: search, $options: "i" } },
+          { lastName: { $regex: search, $options: "i" } },
+          { address: { $regex: search, $options: "i" } },
+          { phone: { $regex: search, $options: "i" } },
         ];
       }
 
@@ -148,13 +146,11 @@ export class UserController extends AbstractController {
     try {
       const points = await RecyclePoint.findOne({ user: req.user.id });
 
-      res
-        .status(200)
-        .send({
-          success: true,
-          message: "balance fetched",
-          data: points?.balance,
-        });
+      res.status(200).send({
+        success: true,
+        message: "balance fetched",
+        data: points?.balance,
+      });
     } catch (error) {
       res.status(400).json({ success: false, error, message: error.message });
     }
@@ -213,5 +209,4 @@ export class UserController extends AbstractController {
       res.status(400).json({ success: false, error, message: error.message });
     }
   }
-
 }
