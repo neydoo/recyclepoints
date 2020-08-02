@@ -180,29 +180,10 @@ export class UserService {
   public async cloudinaryUploader(image: any) {
     try {
       console.log(image);
-      cloudinary.config(clodConfig)
+      cloudinary.config(clodConfig);
 
-        const matches = image.match(/^data:.+\/(.+);base64,(.*)$/);
-
-        const buffer = new Buffer(image, 'base64');
-
-        const randomizedName = (function() {
-          // Math.random should be unique because of its seeding algorithm.
-          // Convert it to base 36 (numbers + letters), and grab the first 9 characters
-          // after the decimal.
-          //   b25d8376-0881-4cc4-883e-716cf1a8799f
-          return `image_${Math.random()
-            .toString(36)
-            .substr(2, 8)}-${Math.random()
-            .toString(8)
-            .substr(2, 4)}-${Math.random()
-            .toString(12)
-            .substr(2, 4)}-${Math.random()
-            .toString(13)
-            .substr(2, 12)}`;
-        })();
-
-      const url = await cloudinary.uploader.upload(`${randomizedName}.png`);
+       const formattedImage = `data:image/png;base64,${image}`
+      const url = await cloudinary.uploader.upload(formattedImage);
       console.log(url);
       return url.public_id;
     } catch (error) {
