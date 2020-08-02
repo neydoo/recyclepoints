@@ -37,16 +37,15 @@ class RequestService {
                 })));
                 const itemIds = (_b = payload.redemptionItems) === null || _b === void 0 ? void 0 : _b.map((item) => item.id);
                 const requestedItems = yield RedemptionItem_1.RedemptionItem.find({ _id: itemIds });
-                const recyclePoints = requestedItems.reduce((curr, item) => {
+                recyclePoints = requestedItems.reduce((curr, item, i) => {
                     var _a;
                     const { quantity } = (_a = payload.redemptionItems) === null || _a === void 0 ? void 0 : _a.find((i) => i.id === item.id);
-                    return (curr = +(item.recyclePoints * quantity));
-                });
+                    return curr += item.recyclePoints * quantity;
+                }, 0);
                 if (balance < recyclePoints)
                     throw new Error("you need more recycle points to complete this request");
                 payload.points = recyclePoints;
                 payload.redemptionId = `RE${UtilService_1.UtilService.generate(6)}`;
-                payload.meta = payload;
             }
             const user = (yield User_1.User.findById(req.user.id));
             const request = yield this.repository.createNew(payload);

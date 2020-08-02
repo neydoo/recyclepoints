@@ -8,7 +8,7 @@ import { RequestRepository as Repository } from "../abstract/RequestRepository";
 import { User, IUserM, Designation } from "../models/User";
 import { RedemptionItem } from "../models/RedemptionItem";
 import { UserNotification } from "../models/UserNotification";
-import { UtilService } from './UtilService';
+import { UtilService } from "./UtilService";
 
 export class RequestService {
   protected repository: Repository;
@@ -42,10 +42,13 @@ export class RequestService {
       const itemIds = payload.redemptionItems?.map((item) => item.id);
       const requestedItems: any[] = await RedemptionItem.find({ _id: itemIds });
 
-      const recyclePoints = requestedItems.reduce((curr, item) => {
-        const { quantity } = payload.redemptionItems?.find((i) => i.id === item.id);
-        return (curr = +(item.recyclePoints * quantity));
-      });
+      recyclePoints = requestedItems.reduce((curr, item, i) => {
+        const { quantity } = payload.redemptionItems?.find(
+          (i) => i.id === item.id
+        );
+        return curr += item.recyclePoints * quantity;
+      }, 0);
+
       if (balance < recyclePoints)
         throw new Error(
           "you need more recycle points to complete this request"
@@ -54,14 +57,13 @@ export class RequestService {
       payload.points = recyclePoints;
 
       payload.redemptionId = `RE${UtilService.generate(6)}`;
-      payload.meta = payload;
+      // payload.meta = payload;
     }
 
     const user = (await User.findById(req.user.id)) as IUserM;
     const request: any = await this.repository.createNew(payload);
 
     if (request.type === "redemption") {
-
       const details = "redemption request";
       await this.deductPoints(recyclePoints, request.id, user, details);
     }
