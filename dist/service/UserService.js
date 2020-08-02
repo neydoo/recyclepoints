@@ -42,7 +42,6 @@ class UserService {
                     userPayload.otp = otp;
                     userPayload.password = otp;
                     userPayload.unverified = true;
-                    yield this.notification.sendRegistrationSMS(userPayload.phone, otp);
                 }
                 else {
                     userPayload.password = "123456";
@@ -50,6 +49,8 @@ class UserService {
             }
             userPayload.password = bcrypt.hashSync(userPayload.password);
             const createdUser = yield this.repository.createNew(userPayload);
+            if (userPayload.designation === User_1.Designation.Client)
+                yield this.notification.sendRegistrationSMS(userPayload.phone, userPayload.otp);
             const user = yield this.repository.findById(createdUser.id);
             if (createdUser.designation === "client")
                 yield RecyclePoint_1.RecyclePoint.create({ user: createdUser.id });

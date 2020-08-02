@@ -7,7 +7,7 @@ const multer = require("multer");
 import * as bcrypt from "bcrypt-nodejs";
 
 import Notification from "./NotificationsService";
-import { IUserM, User } from "../models/User";
+import { IUserM, User, Designation } from "../models/User";
 import { UserRepository as Repository } from "../abstract/UserRepository";
 import { UtilService } from "./UtilService";
 import File from "../utilities/file";
@@ -50,7 +50,6 @@ export class UserService {
         userPayload.otp = otp;
         userPayload.password = otp;
         userPayload.unverified = true;
-        await this.notification.sendRegistrationSMS(userPayload.phone, otp);
       } else {
         userPayload.password = "123456";
       }
@@ -60,6 +59,12 @@ export class UserService {
     // return console.log(userPayload);
 
     const createdUser = await this.repository.createNew(userPayload);
+    if (userPayload.designation === Designation.Client)
+      await this.notification.sendRegistrationSMS(
+        userPayload.phone,
+        userPayload.otp
+      );
+
     const user = await this.repository.findById(createdUser.id);
     if (createdUser.designation === "client")
       await RecyclePoint.create({ user: createdUser.id });
