@@ -16,7 +16,7 @@ import { UserRepository as Repository } from "../abstract/UserRepository";
 import { checkJwt } from "../middleware/auth";
 import { upload } from "../middleware/multer";
 import { IUserM, User, Designation } from "../models/User";
-import { Request as ItemRequest } from "../models/Request";
+import { Request as ItemRequest, Status } from "../models/Request";
 import { UserService } from "../service/UserService";
 import { UtilService } from "../service/UtilService";
 import NotificationsService from "../service/NotificationsService";
@@ -164,7 +164,7 @@ export class UserController extends AbstractController {
       const user: any = await this.repository.findById(req.params.userId);
       // let data: any = user;
       // console.log(user);
-      const meta = { activity: 0 };
+      const meta = { activity: 0, recycles: 0, redemptions: 0 };
       let data = Object.assign({}, user._doc);
 
       if (user.designation === Designation.Staff) {
@@ -177,6 +177,23 @@ export class UserController extends AbstractController {
         meta.activity = await ItemRequest.count({
           acceptedBy: user.id,
           isDeleted: false,
+          status: Status.Collected,
+        });
+      }
+
+      if (user.designation === Designation.Client) {
+        meta.recycles = await ItemRequest.count({
+          acceptedBy: user.id,
+          isDeleted: false,
+          type: "recycle",
+          status: { $ne: Status.Pending },
+        });
+
+        meta.redemptions = await ItemRequest.count({
+          acceptedBy: user.id,
+          isDeleted: false,
+          type: "redemption",
+          status: { $ne: Status.Pending },
         });
       }
       if (user.designation === Designation.Sorter) {

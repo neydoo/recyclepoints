@@ -142,7 +142,7 @@ let UserController = class UserController extends AbstractController_1.AbstractC
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 const user = yield this.repository.findById(req.params.userId);
-                const meta = { activity: 0 };
+                const meta = { activity: 0, recycles: 0, redemptions: 0 };
                 let data = Object.assign({}, user._doc);
                 if (user.designation === User_1.Designation.Staff) {
                     meta.activity = yield Verification_1.Verification.count({
@@ -154,6 +154,21 @@ let UserController = class UserController extends AbstractController_1.AbstractC
                     meta.activity = yield Request_1.Request.count({
                         acceptedBy: user.id,
                         isDeleted: false,
+                        status: Request_1.Status.Collected,
+                    });
+                }
+                if (user.designation === User_1.Designation.Client) {
+                    meta.recycles = yield Request_1.Request.count({
+                        acceptedBy: user.id,
+                        isDeleted: false,
+                        type: "recycle",
+                        status: { $ne: Request_1.Status.Pending },
+                    });
+                    meta.redemptions = yield Request_1.Request.count({
+                        acceptedBy: user.id,
+                        isDeleted: false,
+                        type: "redemption",
+                        status: { $ne: Request_1.Status.Pending },
                     });
                 }
                 if (user.designation === User_1.Designation.Sorter) {
