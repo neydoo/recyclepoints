@@ -39,8 +39,8 @@ class RequestService {
                 const requestedItems = yield RedemptionItem_1.RedemptionItem.find({ _id: itemIds });
                 const recyclePoints = requestedItems.reduce((curr, item) => {
                     var _a;
-                    const { qty } = (_a = payload.redemptionItems) === null || _a === void 0 ? void 0 : _a.find((i) => i.id === item.id);
-                    return (curr = +(item.recyclePoints * qty));
+                    const { quantity } = (_a = payload.redemptionItems) === null || _a === void 0 ? void 0 : _a.find((i) => i.id === item.id);
+                    return (curr = +(item.recyclePoints * quantity));
                 });
                 if (balance < recyclePoints)
                     throw new Error("you need more recycle points to complete this request");

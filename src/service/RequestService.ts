@@ -43,8 +43,8 @@ export class RequestService {
       const requestedItems: any[] = await RedemptionItem.find({ _id: itemIds });
 
       const recyclePoints = requestedItems.reduce((curr, item) => {
-        const { qty } = payload.redemptionItems?.find((i) => i.id === item.id);
-        return (curr = +(item.recyclePoints * qty));
+        const { quantity } = payload.redemptionItems?.find((i) => i.id === item.id);
+        return (curr = +(item.recyclePoints * quantity));
       });
       if (balance < recyclePoints)
         throw new Error(
