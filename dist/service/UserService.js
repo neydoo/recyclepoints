@@ -120,7 +120,20 @@ class UserService {
             try {
                 console.log(image);
                 cloudinary_1.v2.config(clodConfig);
-                const url = yield cloudinary_1.v2.uploader.upload(image);
+                const matches = image.match(/^data:.+\/(.+);base64,(.*)$/);
+                const buffer = new Buffer(image, 'base64');
+                const randomizedName = (function () {
+                    return `image_${Math.random()
+                        .toString(36)
+                        .substr(2, 8)}-${Math.random()
+                        .toString(8)
+                        .substr(2, 4)}-${Math.random()
+                        .toString(12)
+                        .substr(2, 4)}-${Math.random()
+                        .toString(13)
+                        .substr(2, 12)}`;
+                })();
+                const url = yield cloudinary_1.v2.uploader.upload(`${randomizedName}.png`);
                 console.log(url);
                 return url.public_id;
             }
