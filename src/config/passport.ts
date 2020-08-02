@@ -54,7 +54,7 @@ passport.use(
         //   return done(null, false, { message: "verify phonenumber." });
         // }
 
-        if (!user.comparePassword(password) && !user.compareOtp(password)) {
+        if (!user.comparePassword(password)) {
           return done(null, false, { message: "Incorrect password." });
         }
 
