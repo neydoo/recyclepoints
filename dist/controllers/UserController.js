@@ -104,7 +104,7 @@ let UserController = class UserController extends AbstractController_1.AbstractC
                     .json({ success: true, user, message: "user created successfully!" });
             }
             catch (error) {
-                res.status(401).json({ success: false, error, message: error.message });
+                res.status(400).json({ success: false, error, message: error.message });
             }
         });
     }
@@ -124,6 +124,23 @@ let UserController = class UserController extends AbstractController_1.AbstractC
             }
         });
     }
+    getUserPoints(req, res) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            try {
+                const points = yield RecyclePoint_1.RecyclePoint.findOne({ user: req.user.id });
+                res
+                    .status(200)
+                    .send({
+                    success: true,
+                    message: "balance fetched",
+                    data: points === null || points === void 0 ? void 0 : points.balance,
+                });
+            }
+            catch (error) {
+                res.status(400).json({ success: false, error, message: error.message });
+            }
+        });
+    }
     findUser(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
@@ -131,7 +148,7 @@ let UserController = class UserController extends AbstractController_1.AbstractC
                 res.status(200).json({ success: true, data: user });
             }
             catch (error) {
-                res.status(401).json({ success: false, error, message: error.message });
+                res.status(400).json({ success: false, error, message: error.message });
             }
         });
     }
@@ -144,7 +161,7 @@ let UserController = class UserController extends AbstractController_1.AbstractC
                     .send({ success: true, message: "user deleted successfully" });
             }
             catch (error) {
-                res.status(401).json({ success: false, error, message: error.message });
+                res.status(400).json({ success: false, error, message: error.message });
             }
         });
     }
@@ -157,7 +174,7 @@ let UserController = class UserController extends AbstractController_1.AbstractC
                     .send({ success: true, message: "password reset successful" });
             }
             catch (error) {
-                res.status(401).json({ success: false, error, message: error.message });
+                res.status(400).json({ success: false, error, message: error.message });
             }
         });
     }
@@ -176,24 +193,7 @@ let UserController = class UserController extends AbstractController_1.AbstractC
                 }
             }
             catch (error) {
-                res.status(401).json({ success: false, error, message: error.message });
-            }
-        });
-    }
-    getUserPoints(req, res) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            try {
-                const points = yield RecyclePoint_1.RecyclePoint.findOne({ user: req.user.id });
-                res
-                    .status(200)
-                    .send({
-                    success: true,
-                    message: "balance fetched",
-                    data: points === null || points === void 0 ? void 0 : points.balance,
-                });
-            }
-            catch (error) {
-                res.status(401).json({ success: false, error, message: error.message });
+                res.status(400).json({ success: false, error, message: error.message });
             }
         });
     }
@@ -218,6 +218,12 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", Promise)
 ], UserController.prototype, "updateUser", null);
 tslib_1.__decorate([
+    core_1.Get("points"),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object, Object]),
+    tslib_1.__metadata("design:returntype", Promise)
+], UserController.prototype, "getUserPoints", null);
+tslib_1.__decorate([
     core_1.Get(":userId"),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
@@ -241,12 +247,6 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
 ], UserController.prototype, "resendOtp", null);
-tslib_1.__decorate([
-    core_1.Get("points"),
-    tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [Object, Object]),
-    tslib_1.__metadata("design:returntype", Promise)
-], UserController.prototype, "getUserPoints", null);
 UserController = tslib_1.__decorate([
     core_1.Controller("api/users"),
     core_1.ClassMiddleware([auth_1.checkJwt]),

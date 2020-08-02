@@ -6,6 +6,7 @@ const passportLocal = require("passport-local");
 const passportJwt = require("passport-jwt");
 const User_1 = require("../models/User");
 const app_1 = require("../config/app");
+const UtilService_1 = require("../service/UtilService");
 const LocalStrategy = passportLocal.Strategy;
 const JwtStrategy = passportJwt.Strategy;
 const ExtractJwt = passportJwt.ExtractJwt;
@@ -18,7 +19,7 @@ passport.use(new LocalStrategy({ usernameField: "email", passwordField: "passwor
                     email: email.toLowerCase(),
                 },
                 {
-                    phone: email,
+                    phone: UtilService_1.UtilService.formatPhone(email),
                 },
             ],
         }).select("+password +otp");

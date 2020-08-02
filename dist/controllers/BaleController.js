@@ -2,10 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SortingController = void 0;
 const tslib_1 = require("tslib");
-const moment = require('moment');
+const moment = require("moment");
 const core_1 = require("@overnightjs/core");
 const auth_1 = require("../middleware/auth");
 const Bale_1 = require("../models/Bale");
+const User_1 = require("../models/User");
 const PdfService_1 = require("../service/PdfService");
 let SortingController = class SortingController {
     index(req, res) {
@@ -20,8 +21,26 @@ let SortingController = class SortingController {
                         $gte: startDate,
                     };
                 }
-                if (pay) {
-                    searchCriteria.pay = pay;
+                let users = [];
+                if (pay || name) {
+                    if (pay)
+                        searchCriteria.pay = pay;
+                    if (search) {
+                        searchCriteria.$or = [
+                            { firstName: { $regex: search, $options: "i" } },
+                            { lastName: { $regex: search, $options: "i" } },
+                            { address: { $regex: search, $options: "i" } },
+                            { phone: { $regex: search, $options: "i" } },
+                        ];
+                    }
+                    users = yield User_1.User.find(searchCriteria);
+                }
+                if (users === null || users === void 0 ? void 0 : users.length) {
+                    const userIds = users.map((u) => u.id);
+                    criteria.user = userIds;
+                }
+                else if (!users.length && name) {
+                    criteria.user = null;
                 }
                 if (type) {
                     criteria.type = type;
@@ -32,18 +51,7 @@ let SortingController = class SortingController {
                 if (arrivalTime) {
                     criteria.arrivalTime = arrivalTime;
                 }
-                if (search) {
-                    searchCriteria.or = [
-                        { firstName: /search/ },
-                        { lastName: /search/ },
-                        { address: /search/ },
-                        { phone: /search/ },
-                    ];
-                }
-                const data = yield Bale_1.Bale.find({ criteria }).populate({
-                    path: "user",
-                    match: searchCriteria,
-                });
+                const data = yield Bale_1.Bale.find({ criteria }).populate("user");
                 res
                     .status(200)
                     .send({ success: true, message: "data retrieved successfully!", data });
@@ -105,11 +113,27 @@ let SortingController = class SortingController {
     getData(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const { PET, UBC, ONP, BCC, GBS, PWS, name, arrivalTime, startDate, endDate, pay, type } = req.query;
+                const { PET, UBC, ONP, BCC, GBS, PWS, name, arrivalTime, startDate, endDate, pay, type, } = req.query;
                 const criteria = {};
-                const SubCriteria = {};
-                if (name) {
-                    SubCriteria.$or = [{ firstName: /search/ }, { lastName: /search/ }];
+                const subCriteria = {};
+                let users = [];
+                if (pay || name) {
+                    if (pay)
+                        subCriteria.pay = pay;
+                    if (name) {
+                        subCriteria.$or = [
+                            { firstName: { $regex: name, $options: "i" } },
+                            { lastName: { $regex: name, $options: "i" } },
+                        ];
+                    }
+                    users = yield User_1.User.find(subCriteria);
+                }
+                if (users === null || users === void 0 ? void 0 : users.length) {
+                    const userIds = users.map((u) => u.id);
+                    criteria.user = userIds;
+                }
+                else if (!users.length && name) {
+                    criteria.user = null;
                 }
                 if (arrivalTime)
                     criteria.arrivalTime = arrivalTime;
@@ -121,12 +145,7 @@ let SortingController = class SortingController {
                         $lte: endDate ? endDate : moment(),
                     };
                 }
-                if (pay)
-                    SubCriteria.pay = pay;
-                const sorting = yield Bale_1.Bale.find(criteria).populate({
-                    path: "user",
-                    match: SubCriteria,
-                });
+                const sorting = yield Bale_1.Bale.find(criteria).populate("user");
                 const sortingPromise = sorting.map((sort) => {
                     const item = {};
                     if (UBC) {
@@ -147,7 +166,7 @@ let SortingController = class SortingController {
                     if (PET) {
                         item.PET = sort.items.PET;
                     }
-                    return sort.items = item;
+                    return (sort.items = item);
                 });
                 yield Promise.all(sortingPromise);
                 res.status(200).json({ success: true, message: "saved", data: sorting });
@@ -165,8 +184,7 @@ let SortingController = class SortingController {
                 const file = yield pdf.generateStaffDataPdf(data);
                 res.status(200).json({ success: true, message: "saved", data: file });
             }
-            catch (error) {
-            }
+            catch (error) { }
         });
     }
 };
@@ -203,7 +221,7 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", Promise)
 ], SortingController.prototype, "getData", null);
 tslib_1.__decorate([
-    core_1.Post('data/pdf'),
+    core_1.Post("data/pdf"),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)

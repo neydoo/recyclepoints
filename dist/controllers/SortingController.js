@@ -36,16 +36,19 @@ let SortingController = class SortingController {
                 }
                 if (search) {
                     searchCriteria.$or = [
-                        { firstName: /search/ },
-                        { lastName: /search/ },
-                        { address: /search/ },
-                        { phone: /search/ },
+                        { firstName: { $regex: search, $options: "i" } },
+                        { lastName: { $regex: search, $options: "i" } },
+                        { address: { $regex: search, $options: "i" } },
+                        { phone: { $regex: search, $options: "i" } },
                     ];
                     users = yield User_1.User.find(searchCriteria);
                 }
                 if (users === null || users === void 0 ? void 0 : users.length) {
                     const userIds = users.map((u) => u.id);
-                    criteria.user = userIds;
+                    criteria.requestedBy = userIds;
+                }
+                else if (!users.length && search) {
+                    criteria.requestedBy = null;
                 }
                 const data = yield DailySorting_1.DailySorting.find(criteria).populate("user");
                 res

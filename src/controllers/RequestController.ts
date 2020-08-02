@@ -51,18 +51,27 @@ export class RequestController extends AbstractController {
       if (status) {
         criteria.status = status;
       }
-
+      let users: any = [];
       if (search) {
-        searchCriteria.or = [
-          { firstName: /search/ },
-          { address: /search/ },
-          { phone: /search/ },
+        searchCriteria.$or = [
+          { firstName: { $regex: search, $options: "i" } },
+          { lastName: { $regex: search, $options: "i" } },
+          { address: { $regex: search, $options: "i" } },
+          { phone: { $regex: search, $options: "i" } },
         ];
+        users = await User.find(searchCriteria);
       }
+
+      if (users?.length) {
+        const userIds = users.map((u: any) => u.id);
+        criteria.requestedBy = userIds;
+      } else if (!users.length && search) {
+        criteria.requestedBy = null;
+      }
+
       const request = await ItemRequest.find(criteria)
         .populate("requestedBy")
-        .populate({ path: "acceptedBy", match: searchCriteria })
-        .populate("redemptionItem");
+        .populate("acceptedBy");
 
       if (request.length) {
         const requestPromise = request.map(async (r: any) => {

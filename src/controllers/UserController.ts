@@ -123,7 +123,7 @@ export class UserController extends AbstractController {
         .status(200)
         .json({ success: true, user, message: "user created successfully!" });
     } catch (error) {
-      res.status(401).json({ success: false, error, message: error.message });
+      res.status(400).json({ success: false, error, message: error.message });
     }
   }
 
@@ -143,6 +143,22 @@ export class UserController extends AbstractController {
       res.status(400).json({ success: false, error, message: error.message });
     }
   }
+  @Get("points")
+  public async getUserPoints(req: any, res: Response) {
+    try {
+      const points = await RecyclePoint.findOne({ user: req.user.id });
+
+      res
+        .status(200)
+        .send({
+          success: true,
+          message: "balance fetched",
+          data: points?.balance,
+        });
+    } catch (error) {
+      res.status(400).json({ success: false, error, message: error.message });
+    }
+  }
 
   @Get(":userId")
   public async findUser(req: Request, res: Response): Promise<void> {
@@ -151,7 +167,7 @@ export class UserController extends AbstractController {
 
       res.status(200).json({ success: true, data: user });
     } catch (error) {
-      res.status(401).json({ success: false, error, message: error.message });
+      res.status(400).json({ success: false, error, message: error.message });
     }
   }
 
@@ -163,7 +179,7 @@ export class UserController extends AbstractController {
         .status(200)
         .send({ success: true, message: "user deleted successfully" });
     } catch (error) {
-      res.status(401).json({ success: false, error, message: error.message });
+      res.status(400).json({ success: false, error, message: error.message });
     }
   }
 
@@ -175,7 +191,7 @@ export class UserController extends AbstractController {
         .status(200)
         .send({ success: true, message: "password reset successful" });
     } catch (error) {
-      res.status(401).json({ success: false, error, message: error.message });
+      res.status(400).json({ success: false, error, message: error.message });
     }
   }
 
@@ -194,23 +210,8 @@ export class UserController extends AbstractController {
         res.status(200).send({ success: true, message: "code sent" });
       }
     } catch (error) {
-      res.status(401).json({ success: false, error, message: error.message });
+      res.status(400).json({ success: false, error, message: error.message });
     }
   }
 
-  @Get("points")
-  public async getUserPoints(req: any, res: Response) {
-    try {
-      const points = await RecyclePoint.findOne({ user: req.user.id });
-      res
-        .status(200)
-        .send({
-          success: true,
-          message: "balance fetched",
-          data: points?.balance,
-        });
-    } catch (error) {
-      res.status(401).json({ success: false, error, message: error.message });
-    }
-  }
 }

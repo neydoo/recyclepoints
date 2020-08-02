@@ -13,6 +13,7 @@ const NotificationsService_1 = require("../service/NotificationsService");
 const Request_1 = require("../models/Request");
 const PdfService_1 = require("../service/PdfService");
 const UserNotification_1 = require("src/models/UserNotification");
+const User_1 = require("src/models/User");
 let VerificationController = class VerificationController extends AbstractController_1.AbstractController {
     constructor() {
         super(new RequestRepository_1.RequestRepository());
@@ -42,18 +43,24 @@ let VerificationController = class VerificationController extends AbstractContro
                 if (arrivalTime) {
                     criteria.arrivalTime = arrivalTime;
                 }
+                let users = [];
                 if (search) {
-                    searchCriteria.or = [
-                        { firstName: /search/ },
-                        { lastName: /search/ },
-                        { address: /search/ },
-                        { phone: /search/ },
+                    searchCriteria.$or = [
+                        { firstName: { $regex: search, $options: "i" } },
+                        { lastName: { $regex: search, $options: "i" } },
+                        { address: { $regex: search, $options: "i" } },
+                        { phone: { $regex: search, $options: "i" } },
                     ];
+                    users = yield User_1.User.find(searchCriteria);
                 }
-                const data = yield Verification_1.Verification.find(criteria).populate({
-                    path: "user",
-                    match: searchCriteria,
-                });
+                if (users === null || users === void 0 ? void 0 : users.length) {
+                    const userIds = users.map((u) => u.id);
+                    criteria.requestedBy = userIds;
+                }
+                else if (!users.length && search) {
+                    criteria.requestedBy = null;
+                }
+                const data = yield Verification_1.Verification.find(criteria).populate("user");
                 res
                     .status(200)
                     .send({ success: true, message: "data retrieved successfully!", data });

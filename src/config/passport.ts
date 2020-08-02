@@ -3,6 +3,7 @@ import * as passportLocal from "passport-local";
 import * as passportJwt from "passport-jwt";
 import { User, Designation } from "../models/User";
 import { config } from "../config/app";
+import { UtilService } from '../service/UtilService';
 
 // tslint:disable-next-line: variable-name
 const LocalStrategy = passportLocal.Strategy;
@@ -14,6 +15,7 @@ passport.use(
     { usernameField: "email", passwordField: "password" },
     async (email, password, done) => {
       // console.log(email);
+
       try {
         let user;
         user = await User.findOne({
@@ -22,7 +24,7 @@ passport.use(
               email: email.toLowerCase(),
             },
             {
-              phone: email,
+              phone: UtilService.formatPhone(email),
             },
           ],
         }).select("+password +otp");

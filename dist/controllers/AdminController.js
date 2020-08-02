@@ -176,7 +176,7 @@ let AdminController = class AdminController extends AbstractController_1.Abstrac
                     const reviews = yield Review_1.Review.find({
                         buster: user.id,
                         isDeleted: false,
-                        createdAt: { ">=": startMonth, "<=": endMonth },
+                        createdAt: { $gte: startMonth, $lte: endMonth },
                     });
                     const totalRating = reviews.reduce((acc, review) => {
                         const { rating } = review;
@@ -203,7 +203,7 @@ let AdminController = class AdminController extends AbstractController_1.Abstrac
                 res.status(200).json({
                     success: true,
                     data,
-                    message: "request created successfully!",
+                    message: "data retrieved",
                 });
             }
             catch (error) {

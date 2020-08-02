@@ -41,17 +41,26 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                 if (status) {
                     criteria.status = status;
                 }
+                let users = [];
                 if (search) {
-                    searchCriteria.or = [
-                        { firstName: /search/ },
-                        { address: /search/ },
-                        { phone: /search/ },
+                    searchCriteria.$or = [
+                        { firstName: { $regex: search, $options: "i" } },
+                        { lastName: { $regex: search, $options: "i" } },
+                        { address: { $regex: search, $options: "i" } },
+                        { phone: { $regex: search, $options: "i" } },
                     ];
+                    users = yield User_1.User.find(searchCriteria);
+                }
+                if (users === null || users === void 0 ? void 0 : users.length) {
+                    const userIds = users.map((u) => u.id);
+                    criteria.requestedBy = userIds;
+                }
+                else if (!users.length && search) {
+                    criteria.requestedBy = null;
                 }
                 const request = yield Request_1.Request.find(criteria)
                     .populate("requestedBy")
-                    .populate({ path: "acceptedBy", match: searchCriteria })
-                    .populate("redemptionItem");
+                    .populate("acceptedBy");
                 if (request.length) {
                     const requestPromise = request.map((r) => tslib_1.__awaiter(this, void 0, void 0, function* () {
                         if ((r === null || r === void 0 ? void 0 : r.type) === "redemption") {
