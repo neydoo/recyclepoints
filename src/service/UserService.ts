@@ -185,7 +185,7 @@ export class UserService {
        const formattedImage = `data:image/png;base64,${image}`
       const url = await cloudinary.uploader.upload(formattedImage);
       console.log(url);
-      return url.public_id;
+      return url.secure_url;
     } catch (error) {
       console.log(error);
     }

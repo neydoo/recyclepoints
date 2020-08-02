@@ -123,7 +123,7 @@ class UserService {
                 const formattedImage = `data:image/png;base64,${image}`;
                 const url = yield cloudinary_1.v2.uploader.upload(formattedImage);
                 console.log(url);
-                return url.public_id;
+                return url.secure_url;
             }
             catch (error) {
                 console.log(error);
