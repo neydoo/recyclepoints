@@ -7,7 +7,7 @@ const multer = require("multer");
 import * as bcrypt from "bcrypt-nodejs";
 
 import Notification from "./NotificationsService";
-import { IUserM } from "../models/User";
+import { IUserM, User } from "../models/User";
 import { UserRepository as Repository } from "../abstract/UserRepository";
 import { UtilService } from "./UtilService";
 import File from "../utilities/file";
@@ -36,9 +36,13 @@ export class UserService {
 
   public async create(req: any): Promise<void> {
     const userPayload: IUserM = req.body;
-    const { firstName, lastName, phone, designation } = userPayload;
+    let { firstName, lastName, phone, designation } = userPayload;
     if (!firstName || !lastName || !phone || !designation)
       throw new Error("incomplete parameters");
+    phone = UtilService.formatPhone(phone);
+
+    const existingPhone = await User.findOne({ phone });
+    if (existingPhone) throw new Error("user with phonenumber already exists");
 
     if (!userPayload.password) {
       if (userPayload.designation === "client") {
@@ -103,7 +107,7 @@ export class UserService {
     }
 
     const existingUser = await this.repository.findById(req.params.userId);
-    if (existingUser.firstTimeLogin) userPayload.firstTimeLogin = false;
+    if (existingUser?.firstTimeLogin) userPayload.firstTimeLogin = false;
     const user = await this.repository.updateData(
       req.params.userId,
       userPayload
@@ -182,7 +186,7 @@ export class UserService {
       console.log(image);
       cloudinary.config(clodConfig);
 
-       const formattedImage = `data:image/png;base64,${image}`
+      const formattedImage = `data:image/png;base64,${image}`;
       const url = await cloudinary.uploader.upload(formattedImage);
       console.log(url);
       return url.secure_url;

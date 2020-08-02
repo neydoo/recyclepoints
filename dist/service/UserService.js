@@ -8,6 +8,7 @@ const cloudinaryStorage = require("multer-storage-cloudinary");
 const multer = require("multer");
 const bcrypt = require("bcrypt-nodejs");
 const NotificationsService_1 = require("./NotificationsService");
+const User_1 = require("../models/User");
 const UserRepository_1 = require("../abstract/UserRepository");
 const UtilService_1 = require("./UtilService");
 const file_1 = require("../utilities/file");
@@ -28,9 +29,13 @@ class UserService {
     create(req) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const userPayload = req.body;
-            const { firstName, lastName, phone, designation } = userPayload;
+            let { firstName, lastName, phone, designation } = userPayload;
             if (!firstName || !lastName || !phone || !designation)
                 throw new Error("incomplete parameters");
+            phone = UtilService_1.UtilService.formatPhone(phone);
+            const existingPhone = yield User_1.User.findOne({ phone });
+            if (existingPhone)
+                throw new Error("user with phonenumber already exists");
             if (!userPayload.password) {
                 if (userPayload.designation === "client") {
                     const otp = UtilService_1.UtilService.generate(5);
@@ -74,7 +79,7 @@ class UserService {
                 userPayload.password = bcrypt.hashSync(req.body.password);
             }
             const existingUser = yield this.repository.findById(req.params.userId);
-            if (existingUser.firstTimeLogin)
+            if (existingUser === null || existingUser === void 0 ? void 0 : existingUser.firstTimeLogin)
                 userPayload.firstTimeLogin = false;
             const user = yield this.repository.updateData(req.params.userId, userPayload);
             user.profileImage = req.body.profileImage

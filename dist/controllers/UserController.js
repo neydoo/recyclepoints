@@ -4,12 +4,14 @@ exports.UserController = void 0;
 const tslib_1 = require("tslib");
 const moment = require("moment");
 const bcrypt = require("bcrypt-nodejs");
+const _ = require("lodash");
 const core_1 = require("@overnightjs/core");
 const AbstractController_1 = require("./AbstractController");
 const UserRepository_1 = require("../abstract/UserRepository");
 const auth_1 = require("../middleware/auth");
 const multer_1 = require("../middleware/multer");
 const User_1 = require("../models/User");
+const Request_1 = require("../models/Request");
 const UserService_1 = require("../service/UserService");
 const UtilService_1 = require("../service/UtilService");
 const NotificationsService_1 = require("../service/NotificationsService");
@@ -140,7 +142,34 @@ let UserController = class UserController extends AbstractController_1.AbstractC
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 const user = yield this.repository.findById(req.params.userId);
-                res.status(200).json({ success: true, data: user });
+                const meta = { activity: 0 };
+                let data = Object.assign({}, user._doc);
+                if (user.designation === User_1.Designation.Staff) {
+                    meta.activity = yield Verification_1.Verification.count({
+                        user: user.id,
+                        isDeleted: false,
+                    });
+                }
+                if (user.designation === User_1.Designation.Buster) {
+                    meta.activity = yield Request_1.Request.count({
+                        acceptedBy: user.id,
+                        isDeleted: false,
+                    });
+                }
+                if (user.designation === User_1.Designation.Sorter) {
+                    meta.activity = yield DailySorting_1.DailySorting.count({
+                        user: user.id,
+                        isDeleted: false,
+                    });
+                }
+                if (user.designation === User_1.Designation.Operator) {
+                    meta.activity = yield Bale_1.Bale.count({
+                        user: user.id,
+                        isDeleted: false,
+                    });
+                }
+                data.meta = meta;
+                res.status(200).json({ success: true, data });
             }
             catch (error) {
                 res.status(400).json({ success: false, error, message: error.message });

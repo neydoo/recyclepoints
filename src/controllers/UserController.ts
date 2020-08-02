@@ -1,5 +1,6 @@
 const moment = require("moment");
 import * as bcrypt from "bcrypt-nodejs";
+const _ = require("lodash");
 import { NextFunction, Request, Response } from "express";
 import {
   Controller,
@@ -15,6 +16,7 @@ import { UserRepository as Repository } from "../abstract/UserRepository";
 import { checkJwt } from "../middleware/auth";
 import { upload } from "../middleware/multer";
 import { IUserM, User, Designation } from "../models/User";
+import { Request as ItemRequest } from "../models/Request";
 import { UserService } from "../service/UserService";
 import { UtilService } from "../service/UtilService";
 import NotificationsService from "../service/NotificationsService";
@@ -159,9 +161,39 @@ export class UserController extends AbstractController {
   @Get(":userId")
   public async findUser(req: Request, res: Response): Promise<void> {
     try {
-      const user: IUserM = await this.repository.findById(req.params.userId);
+      const user: any = await this.repository.findById(req.params.userId);
+      // let data: any = user;
+      // console.log(user);
+      const meta = { activity: 0 };
+      let data = Object.assign({}, user._doc);
 
-      res.status(200).json({ success: true, data: user });
+      if (user.designation === Designation.Staff) {
+        meta.activity = await Verification.count({
+          user: user.id,
+          isDeleted: false,
+        });
+      }
+      if (user.designation === Designation.Buster) {
+        meta.activity = await ItemRequest.count({
+          acceptedBy: user.id,
+          isDeleted: false,
+        });
+      }
+      if (user.designation === Designation.Sorter) {
+        meta.activity = await DailySorting.count({
+          user: user.id,
+          isDeleted: false,
+        });
+      }
+      if (user.designation === Designation.Operator) {
+        meta.activity = await Bale.count({
+          user: user.id,
+          isDeleted: false,
+        });
+      }
+      data.meta = meta;
+
+      res.status(200).json({ success: true, data });
     } catch (error) {
       res.status(400).json({ success: false, error, message: error.message });
     }
