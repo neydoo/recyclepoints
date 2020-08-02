@@ -29,6 +29,7 @@ passport.use(
           phone: `+${phone}`,
         },
       ];
+      console.log(criteria);
       try {
         let user;
         user = await User.findOne({

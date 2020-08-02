@@ -26,6 +26,7 @@ passport.use(new LocalStrategy({ usernameField: "email", passwordField: "passwor
             phone: `+${phone}`,
         },
     ];
+    console.log(criteria);
     try {
         let user;
         user = yield User_1.User.findOne({
