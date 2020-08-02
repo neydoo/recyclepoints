@@ -61,6 +61,7 @@ passport.use(
         user = await User.findById(user.id);
         return done(null, user);
       } catch (err) {
+        console.log(err)
         return done(err);
       }
     }

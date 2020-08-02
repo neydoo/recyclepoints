@@ -47,6 +47,7 @@ passport.use(new LocalStrategy({ usernameField: "email", passwordField: "passwor
         return done(null, user);
     }
     catch (err) {
+        console.log(err);
         return done(err);
     }
 })));
