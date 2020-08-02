@@ -17,7 +17,6 @@ exports.requestSchema = new mongoose_1.Schema({
     acceptedBy: { type: mongoose_1.Schema.Types.ObjectId, ref: "User" },
     type: { type: String, enum: ["recycle", "redemption"], required: true },
     items: { type: mongoose_1.Schema.Types.Mixed },
-    quantity: { type: Number },
     redemptionId: { type: String },
     deliveryType: { type: String, enum: ["home", "pickup"] },
     redemptionItems: { type: mongoose_1.Schema.Types.Array },
@@ -37,5 +36,6 @@ exports.requestSchema = new mongoose_1.Schema({
     isDeleted: { type: Boolean, default: false },
     points: { type: Number, default: 0 },
     weight: { type: Number, default: 0 },
+    meta: { type: mongoose_1.Schema.Types.Mixed },
 }, { timestamps: true });
 exports.Request = mongoose_1.model("Request", exports.requestSchema);

@@ -335,9 +335,23 @@ export class RequestController extends AbstractController {
   @Get("buster/accepted")
   public async fetchAcceptedRequests(req: any, res: Response): Promise<void> {
     try {
-      const request = await ItemRequest.find({
-        acceptedBy: req.user.id,
-      });
+      const { startDate, endDate, userId, search } = req.query;
+
+      const user =
+        req.user.designation !== Designation.Admin ? req.user.id : userId;
+      const criteria: any = {};
+      if (user) {
+        criteria.acceptedBy = user;
+      }
+
+      if (startDate) {
+        criteria.createdAt = {
+          $gte: startDate,
+          $lte: endDate ? endDate : moment(),
+        };
+      }
+
+      const request = await ItemRequest.find(criteria);
 
       res.status(200).json({ success: true, data: request });
     } catch (error) {

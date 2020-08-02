@@ -177,6 +177,7 @@ export class SortingController {
         startDate,
         endDate,
         pay,
+        userId,
       } = req.query;
 
       const criteria: any = {};
@@ -194,12 +195,15 @@ export class SortingController {
         users = await User.find(subCriteria);
       }
 
-      if (users?.length) {
+      if (users?.length && !userId) {
         const userIds = users.map((u: any) => u.id);
         criteria.user = userIds;
       } else if (!users.length && name) {
         criteria.user = null;
+      } else if(userId){
+        criteria.user = userId;
       }
+
 
       if (arrivalTime) criteria.arrivalTime = arrivalTime;
       if (startDate) {

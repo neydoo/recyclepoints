@@ -54,6 +54,7 @@ export class RequestService {
       payload.points = recyclePoints;
 
       payload.redemptionId = `RE${UtilService.generate(6)}`;
+      payload.meta = payload;
     }
 
     const user = (await User.findById(req.user.id)) as IUserM;

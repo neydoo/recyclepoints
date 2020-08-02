@@ -14,19 +14,25 @@ passport.use(
   new LocalStrategy(
     { usernameField: "email", passwordField: "password" },
     async (email, password, done) => {
-      email = UtilService.formatPhone(email);
-
+      const phone = UtilService.formatPhone(email);
+      const criteria = [
+        {
+          email: email.toLowerCase(),
+        },
+        {
+          phone,
+        },
+        {
+          phone: `0${phone.slice(3)}`,
+        },
+        {
+          phone: `+${phone}`,
+        },
+      ];
       try {
         let user;
         user = await User.findOne({
-          $or: [
-            {
-              email: email.toLowerCase(),
-            },
-            {
-              phone: email,
-            },
-          ],
+          $or: criteria,
         }).select("+password +otp");
 
         if (!user) {
@@ -51,18 +57,7 @@ passport.use(
           return done(null, false, { message: "Incorrect password." });
         }
 
-        user = await User.findOne({
-          $or: [
-            {
-              email: email.toLowerCase(),
-              isDeleted: false,
-            },
-            {
-              phone: email.toLowerCase(),
-              isDeleted: false,
-            },
-          ],
-        });
+        user = await User.findById(user.id);
         return done(null, user);
       } catch (err) {
         return done(err);

@@ -61,27 +61,31 @@ export class AuthController {
 
   @Post("login")
   public authenticateUser(req: Request, res: Response, next: NextFunction) {
-    passport.authenticate("local", { session: false }, (err, user, info) => {
-      // no async/await because passport works only with callback ..
-      if (err) {
-        return next({ err });
-      }
-      if (!user) {
-        const message = info.message ? info.message : "invalid credentials";
-        return res.status(400).json({ success: false, info, message });
-      } else {
-        req.logIn(user, { session: false }, (err) => {
-          if (err) {
-            return res.json(err.message);
-          }
-          const token = jwt.sign(
-            { designation: user.designation, email: user.email, id: user.id },
-            config.app.JWT_SECRET
-          );
-          res.status(200).json({ success: true, data: { user, token } });
-        });
-      }
-    })(req, res, next);
+    try {
+      passport.authenticate("local", { session: false }, (err, user, info) => {
+        // no async/await because passport works only with callback ..
+        if (err) {
+          return next({ err });
+        }
+        if (!user) {
+          const message = info.message ? info.message : "invalid credentials";
+          return res.status(400).json({ success: false, info, message });
+        } else {
+          req.logIn(user, { session: false }, (err) => {
+            if (err) {
+              return res.json(err.message);
+            }
+            const token = jwt.sign(
+              { designation: user.designation, email: user.email, id: user.id },
+              config.app.JWT_SECRET
+            );
+            res.status(200).json({ success: true, data: { user, token } });
+          });
+        }
+      })(req, res, next);
+    } catch (err) {
+      res.status(400).json({ success: false, err });
+    }
   }
 
   @Post("verify-token/:phone")

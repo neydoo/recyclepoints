@@ -19,11 +19,11 @@ export class UtilService {
 
   static formatPhone(phonenumber: any): string {
     phonenumber.toString();
+    if (phonenumber.startsWith("+")) phonenumber = phonenumber.slice(1);
+    if (phonenumber.startsWith("234")) phonenumber = phonenumber.slice(3);
+    if (phonenumber.startsWith("09")) phonenumber = phonenumber.slice(1);
     if (phonenumber.startsWith("07")) phonenumber = phonenumber.slice(1);
     if (phonenumber.startsWith("08")) phonenumber = phonenumber.slice(1);
-    if (phonenumber.startsWith("09")) phonenumber = phonenumber.slice(1);
-    if (phonenumber.startsWith("+")) phonenumber = phonenumber.slice(1);
-    if (phonenumber.startsWith("234")) return phonenumber;
     return phonenumber = `234${phonenumber}`
   }
 }

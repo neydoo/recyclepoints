@@ -135,7 +135,7 @@ let SortingController = class SortingController {
     getData(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const { PET, UBC, ONP, BCC, GBS, PWS, name, arrivalTime, startDate, endDate, pay, } = req.query;
+                const { PET, UBC, ONP, BCC, GBS, PWS, name, arrivalTime, startDate, endDate, pay, userId, } = req.query;
                 const criteria = {};
                 const subCriteria = {};
                 let users = [];
@@ -150,12 +150,15 @@ let SortingController = class SortingController {
                     }
                     users = yield User_1.User.find(subCriteria);
                 }
-                if (users === null || users === void 0 ? void 0 : users.length) {
+                if ((users === null || users === void 0 ? void 0 : users.length) && !userId) {
                     const userIds = users.map((u) => u.id);
                     criteria.user = userIds;
                 }
                 else if (!users.length && name) {
                     criteria.user = null;
+                }
+                else if (userId) {
+                    criteria.user = userId;
                 }
                 if (arrivalTime)
                     criteria.arrivalTime = arrivalTime;

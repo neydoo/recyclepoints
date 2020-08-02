@@ -13,7 +13,6 @@ export interface RequestM extends Document {
   requestedBy: string;
   acceptedBy?: string;
   type: string;
-  quantity: string;
   deliveryType: string;
   items?: RecycleItems;
   redemptionItems?: any[];
@@ -22,6 +21,7 @@ export interface RequestM extends Document {
   points?: number;
   weight?: number;
   createdAt?: Date;
+  meta: any;
 }
 
 export type RecycleItems = {
@@ -39,7 +39,6 @@ export const requestSchema: Schema = new Schema(
     acceptedBy: { type: Schema.Types.ObjectId, ref: "User" },
     type: { type: String, enum: ["recycle", "redemption"], required: true },
     items: { type: Schema.Types.Mixed },
-    quantity: { type: Number },
     redemptionId: { type: String },
     deliveryType: { type: String, enum: ["home", "pickup"] },
     redemptionItems: { type: Schema.Types.Array },
@@ -59,6 +58,7 @@ export const requestSchema: Schema = new Schema(
     isDeleted: { type: Boolean, default: false },
     points: { type: Number, default: 0 },
     weight: { type: Number, default: 0 },
+    meta: { type: Schema.Types.Mixed },
   },
   { timestamps: true }
 );

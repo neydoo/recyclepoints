@@ -46,6 +46,7 @@ class RequestService {
                     throw new Error("you need more recycle points to complete this request");
                 payload.points = recyclePoints;
                 payload.redemptionId = `RE${UtilService_1.UtilService.generate(6)}`;
+                payload.meta = payload;
             }
             const user = (yield User_1.User.findById(req.user.id));
             const request = yield this.repository.createNew(payload);

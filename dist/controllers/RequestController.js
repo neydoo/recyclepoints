@@ -279,9 +279,19 @@ let RequestController = class RequestController extends AbstractController_1.Abs
     fetchAcceptedRequests(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const request = yield Request_1.Request.find({
-                    acceptedBy: req.user.id,
-                });
+                const { startDate, endDate, userId, search } = req.query;
+                const user = req.user.designation !== User_1.Designation.Admin ? req.user.id : userId;
+                const criteria = {};
+                if (user) {
+                    criteria.acceptedBy = user;
+                }
+                if (startDate) {
+                    criteria.createdAt = {
+                        $gte: startDate,
+                        $lte: endDate ? endDate : moment(),
+                    };
+                }
+                const request = yield Request_1.Request.find(criteria);
                 res.status(200).json({ success: true, data: request });
             }
             catch (error) {

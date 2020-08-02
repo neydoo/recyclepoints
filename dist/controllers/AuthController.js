@@ -56,24 +56,29 @@ let AuthController = class AuthController {
         });
     }
     authenticateUser(req, res, next) {
-        passport.authenticate("local", { session: false }, (err, user, info) => {
-            if (err) {
-                return next({ err });
-            }
-            if (!user) {
-                const message = info.message ? info.message : "invalid credentials";
-                return res.status(400).json({ success: false, info, message });
-            }
-            else {
-                req.logIn(user, { session: false }, (err) => {
-                    if (err) {
-                        return res.json(err.message);
-                    }
-                    const token = jwt.sign({ designation: user.designation, email: user.email, id: user.id }, app_1.config.app.JWT_SECRET);
-                    res.status(200).json({ success: true, data: { user, token } });
-                });
-            }
-        })(req, res, next);
+        try {
+            passport.authenticate("local", { session: false }, (err, user, info) => {
+                if (err) {
+                    return next({ err });
+                }
+                if (!user) {
+                    const message = info.message ? info.message : "invalid credentials";
+                    return res.status(400).json({ success: false, info, message });
+                }
+                else {
+                    req.logIn(user, { session: false }, (err) => {
+                        if (err) {
+                            return res.json(err.message);
+                        }
+                        const token = jwt.sign({ designation: user.designation, email: user.email, id: user.id }, app_1.config.app.JWT_SECRET);
+                        res.status(200).json({ success: true, data: { user, token } });
+                    });
+                }
+            })(req, res, next);
+        }
+        catch (err) {
+            res.status(400).json({ success: false, err });
+        }
     }
     verifyOTP(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {

@@ -11,18 +11,25 @@ const LocalStrategy = passportLocal.Strategy;
 const JwtStrategy = passportJwt.Strategy;
 const ExtractJwt = passportJwt.ExtractJwt;
 passport.use(new LocalStrategy({ usernameField: "email", passwordField: "password" }, (email, password, done) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
-    email = UtilService_1.UtilService.formatPhone(email);
+    const phone = UtilService_1.UtilService.formatPhone(email);
+    const criteria = [
+        {
+            email: email.toLowerCase(),
+        },
+        {
+            phone,
+        },
+        {
+            phone: `0${phone.slice(3)}`,
+        },
+        {
+            phone: `+${phone}`,
+        },
+    ];
     try {
         let user;
         user = yield User_1.User.findOne({
-            $or: [
-                {
-                    email: email.toLowerCase(),
-                },
-                {
-                    phone: email,
-                },
-            ],
+            $or: criteria,
         }).select("+password +otp");
         if (!user) {
             return done(undefined, false, {
@@ -35,18 +42,7 @@ passport.use(new LocalStrategy({ usernameField: "email", passwordField: "passwor
         if (!user.comparePassword(password) && !user.compareOtp(password)) {
             return done(null, false, { message: "Incorrect password." });
         }
-        user = yield User_1.User.findOne({
-            $or: [
-                {
-                    email: email.toLowerCase(),
-                    isDeleted: false,
-                },
-                {
-                    phone: email.toLowerCase(),
-                    isDeleted: false,
-                },
-            ],
-        });
+        user = yield User_1.User.findById(user.id);
         return done(null, user);
     }
     catch (err) {
