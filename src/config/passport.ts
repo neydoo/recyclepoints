@@ -55,13 +55,15 @@ passport.use(
         // }
 
         if (!user.comparePassword(password)) {
+          if (user.unverified)
+            return done(null, false, { message: "Invalid otp." });
           return done(null, false, { message: "Incorrect password." });
         }
 
         user = await User.findById(user.id);
         return done(null, user);
       } catch (err) {
-        console.log(err)
+        console.log(err);
         return done(err);
       }
     }

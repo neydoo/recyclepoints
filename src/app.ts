@@ -20,7 +20,6 @@ class AppServer extends Server {
   }
 
   private config(): void {
-    this.app.use(Sentry.Handlers.requestHandler());
     this.app.use(bodyParser.json());
     this.app.use(bodyParser.urlencoded({ extended: true}));
     this.app.use(cors());
@@ -30,6 +29,7 @@ class AppServer extends Server {
     this.mongo();
     this.app.use(passport.initialize());
     this.app.use(passport.session());
+    this.app.use(Sentry.Handlers.requestHandler());
     this.setupControllers();
     require("./config/cron");
   }

@@ -41,6 +41,8 @@ passport.use(new LocalStrategy({ usernameField: "email", passwordField: "passwor
             return done(null, false, { message: "User has been deactivated." });
         }
         if (!user.comparePassword(password)) {
+            if (user.unverified)
+                return done(null, false, { message: "Invalid otp." });
             return done(null, false, { message: "Incorrect password." });
         }
         user = yield User_1.User.findById(user.id);
