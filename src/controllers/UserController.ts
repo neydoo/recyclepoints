@@ -274,7 +274,7 @@ export class UserController extends AbstractController {
         if (confirmPassword && confirmPassword !== newPassword)
           throw new Error("passwords do not match");
         console.log("here");
-        if (!user.comparePassword(oldPassword))
+        if (!user.comparePassword(oldPassword.toString()))
           throw new Error("invalid old password");
         console.log("here1");
 
