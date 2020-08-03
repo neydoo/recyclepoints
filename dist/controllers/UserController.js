@@ -238,6 +238,26 @@ let UserController = class UserController extends AbstractController_1.AbstractC
             }
         });
     }
+    updatePassword(req, res) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            try {
+                const { oldPassword, newPassword } = req.body;
+                if (!oldPassword || !newPassword)
+                    throw new Error("missing parameters");
+                const user = yield User_1.User.findOne({ _id: req.user.id });
+                if (user) {
+                    if (!user.comparePassword(oldPassword))
+                        throw new Error("invalid old password");
+                    user.password = bcrypt.hashSync(newPassword);
+                    yield user.save();
+                    res.status(200).send({ success: true, message: "password changed" });
+                }
+            }
+            catch (error) {
+                res.status(400).json({ success: false, error, message: error.message });
+            }
+        });
+    }
 };
 tslib_1.__decorate([
     core_1.Get(""),
@@ -288,6 +308,12 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
 ], UserController.prototype, "resendOtp", null);
+tslib_1.__decorate([
+    core_1.Post("update-password"),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object, Object]),
+    tslib_1.__metadata("design:returntype", Promise)
+], UserController.prototype, "updatePassword", null);
 UserController = tslib_1.__decorate([
     core_1.Controller("api/users"),
     core_1.ClassMiddleware([auth_1.checkJwt]),

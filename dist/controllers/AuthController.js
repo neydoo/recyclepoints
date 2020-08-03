@@ -71,6 +71,8 @@ let AuthController = class AuthController {
                             return res.json(err.message);
                         }
                         const token = jwt.sign({ designation: user.designation, email: user.email, id: user.id }, app_1.config.app.JWT_SECRET);
+                        user.unverified = false;
+                        user.save();
                         res.status(200).json({ success: true, data: { user, token } });
                     });
                 }

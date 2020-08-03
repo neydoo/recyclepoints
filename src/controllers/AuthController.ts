@@ -79,6 +79,8 @@ export class AuthController {
               { designation: user.designation, email: user.email, id: user.id },
               config.app.JWT_SECRET
             );
+            user.unverified = false;
+            user.save();
             res.status(200).json({ success: true, data: { user, token } });
           });
         }
