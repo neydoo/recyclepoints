@@ -242,17 +242,23 @@ let UserController = class UserController extends AbstractController_1.AbstractC
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 const { oldPassword, newPassword, confirmPassword } = req.body;
-                console.log(`${oldPassword}${newPassword}, ${confirmPassword}`);
+                console.log(`${oldPassword} ${newPassword}, ${confirmPassword}`);
                 if (!oldPassword || !newPassword)
                     throw new Error("missing parameters");
+                console.log("here-1");
                 const user = yield User_1.User.findOne({ _id: req.user.id });
+                console.log("here0");
                 if (user) {
                     if (confirmPassword && confirmPassword !== newPassword)
                         throw new Error("passwords do not match");
+                    console.log("here");
                     if (!user.comparePassword(oldPassword))
                         throw new Error("invalid old password");
+                    console.log("here1");
                     user.password = bcrypt.hashSync(newPassword);
+                    console.log("here2");
                     yield user.save();
+                    console.log("here3");
                     res.status(200).send({ success: true, message: "password changed" });
                 }
             }
