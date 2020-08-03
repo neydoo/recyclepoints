@@ -11,3 +11,4 @@ tslib_1.__exportStar(require("./NotificationController"), exports);
 tslib_1.__exportStar(require("./MobileController"), exports);
 tslib_1.__exportStar(require("./AdminController"), exports);
 tslib_1.__exportStar(require("./UserNotificationController"), exports);
+tslib_1.__exportStar(require("./VerificationController"), exports);

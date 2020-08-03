@@ -12,8 +12,8 @@ const RequestService_1 = require("../service/RequestService");
 const NotificationsService_1 = require("../service/NotificationsService");
 const Request_1 = require("../models/Request");
 const PdfService_1 = require("../service/PdfService");
-const UserNotification_1 = require("src/models/UserNotification");
-const User_1 = require("src/models/User");
+const UserNotification_1 = require("../models/UserNotification");
+const User_1 = require("../models/User");
 let VerificationController = class VerificationController extends AbstractController_1.AbstractController {
     constructor() {
         super(new RequestRepository_1.RequestRepository());

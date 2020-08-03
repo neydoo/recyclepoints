@@ -8,3 +8,4 @@ export * from "./NotificationController";
 export * from "./MobileController";
 export * from "./AdminController";
 export * from "./UserNotificationController";
+export * from "./VerificationController";
