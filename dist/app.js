@@ -21,8 +21,8 @@ class AppServer extends core_1.Server {
         this.config();
     }
     config() {
-        this.app.use(bodyParser.json());
-        this.app.use(bodyParser.urlencoded({ extended: true }));
+        this.app.use(bodyParser.json({ limit: "25mb" }));
+        this.app.use(bodyParser.urlencoded({ extended: true, limit: "25mb" }));
         this.app.use(cors());
         this.app.use(morgan("dev"));
         this.app.use("/uploads", express.static(path.join(__dirname, "uploads")));
