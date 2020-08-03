@@ -242,6 +242,7 @@ let UserController = class UserController extends AbstractController_1.AbstractC
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 const { oldPassword, newPassword, confirmPassword } = req.body;
+                console.log(`${oldPassword}${newPassword}, ${confirmPassword}`);
                 if (!oldPassword || !newPassword)
                     throw new Error("missing parameters");
                 const user = yield User_1.User.findOne({ _id: req.user.id });

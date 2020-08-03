@@ -265,6 +265,7 @@ export class UserController extends AbstractController {
   public async updatePassword(req: any, res: Response) {
     try {
       const { oldPassword, newPassword, confirmPassword } = req.body;
+      console.log(`${oldPassword}${newPassword}, ${confirmPassword}`);
       if (!oldPassword || !newPassword) throw new Error("missing parameters");
       const user = await User.findOne({ _id: req.user.id });
       if (user) {
