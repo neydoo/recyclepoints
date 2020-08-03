@@ -119,7 +119,7 @@ export class UserService {
     const { oldPassword, newPassword, confirmPassword } = req.body;
     let user = await User.findOne({ _id: req.user.id }).select("+password");
 
-    if (!oldPassword || !newPassword) throw new Error("missing parameters");
+    // if (!oldPassword || !newPassword) throw new Error("missing parameters");
     if (user) {
       if (confirmPassword && confirmPassword !== newPassword)
         throw new Error("passwords do not match");
