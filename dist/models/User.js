@@ -20,19 +20,6 @@ exports.userSchema = new mongoose_1.Schema({
     lastName: { type: String },
     address: { type: String },
     otp: { type: String, select: false },
-    email: {
-        type: String,
-        lowercase: true,
-        validate: [
-            /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-            "Please fill a valid email address",
-        ],
-        match: [
-            /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-            "Please fill a valid email address",
-        ],
-        index: { unique: true },
-    },
     phone: { type: String, unique: true },
     password: { type: String, select: false },
     notificationTokens: { type: mongoose_1.Schema.Types.Array, select: false },
