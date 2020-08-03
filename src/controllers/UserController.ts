@@ -264,10 +264,12 @@ export class UserController extends AbstractController {
   @Post("update-password")
   public async updatePassword(req: any, res: Response) {
     try {
-      const { oldPassword, newPassword } = req.body;
+      const { oldPassword, newPassword, confirmPassword } = req.body;
       if (!oldPassword || !newPassword) throw new Error("missing parameters");
       const user = await User.findOne({ _id: req.user.id });
       if (user) {
+        if (confirmPassword && confirmPassword !== newPassword)
+          throw new Error("passwords do not match");
         if (!user.comparePassword(oldPassword))
           throw new Error("invalid old password");
 
