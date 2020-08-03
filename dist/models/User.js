@@ -68,7 +68,7 @@ exports.userSchema = new mongoose_1.Schema({
     firstTimeLogin: { type: Boolean, default: true },
 }, { timestamps: true });
 exports.userSchema.methods.comparePassword = function (candidatePassword) {
-    return bcrypt.compareSync(candidatePassword, this.password);
+    return bcrypt.compareSync(candidatePassword.toString(), this.password);
 };
 exports.userSchema.methods.compareOtp = function (candidatePassword) {
     return this.otp ? bcrypt.compareSync(candidatePassword, this.otp) : false;
