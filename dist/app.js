@@ -20,17 +20,17 @@ class AppServer extends core_1.Server {
         this.config();
     }
     config() {
-        this.app.use(bodyParser.json());
-        this.app.use(bodyParser.urlencoded({ extended: true }));
+        this.app.use(bodyParser.json({ limit: "25mb" }));
+        this.app.use(bodyParser.urlencoded({ extended: true, limit: "25mb" }));
         this.app.use(cors());
         this.app.use(morgan("dev"));
-        this.app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+        this.app.use("/uploads", express.static(path.join(__dirname, "uploads")));
         require("./config/passport");
         this.mongo();
         this.app.use(passport.initialize());
         this.app.use(passport.session());
         this.setupControllers();
-        require('./config/cron');
+        require("./config/cron");
     }
     mongo() {
         const connection = mongoose.connection;
@@ -46,8 +46,10 @@ class AppServer extends core_1.Server {
             setTimeout(() => {
                 mongoose.connect(app_1.config.db.url, {
                     useNewUrlParser: true,
-                    autoReconnect: true, keepAlive: true,
-                    socketTimeoutMS: 3000, connectTimeoutMS: 3000,
+                    autoReconnect: true,
+                    keepAlive: true,
+                    socketTimeoutMS: 3000,
+                    connectTimeoutMS: 3000,
                 });
             }, 3000);
         });
@@ -60,7 +62,8 @@ class AppServer extends core_1.Server {
         const run = () => tslib_1.__awaiter(this, void 0, void 0, function* () {
             yield mongoose.connect(app_1.config.db.url, {
                 useNewUrlParser: true,
-                autoReconnect: true, keepAlive: true,
+                autoReconnect: true,
+                keepAlive: true,
             });
         });
         run().catch((error) => logger_1.Logger.Imp(error));
