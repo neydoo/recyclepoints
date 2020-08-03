@@ -9,7 +9,7 @@ import * as mongoose from "mongoose";
 import * as passport from "passport";
 import { config } from "./config/app";
 import * as path from "path";
-import * as Sentry from '@sentry/node';
+import * as Sentry from "@sentry/node";
 class AppServer extends Server {
   private readonly SERVER_STARTED = "Example server started on port: ";
   public a = 10;
@@ -21,7 +21,7 @@ class AppServer extends Server {
 
   private config(): void {
     this.app.use(bodyParser.json());
-    this.app.use(bodyParser.urlencoded({ extended: true}));
+    this.app.use(bodyParser.urlencoded({ extended: true }));
     this.app.use(cors());
     this.app.use(morgan("dev"));
     this.app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -30,6 +30,17 @@ class AppServer extends Server {
     this.app.use(passport.initialize());
     this.app.use(passport.session());
     this.app.use(Sentry.Handlers.requestHandler());
+    this.app.use(
+      Sentry.Handlers.errorHandler({
+        shouldHandleError(error: any) {
+          // Capture all 404 and 500 errors
+          if (error.status > 404) {
+            return true;
+          }
+          return false;
+        },
+      })
+    );
     this.setupControllers();
     require("./config/cron");
   }

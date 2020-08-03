@@ -31,6 +31,14 @@ class AppServer extends core_1.Server {
         this.app.use(passport.initialize());
         this.app.use(passport.session());
         this.app.use(Sentry.Handlers.requestHandler());
+        this.app.use(Sentry.Handlers.errorHandler({
+            shouldHandleError(error) {
+                if (error.status > 404) {
+                    return true;
+                }
+                return false;
+            },
+        }));
         this.setupControllers();
         require("./config/cron");
     }
