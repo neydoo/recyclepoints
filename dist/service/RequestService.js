@@ -23,6 +23,8 @@ class RequestService {
         var _a, _b;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const payload = req.body;
+            if (!req.user.id)
+                throw new Error("invalid user");
             payload.requestedBy = req.user.id;
             console.log("start create request");
             if (!payload.type) {

@@ -85,7 +85,7 @@ class UserService {
                     throw new Error("user with phonenumber already exists");
             }
             const { oldPassword, newPassword, confirmPassword } = req.body;
-            let user = yield User_1.User.findOne({ _id: req.user.id });
+            let user = yield User_1.User.findOne({ _id: req.user.id }).select("+password");
             if (!oldPassword || !newPassword)
                 throw new Error("missing parameters");
             if (user) {

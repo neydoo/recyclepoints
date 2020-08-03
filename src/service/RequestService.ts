@@ -23,6 +23,7 @@ export class RequestService {
 
   public async create(req: any): Promise<void> {
     const payload: RequestM = req.body;
+    if (!req.user.id) throw new Error("invalid user");
     payload.requestedBy = req.user.id;
     console.log("start create request");
     if (!payload.type) {

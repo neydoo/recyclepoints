@@ -117,7 +117,7 @@ export class UserService {
     }
 
     const { oldPassword, newPassword, confirmPassword } = req.body;
-    let user = await User.findOne({ _id: req.user.id });
+    let user = await User.findOne({ _id: req.user.id }).select("+password");
 
     if (!oldPassword || !newPassword) throw new Error("missing parameters");
     if (user) {
