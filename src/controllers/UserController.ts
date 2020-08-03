@@ -268,7 +268,7 @@ export class UserController extends AbstractController {
       console.log(`${oldPassword} ${newPassword}, ${confirmPassword}`);
       if (!oldPassword || !newPassword) throw new Error("missing parameters");
       console.log("here-1");
-      const user = await User.findOne({ _id: req.user.id });
+      const user = await User.findOne({ _id: req.user.id }).select("+password");
       console.log("here0");
       if (user) {
         if (confirmPassword && confirmPassword !== newPassword)
