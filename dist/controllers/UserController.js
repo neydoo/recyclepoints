@@ -126,11 +126,13 @@ let UserController = class UserController extends AbstractController_1.AbstractC
     getUserPoints(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const points = yield RecyclePoint_1.RecyclePoint.findOne({ user: req.user.id });
+                let points = 0;
+                const recycle = yield RecyclePoint_1.RecyclePoint.findOne({ user: req.user.id });
+                points = (recycle === null || recycle === void 0 ? void 0 : recycle.balance) || 0;
                 res.status(200).send({
                     success: true,
                     message: "balance fetched",
-                    data: points === null || points === void 0 ? void 0 : points.balance,
+                    data: points,
                 });
             }
             catch (error) {

@@ -146,12 +146,15 @@ export class UserController extends AbstractController {
   @Get("points")
   public async getUserPoints(req: any, res: Response) {
     try {
-      const points = await RecyclePoint.findOne({ user: req.user.id });
+
+      let points = 0;
+      const recycle = await RecyclePoint.findOne({ user: req.user.id });
+      points = recycle?.balance || 0;
 
       res.status(200).send({
         success: true,
         message: "balance fetched",
-        data: points?.balance,
+        data: points,
       });
     } catch (error) {
       res.status(400).json({ success: false, error, message: error.message });

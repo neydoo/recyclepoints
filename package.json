@@ -32,6 +32,7 @@
     "@overnightjs/core": "^1.6.12",
     "@overnightjs/logger": "^1.1.10",
     "@sendgrid/mail": "^7.2.2",
+    "@sentry/node": "5.20.1",
     "axios": "^0.19.2",
     "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.19.0",

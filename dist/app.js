@@ -12,6 +12,7 @@ const mongoose = require("mongoose");
 const passport = require("passport");
 const app_1 = require("./config/app");
 const path = require("path");
+const Sentry = require("@sentry/node");
 class AppServer extends core_1.Server {
     constructor() {
         super(true);
@@ -20,6 +21,7 @@ class AppServer extends core_1.Server {
         this.config();
     }
     config() {
+        this.app.use(Sentry.Handlers.requestHandler());
         this.app.use(bodyParser.json({ limit: "25mb" }));
         this.app.use(bodyParser.urlencoded({ extended: true, limit: "25mb" }));
         this.app.use(cors());

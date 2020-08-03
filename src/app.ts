@@ -9,6 +9,7 @@ import * as mongoose from "mongoose";
 import * as passport from "passport";
 import { config } from "./config/app";
 import * as path from "path";
+import * as Sentry from '@sentry/node';
 class AppServer extends Server {
   private readonly SERVER_STARTED = "Example server started on port: ";
   public a = 10;
@@ -19,6 +20,7 @@ class AppServer extends Server {
   }
 
   private config(): void {
+    this.app.use(Sentry.Handlers.requestHandler());
     this.app.use(bodyParser.json({ limit: "25mb" }));
     this.app.use(bodyParser.urlencoded({ extended: true, limit: "25mb" }));
     this.app.use(cors());
