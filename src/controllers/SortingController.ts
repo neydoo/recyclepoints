@@ -214,29 +214,29 @@ export class SortingController {
       }
 
       const sorting = await DailySorting.find(criteria).populate("user");
-      const sortingPromise = sorting.map((sort) => {
-        const item: any = {};
-        if (UBC) {
-          item.UBC = sort.items.UBC;
-        }
-        if (PWS) {
-          item.PWS = sort.items.PWS;
-        }
-        if (ONP) {
-          item.ONP = sort.items.ONP;
-        }
-        if (BCC) {
-          item.BCC = sort.items.BCC;
-        }
-        if (GBS) {
-          item.GBS = sort.items.GBS;
-        }
-        if (PET) {
-          item.PET = sort.items.PET;
-        }
-        return (sort.items = item);
-      });
-      await Promise.all(sortingPromise);
+      // const sortingPromise = sorting.map((sort) => {
+      //   const item: any = {};
+      //   if (UBC) {
+      //     item.UBC = sort.items.UBC;
+      //   }
+      //   if (PWS) {
+      //     item.PWS = sort.items.PWS;
+      //   }
+      //   if (ONP) {
+      //     item.ONP = sort.items.ONP;
+      //   }
+      //   if (BCC) {
+      //     item.BCC = sort.items.BCC;
+      //   }
+      //   if (GBS) {
+      //     item.GBS = sort.items.GBS;
+      //   }
+      //   if (PET) {
+      //     item.PET = sort.items.PET;
+      //   }
+      //   return (sort.items = item);
+      // });
+      // await Promise.all(sortingPromise);
       res.status(200).json({ success: true, message: "saved", data: sorting });
     } catch (error) {
       res.status(400).json({ success: false, error, message: error.message });

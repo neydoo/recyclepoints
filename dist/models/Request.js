@@ -13,7 +13,7 @@ var Status;
     Status["Cancelled"] = "cancelled";
 })(Status = exports.Status || (exports.Status = {}));
 exports.requestSchema = new mongoose_1.Schema({
-    requestedBy: { type: mongoose_1.Schema.Types.ObjectId, ref: "User" },
+    requestedBy: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
     acceptedBy: { type: mongoose_1.Schema.Types.ObjectId, ref: "User" },
     type: { type: String, enum: ["recycle", "redemption"], required: true },
     items: { type: mongoose_1.Schema.Types.Mixed },

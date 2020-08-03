@@ -54,7 +54,7 @@ exports.userSchema = new mongoose_1.Schema({
             "admin",
             "dev",
             "sorter",
-            "baler",
+            "operatorp",
             "verification-staff",
             "client",
         ],

@@ -169,29 +169,6 @@ let SortingController = class SortingController {
                     };
                 }
                 const sorting = yield DailySorting_1.DailySorting.find(criteria).populate("user");
-                const sortingPromise = sorting.map((sort) => {
-                    const item = {};
-                    if (UBC) {
-                        item.UBC = sort.items.UBC;
-                    }
-                    if (PWS) {
-                        item.PWS = sort.items.PWS;
-                    }
-                    if (ONP) {
-                        item.ONP = sort.items.ONP;
-                    }
-                    if (BCC) {
-                        item.BCC = sort.items.BCC;
-                    }
-                    if (GBS) {
-                        item.GBS = sort.items.GBS;
-                    }
-                    if (PET) {
-                        item.PET = sort.items.PET;
-                    }
-                    return (sort.items = item);
-                });
-                yield Promise.all(sortingPromise);
                 res.status(200).json({ success: true, message: "saved", data: sorting });
             }
             catch (error) {

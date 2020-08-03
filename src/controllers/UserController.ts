@@ -278,6 +278,7 @@ export class UserController extends AbstractController {
         res.status(200).send({ success: true, message: "password changed" });
       }
     } catch (error) {
+      console.log(error);
       res.status(400).json({ success: false, error, message: error.message });
     }
   }

@@ -35,7 +35,7 @@ export type RecycleItems = {
 
 export const requestSchema: Schema = new Schema(
   {
-    requestedBy: { type: Schema.Types.ObjectId, ref: "User" },
+    requestedBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
     acceptedBy: { type: Schema.Types.ObjectId, ref: "User" },
     type: { type: String, enum: ["recycle", "redemption"], required: true },
     items: { type: Schema.Types.Mixed },

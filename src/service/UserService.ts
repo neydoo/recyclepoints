@@ -104,25 +104,42 @@ export class UserService {
     return user;
   }
 
-  public async update(req: any): Promise<void> {
+  public async update(req: any): Promise<any> {
     const userPayload: IUserM = req.body;
 
     if (userPayload.password) {
       userPayload.password = bcrypt.hashSync(req.body.password);
     }
+    if (userPayload.phone) {
+      const existingPhone = await User.findOne({ phone: userPayload.phone });
+      if (existingPhone)
+        throw new Error("user with phonenumber already exists");
+    }
 
-    const existingUser = await this.repository.findById(req.params.userId);
-    if (existingUser?.firstTimeLogin) userPayload.firstTimeLogin = false;
-    const user = await this.repository.updateData(
-      req.params.userId,
-      userPayload
-    );
+    const { oldPassword, newPassword, confirmPassword } = req.body;
+    let user = await User.findOne({ _id: req.user.id });
 
-    user.profileImage = req.body.profileImage
-      ? await this.cloudinaryUploader(req.body.profileImage)
-      : user.profileImage;
-    user.save();
+    if (!oldPassword || !newPassword) throw new Error("missing parameters");
+    if (user) {
+      if (confirmPassword && confirmPassword !== newPassword)
+        throw new Error("passwords do not match");
+      if (!user.comparePassword(oldPassword))
+        throw new Error("invalid old password");
 
+      user.password = bcrypt.hashSync(newPassword);
+      await user.save();
+
+      const existingUser = await this.repository.findById(req.params.userId);
+      if (existingUser?.firstTimeLogin) userPayload.firstTimeLogin = false;
+      user = await this.repository.updateData(req.params.userId, userPayload);
+
+      user
+        ? (user.profileImage = req.body.profileImage
+            ? await this.cloudinaryUploader(req.body.profileImage)
+            : user?.profileImage)
+        : null;
+      user?.save();
+    }
     // this.core.Email(
     //   user,
     //   "Profile Updated",
@@ -130,19 +147,6 @@ export class UserService {
     //     `<p style="color: #000">Hello ${user.firstName} ${user.lastName}, \n\r Your profile has been updated successfully. </p>`
     //   )
     // );
-
-    this.core.activityLog(req, user.id, "Update Profile");
-
-    this.notification.triggerNotification(
-      "notifications",
-      "users",
-      {
-        user,
-        message: { message: user.lastName + " Just created a new account." },
-      },
-      req,
-      user.id
-    );
 
     return user;
   }

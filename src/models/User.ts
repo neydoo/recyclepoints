@@ -78,7 +78,7 @@ export const userSchema: Schema = new Schema(
         "admin",
         "dev",
         "sorter",
-        "baler",
+        "operatorp",
         "verification-staff",
         "client",
       ],

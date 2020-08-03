@@ -256,6 +256,7 @@ let UserController = class UserController extends AbstractController_1.AbstractC
                 }
             }
             catch (error) {
+                console.log(error);
                 res.status(400).json({ success: false, error, message: error.message });
             }
         });

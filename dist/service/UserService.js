@@ -79,19 +79,33 @@ class UserService {
             if (userPayload.password) {
                 userPayload.password = bcrypt.hashSync(req.body.password);
             }
-            const existingUser = yield this.repository.findById(req.params.userId);
-            if (existingUser === null || existingUser === void 0 ? void 0 : existingUser.firstTimeLogin)
-                userPayload.firstTimeLogin = false;
-            const user = yield this.repository.updateData(req.params.userId, userPayload);
-            user.profileImage = req.body.profileImage
-                ? yield this.cloudinaryUploader(req.body.profileImage)
-                : user.profileImage;
-            user.save();
-            this.core.activityLog(req, user.id, "Update Profile");
-            this.notification.triggerNotification("notifications", "users", {
-                user,
-                message: { message: user.lastName + " Just created a new account." },
-            }, req, user.id);
+            if (userPayload.phone) {
+                const existingPhone = yield User_1.User.findOne({ phone: userPayload.phone });
+                if (existingPhone)
+                    throw new Error("user with phonenumber already exists");
+            }
+            const { oldPassword, newPassword, confirmPassword } = req.body;
+            let user = yield User_1.User.findOne({ _id: req.user.id });
+            if (!oldPassword || !newPassword)
+                throw new Error("missing parameters");
+            if (user) {
+                if (confirmPassword && confirmPassword !== newPassword)
+                    throw new Error("passwords do not match");
+                if (!user.comparePassword(oldPassword))
+                    throw new Error("invalid old password");
+                user.password = bcrypt.hashSync(newPassword);
+                yield user.save();
+                const existingUser = yield this.repository.findById(req.params.userId);
+                if (existingUser === null || existingUser === void 0 ? void 0 : existingUser.firstTimeLogin)
+                    userPayload.firstTimeLogin = false;
+                user = yield this.repository.updateData(req.params.userId, userPayload);
+                user
+                    ? (user.profileImage = req.body.profileImage
+                        ? yield this.cloudinaryUploader(req.body.profileImage)
+                        : user === null || user === void 0 ? void 0 : user.profileImage)
+                    : null;
+                user === null || user === void 0 ? void 0 : user.save();
+            }
             return user;
         });
     }
