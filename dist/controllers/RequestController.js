@@ -240,9 +240,10 @@ let RequestController = class RequestController extends AbstractController_1.Abs
     getUserRecycleRequests(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const { startDate, endDate, status, type } = req.query;
+                const { startDate, endDate, status, type, userId } = req.query;
+                const user = userId ? userId : req.user.id;
                 const criteria = {
-                    requestedBy: req.user.id,
+                    requestedBy: user,
                     isDeleted: false,
                 };
                 if (type) {

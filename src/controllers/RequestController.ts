@@ -269,9 +269,10 @@ export class RequestController extends AbstractController {
   @Get("list/user")
   public async getUserRecycleRequests(req: any, res: Response): Promise<void> {
     try {
-      const { startDate, endDate, status, type } = req.query;
+      const { startDate, endDate, status, type, userId } = req.query;
+      const user = userId ? userId : req.user.id;
       const criteria: any = {
-        requestedBy: req.user.id,
+        requestedBy: user,
         isDeleted: false,
       };
       if (type) {
