@@ -61,8 +61,7 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                 const request = yield Request_1.Request.find(criteria)
                     .populate("requestedBy")
                     .populate("acceptedBy")
-                    .populate("approvedBy")
-                    .populate("declinedBy");
+                    .populate("resolvedBy");
                 const data = [];
                 if (request.length) {
                     const requestPromise = request.map((r) => tslib_1.__awaiter(this, void 0, void 0, function* () {
@@ -221,7 +220,7 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                     status: Request_1.Status.Pending,
                 }).populate("requestedBy");
                 request.status = Request_1.Status.Declined;
-                request.declinedBy = req.user.id;
+                request.resolvedBy = req.user.id;
                 const details = "redemption declined";
                 yield this.request.addPoints(request.points, request.id, request.requestedBy, details);
                 request.save();
@@ -245,7 +244,7 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                     status: Request_1.Status.Pending,
                 });
                 request.status = Request_1.Status.Approved;
-                request.approvedBy = req.user.id;
+                request.resolvedBy = req.user.id;
                 request.save();
                 yield UserNotification_1.UserNotification.create({
                     title: "Request approved",
@@ -293,6 +292,87 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                     }
                 })));
                 res.status(200).json({ success: true, data });
+            }
+            catch (error) {
+                res.status(400).json({ success: false, error, message: error.message });
+            }
+        });
+    }
+    getnonPendingRequests(req, res) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            try {
+                const { startDate, endDate, status, type, search } = req.query;
+                const criteria = {
+                    $and: [{ status: "pending" }, { status: "cancelled" }],
+                    isDeleted: false,
+                };
+                const searchCriteria = {
+                    isDeleted: false,
+                };
+                if (type) {
+                    criteria.type = type;
+                }
+                if (startDate) {
+                    criteria.createdAt = {
+                        $gte: startDate,
+                        $lte: endDate ? endDate : moment(),
+                    };
+                }
+                if (status) {
+                    criteria.status = status;
+                }
+                let users = [];
+                if (search) {
+                    searchCriteria.$or = [
+                        { firstName: { $regex: search, $options: "i" } },
+                        { lastName: { $regex: search, $options: "i" } },
+                        { address: { $regex: search, $options: "i" } },
+                        { phone: { $regex: search, $options: "i" } },
+                    ];
+                    users = yield User_1.User.find(searchCriteria);
+                }
+                if (users === null || users === void 0 ? void 0 : users.length) {
+                    const userIds = users.map((u) => u.id);
+                    criteria.requestedBy = userIds;
+                }
+                else if (!users.length && search) {
+                    criteria.requestedBy = null;
+                }
+                const request = yield Request_1.Request.find(criteria)
+                    .populate("requestedBy")
+                    .populate("acceptedBy")
+                    .populate("resolvedBy");
+                const data = [];
+                if (request.length) {
+                    const requestPromise = request.map((r) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+                        let rData = Object.assign({}, r._doc);
+                        if ((r === null || r === void 0 ? void 0 : r.type) === "redemption") {
+                            const transaction = yield RecyclePointRecord_1.RecyclePointRecord.findOne({
+                                transactionId: r.id,
+                                type: "deduction",
+                            });
+                            rData.transaction = transaction;
+                            const rIds = r.redemptionItems.map((r) => r.id);
+                            const redemptionItems = yield RedemptionItem_1.RedemptionItem.find({ _id: rIds });
+                            const items = [];
+                            const formatted = redemptionItems.map((item) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+                                const thisData = Object.assign({}, item._doc);
+                                const stuff = r.redemptionItems.map((i) => {
+                                    console.log(item._id.toString(), i.id.toString());
+                                    if (item._id.toString() == i.id.toString()) {
+                                        thisData.quantity = i.quantity;
+                                    }
+                                });
+                                return items.push(thisData);
+                            }));
+                            yield Promise.all(formatted);
+                            rData.redemptionItems = items;
+                        }
+                        data.push(rData);
+                    }));
+                    yield Promise.all(requestPromise);
+                }
+                res.status(200).send({ success: true, data });
             }
             catch (error) {
                 res.status(400).json({ success: false, error, message: error.message });
@@ -412,50 +492,22 @@ let RequestController = class RequestController extends AbstractController_1.Abs
     getGraph(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const weeklyRecycle = {
-                    mon: 0,
-                    tue: 0,
-                    wed: 0,
-                    thur: 0,
-                    fri: 0,
-                    sat: 0,
-                    sun: 0,
-                };
+                const weeklyRecycle = {};
                 let allRecycles = yield Request_1.Request.find({
                     isDeleted: false,
                     type: "recycle",
                     requestedBy: req.params.id,
                 });
-                const monStart = moment().startOf("week");
-                const monEnd = monStart.endOf("day");
-                const tueStart = monStart.add(1, "day");
-                const tueEnd = tueStart.endOf("day");
-                const wedStart = tueStart.add(1, "day");
-                const wedEnd = wedStart.endOf("day");
-                const thurStart = wedStart.add(1, "day");
-                const thurEnd = thurStart.endOf("day");
-                const friStart = thurStart.add(1, "day");
-                const friEnd = friStart.endOf("day");
-                const satStart = friStart.add(1, "day");
-                const satEnd = satStart.endOf("day");
-                const sunStart = satStart.add(1, "day");
-                const sunEnd = sunStart.endOf("day");
+                const { month } = req.params;
+                const numberOfWeeks = moment(month).daysInMonth() / 7;
+                const firstWeek = moment(month).startOf("month");
+                const endFirstWeek = moment(month).startOf("month");
                 const recycleGraph = allRecycles.map((recycle) => tslib_1.__awaiter(this, void 0, void 0, function* () {
-                    if (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) {
-                        if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= monStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= monEnd)
-                            weeklyRecycle.mon += 1;
-                        if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= tueStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= tueEnd)
-                            weeklyRecycle.tue += 1;
-                        if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= wedStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= wedEnd)
-                            weeklyRecycle.wed += 1;
-                        if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= thurStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= thurEnd)
-                            weeklyRecycle.thur += 1;
-                        if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= friStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= friEnd)
-                            weeklyRecycle.fri += 1;
-                        if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= satStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= satEnd)
-                            weeklyRecycle.sat += 1;
-                        if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= sunStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= sunEnd)
-                            weeklyRecycle.sun += 1;
+                    for (let i = 0; i < numberOfWeeks; i++) {
+                        if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= firstWeek.add(i, "week") &&
+                            (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= endFirstWeek.add(i, "week")) {
+                            weeklyRecycle[`week${i + 1}`] += 1;
+                        }
                     }
                 }));
                 yield Promise.all(recycleGraph);
@@ -523,6 +575,12 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
 ], RequestController.prototype, "getUserRecycleRequests", null);
+tslib_1.__decorate([
+    core_1.Get("list/non-pending"),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object, Object]),
+    tslib_1.__metadata("design:returntype", Promise)
+], RequestController.prototype, "getnonPendingRequests", null);
 tslib_1.__decorate([
     core_1.Get("buster/accepted"),
     tslib_1.__metadata("design:type", Function),
