@@ -310,7 +310,7 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                 res.status(200).json({ success: true, data: request });
             }
             catch (error) {
-                res.status(401).json({ success: false, error, message: error.message });
+                res.status(400).json({ success: false, error, message: error.message });
             }
         });
     }
@@ -324,7 +324,7 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                 res.status(200).json({ success: true, data: request });
             }
             catch (error) {
-                res.status(401).json({ success: false, error, message: error.message });
+                res.status(400).json({ success: false, error, message: error.message });
             }
         });
     }
@@ -350,7 +350,7 @@ let RequestController = class RequestController extends AbstractController_1.Abs
             }
             catch (error) {
                 console.log(error);
-                res.status(401).json({ success: false, error, message: error.message });
+                res.status(400).json({ success: false, error, message: error.message });
             }
         });
     }
@@ -363,8 +363,89 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                     .send({ success: true, message: "request deleted successfully" });
             }
             catch (error) {
-                res.status(401).json({ success: false, error, message: error.message });
+                res.status(400).json({ success: false, error, message: error.message });
             }
+        });
+    }
+    getOngoing(req, res) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            try {
+                const userId = req.params.userId ? req.params.userId : req.user.id;
+                const request = Request_1.Request.findOne({
+                    isDeleted: false,
+                    requestedBy: userId,
+                    type: "recycle",
+                })
+                    .populate("acceptedBy")
+                    .sort("asc");
+                res
+                    .status(200)
+                    .json({ success: true, message: "request retrieved", data: request });
+            }
+            catch (error) {
+                res.status(400).json({ success: false, error, message: error.message });
+            }
+        });
+    }
+    getGraph(req, res) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            try {
+                const weeklyRecycle = {
+                    mon: 0,
+                    tue: 0,
+                    wed: 0,
+                    thur: 0,
+                    fri: 0,
+                    sat: 0,
+                    sun: 0,
+                };
+                let allRecycles = yield Request_1.Request.find({
+                    isDeleted: false,
+                    type: "recycle",
+                    requestedBy: req.params.id,
+                });
+                const monStart = moment().startOf("week");
+                const monEnd = monStart.endOf("day");
+                const tueStart = monStart.add(1, "day");
+                const tueEnd = tueStart.endOf("day");
+                const wedStart = tueStart.add(1, "day");
+                const wedEnd = wedStart.endOf("day");
+                const thurStart = wedStart.add(1, "day");
+                const thurEnd = thurStart.endOf("day");
+                const friStart = thurStart.add(1, "day");
+                const friEnd = friStart.endOf("day");
+                const satStart = friStart.add(1, "day");
+                const satEnd = satStart.endOf("day");
+                const sunStart = satStart.add(1, "day");
+                const sunEnd = sunStart.endOf("day");
+                const recycleGraph = allRecycles.map((recycle) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+                    if (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) {
+                        if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= monStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= monEnd)
+                            weeklyRecycle.mon += 1;
+                        if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= tueStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= tueEnd)
+                            weeklyRecycle.tue += 1;
+                        if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= wedStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= wedEnd)
+                            weeklyRecycle.wed += 1;
+                        if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= thurStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= thurEnd)
+                            weeklyRecycle.thur += 1;
+                        if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= friStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= friEnd)
+                            weeklyRecycle.fri += 1;
+                        if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= satStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= satEnd)
+                            weeklyRecycle.sat += 1;
+                        if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= sunStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= sunEnd)
+                            weeklyRecycle.sun += 1;
+                    }
+                }));
+                yield Promise.all(recycleGraph);
+                res
+                    .status(200)
+                    .send({
+                    success: true,
+                    message: "retrieved dashboard data",
+                    data: weeklyRecycle,
+                });
+            }
+            catch (error) { }
         });
     }
 };
@@ -452,6 +533,18 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
 ], RequestController.prototype, "destroy", null);
+tslib_1.__decorate([
+    core_1.Get("ongoing/user"),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object, Object]),
+    tslib_1.__metadata("design:returntype", Promise)
+], RequestController.prototype, "getOngoing", null);
+tslib_1.__decorate([
+    core_1.Get("graph/user/:id"),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object, Object]),
+    tslib_1.__metadata("design:returntype", Promise)
+], RequestController.prototype, "getGraph", null);
 RequestController = tslib_1.__decorate([
     core_1.Controller("api/request"),
     core_1.ClassMiddleware([auth_1.checkJwt]),

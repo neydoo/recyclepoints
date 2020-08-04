@@ -373,7 +373,7 @@ export class RequestController extends AbstractController {
 
       res.status(200).json({ success: true, data: request });
     } catch (error) {
-      res.status(401).json({ success: false, error, message: error.message });
+      res.status(400).json({ success: false, error, message: error.message });
     }
   }
 
@@ -390,7 +390,7 @@ export class RequestController extends AbstractController {
 
       res.status(200).json({ success: true, data: request });
     } catch (error) {
-      res.status(401).json({ success: false, error, message: error.message });
+      res.status(400).json({ success: false, error, message: error.message });
     }
   }
 
@@ -417,7 +417,7 @@ export class RequestController extends AbstractController {
       res.status(200).json({ success: true, message: "sent reminder" });
     } catch (error) {
       console.log(error);
-      res.status(401).json({ success: false, error, message: error.message });
+      res.status(400).json({ success: false, error, message: error.message });
     }
   }
 
@@ -429,7 +429,7 @@ export class RequestController extends AbstractController {
         .status(200)
         .send({ success: true, message: "request deleted successfully" });
     } catch (error) {
-      res.status(401).json({ success: false, error, message: error.message });
+      res.status(400).json({ success: false, error, message: error.message });
     }
   }
 
@@ -453,87 +453,73 @@ export class RequestController extends AbstractController {
     }
   }
 
-  // @Get("graph/user")
-  // public async getGraph(req: any, res: Response): Promise<void> {
-  //   try {
-  //     const data = {
-  //       weeklyRecycle: {
-  //         mon: 0,
-  //         tue: 0,
-  //         wed: 0,
-  //         thur: 0,
-  //         fri: 0,
-  //         sat: 0,
-  //         sun: 0,
-  //       },
-  //       dataHistory: {},
-  //     };
+  @Get("graph/user/:id")
+  public async getGraph(req: any, res: Response): Promise<void> {
+    try {
+      const weeklyRecycle = {
+        mon: 0,
+        tue: 0,
+        wed: 0,
+        thur: 0,
+        fri: 0,
+        sat: 0,
+        sun: 0,
+      };
 
-  //     let allRecycles = await ItemRequest.find({
-  //       isDeleted: false,
-  //       type: "recycle",
-  //       requestedBy: req.user.id,
-  //     });
-  //     const monStart = moment().startOf("week");
-  //     const monEnd = monStart.endOf("day");
+      let allRecycles = await ItemRequest.find({
+        isDeleted: false,
+        type: "recycle",
+        requestedBy: req.params.id,
+      });
+      const monStart = moment().startOf("week");
+      const monEnd = monStart.endOf("day");
 
-  //     const tueStart = monStart.add(1, "day");
-  //     const tueEnd = tueStart.endOf("day");
+      const tueStart = monStart.add(1, "day");
+      const tueEnd = tueStart.endOf("day");
 
-  //     const wedStart = tueStart.add(1, "day");
-  //     const wedEnd = wedStart.endOf("day");
+      const wedStart = tueStart.add(1, "day");
+      const wedEnd = wedStart.endOf("day");
 
-  //     const thurStart = wedStart.add(1, "day");
-  //     const thurEnd = thurStart.endOf("day");
+      const thurStart = wedStart.add(1, "day");
+      const thurEnd = thurStart.endOf("day");
 
-  //     const friStart = thurStart.add(1, "day");
-  //     const friEnd = friStart.endOf("day");
+      const friStart = thurStart.add(1, "day");
+      const friEnd = friStart.endOf("day");
 
-  //     const satStart = friStart.add(1, "day");
-  //     const satEnd = satStart.endOf("day");
+      const satStart = friStart.add(1, "day");
+      const satEnd = satStart.endOf("day");
 
-  //     const sunStart = satStart.add(1, "day");
-  //     const sunEnd = sunStart.endOf("day");
+      const sunStart = satStart.add(1, "day");
+      const sunEnd = sunStart.endOf("day");
 
-  //     const recycleGraph = allRecycles.map(async (recycle) => {
-  //       if (recycle?.createdAt) {
-  //         if (recycle?.createdAt >= monStart && recycle?.createdAt <= monEnd)
-  //           data.weeklyRecycle.mon += 1;
-  //         if (recycle?.createdAt >= tueStart && recycle?.createdAt <= tueEnd)
-  //           data.weeklyRecycle.tue += 1;
-  //         if (
-  //           recycle?.createdAt >= wedStart &&
-  //           recycle?.createdAt <= wedEnd
-  //         )
-  //           data.weeklyRecycle.mar += 1;
-  //         if (recycle?.createdAt >= thurStart && recycle?.createdAt <= thurEnd)
-  //           data.weeklyRecycle.thur += 1;
-  //         if (recycle?.createdAt >= friStart && recycle?.createdAt <= friEnd)
-  //           data.weeklyRecycle.fri += 1;
-  //         if (recycle?.createdAt >= satStart && recycle?.createdAt <= satEnd)
-  //           data.weeklyRecycle.sat += 1;
-  //         if (recycle?.createdAt >= sunStart && recycle?.createdAt <= sunEnd)
-  //           data.weeklyRecycle.sun += 1;
-  //         if (recycle?.createdAt >= augStart && recycle?.createdAt <= augEnd)
-  //           data.weeklyRecycle.aug += 1;
-  //         if (recycle?.createdAt >= sepStart && recycle?.createdAt <= sepEnd)
-  //           data.weeklyRecycle.sep += 1;
-  //         if (recycle?.createdAt >= octStart && recycle?.createdAt <= octEnd)
-  //           data.weeklyRecycle.oct += 1;
-  //         if (recycle?.createdAt >= novStart && recycle?.createdAt <= novEnd)
-  //           data.weeklyRecycle.nov += 1;
-  //         if (recycle?.createdAt >= decStart && recycle?.createdAt <= decEnd)
-  //           data.weeklyRecycle.dec += 1;
-  //       }
-  //     });
+      const recycleGraph = allRecycles.map(async (recycle) => {
+        if (recycle?.createdAt) {
+          if (recycle?.createdAt >= monStart && recycle?.createdAt <= monEnd)
+            weeklyRecycle.mon += 1;
+          if (recycle?.createdAt >= tueStart && recycle?.createdAt <= tueEnd)
+            weeklyRecycle.tue += 1;
+          if (recycle?.createdAt >= wedStart && recycle?.createdAt <= wedEnd)
+            weeklyRecycle.wed += 1;
+          if (recycle?.createdAt >= thurStart && recycle?.createdAt <= thurEnd)
+            weeklyRecycle.thur += 1;
+          if (recycle?.createdAt >= friStart && recycle?.createdAt <= friEnd)
+            weeklyRecycle.fri += 1;
+          if (recycle?.createdAt >= satStart && recycle?.createdAt <= satEnd)
+            weeklyRecycle.sat += 1;
+          if (recycle?.createdAt >= sunStart && recycle?.createdAt <= sunEnd)
+            weeklyRecycle.sun += 1;
+        }
+      });
 
-  //     data.dataHistory = await DataHistory.find({}).limit(5);
+      await Promise.all(recycleGraph);
 
-  //     await Promise.all([sorting, recycleGraph]);
-
-  //     res
-  //       .status(200)
-  //       .send({ success: true, message: "retrieved dashboard data", data });
-  //   } catch (error) {}
-  // }
+      res
+        .status(200)
+        .send({
+          success: true,
+          message: "retrieved dashboard data",
+          data: weeklyRecycle,
+        });
+    } catch (error) {}
+  }
 }

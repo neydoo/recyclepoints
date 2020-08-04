@@ -214,7 +214,7 @@ let MobileController = class MobileController extends AbstractController_1.Abstr
                 res.status(200).json({ success: true, data: request });
             }
             catch (error) {
-                res.status(401).json({ success: false, error, message: error.message });
+                res.status(400).json({ success: false, error, message: error.message });
             }
         });
     }
@@ -228,7 +228,7 @@ let MobileController = class MobileController extends AbstractController_1.Abstr
                 res.status(200).json({ success: true, data: request });
             }
             catch (error) {
-                res.status(401).json({ success: false, error, message: error.message });
+                res.status(400).json({ success: false, error, message: error.message });
             }
         });
     }
@@ -255,7 +255,7 @@ let MobileController = class MobileController extends AbstractController_1.Abstr
             }
             catch (error) {
                 console.log(error);
-                res.status(401).json({ success: false, error, message: error.message });
+                res.status(400).json({ success: false, error, message: error.message });
             }
         });
     }
@@ -268,7 +268,7 @@ let MobileController = class MobileController extends AbstractController_1.Abstr
                     .send({ success: true, message: "request deleted successfully" });
             }
             catch (error) {
-                res.status(401).json({ success: false, error, message: error.message });
+                res.status(400).json({ success: false, error, message: error.message });
             }
         });
     }

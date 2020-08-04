@@ -88,7 +88,7 @@ let UserController = class UserController extends AbstractController_1.AbstractC
                 res.status(200).send({ success: true, data: users });
             }
             catch (error) {
-                res.status(401).json({ success: false, error, message: error.message });
+                res.status(400).json({ success: false, error, message: error.message });
             }
         });
     }

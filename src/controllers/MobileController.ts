@@ -289,7 +289,7 @@ export class MobileController extends AbstractController {
 
       res.status(200).json({ success: true, data: request });
     } catch (error) {
-      res.status(401).json({ success: false, error, message: error.message });
+      res.status(400).json({ success: false, error, message: error.message });
     }
   }
 
@@ -306,7 +306,7 @@ export class MobileController extends AbstractController {
 
       res.status(200).json({ success: true, data: request });
     } catch (error) {
-      res.status(401).json({ success: false, error, message: error.message });
+      res.status(400).json({ success: false, error, message: error.message });
     }
   }
 
@@ -340,7 +340,7 @@ export class MobileController extends AbstractController {
       res.status(200).json({ success: true, message: "sent reminder" });
     } catch (error) {
       console.log(error);
-      res.status(401).json({ success: false, error, message: error.message });
+      res.status(400).json({ success: false, error, message: error.message });
     }
   }
 
@@ -352,7 +352,7 @@ export class MobileController extends AbstractController {
         .status(200)
         .send({ success: true, message: "request deleted successfully" });
     } catch (error) {
-      res.status(401).json({ success: false, error, message: error.message });
+      res.status(400).json({ success: false, error, message: error.message });
     }
   }
 }

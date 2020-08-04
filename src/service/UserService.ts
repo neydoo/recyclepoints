@@ -121,14 +121,14 @@ export class UserService {
 
     // if (!oldPassword || !newPassword) throw new Error("missing parameters");
     if (user) {
-      if (confirmPassword && confirmPassword !== newPassword)
-        throw new Error("passwords do not match");
-      if (!user.comparePassword(oldPassword))
-        throw new Error("invalid old password");
+      if (oldPassword) {
+        if (confirmPassword && confirmPassword !== newPassword)
+          throw new Error("passwords do not match");
+        if (!user.comparePassword(oldPassword))
+          throw new Error("invalid old password");
 
-      user.password = bcrypt.hashSync(newPassword);
-      await user.save();
-
+        user.password = bcrypt.hashSync(newPassword);
+      }
       const existingUser = await this.repository.findById(req.params.userId);
       if (existingUser?.firstTimeLogin) userPayload.firstTimeLogin = false;
       user = await this.repository.updateData(req.params.userId, userPayload);
@@ -138,7 +138,7 @@ export class UserService {
             ? await this.cloudinaryUploader(req.body.profileImage)
             : user?.profileImage)
         : null;
-      user?.save();
+      await user?.save();
     }
     // this.core.Email(
     //   user,

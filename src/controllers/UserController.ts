@@ -106,7 +106,7 @@ export class UserController extends AbstractController {
       await Promise.all(promise);
       res.status(200).send({ success: true, data: users });
     } catch (error) {
-      res.status(401).json({ success: false, error, message: error.message });
+      res.status(400).json({ success: false, error, message: error.message });
     }
   }
 

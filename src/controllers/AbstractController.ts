@@ -14,7 +14,7 @@ export class AbstractController {
             const data = await this.repository.findAll();
             res.status(200).send({ success: true, data });
         } catch (error) {
-            res.status(401).json({ success: false, error, message: error.message });
+            res.status(400).json({ success: false, error, message: error.message });
         }
     }
 
@@ -24,7 +24,7 @@ export class AbstractController {
             this.repository.forceDelete(req.params.id);
             res.status(200).send({ success: true, message: "record deleted successfull"});
         } catch (error) {
-            res.status(401).json({ success: false, error, message: error.message });
+            res.status(400).json({ success: false, error, message: error.message });
         }
 
     }
@@ -35,7 +35,7 @@ export class AbstractController {
             this.repository.softDelete(req.params.id);
             res.status(200).send({ success: true, message: "record deleted successfull"});
         } catch (error) {
-            res.status(401).json({ success: false, error, message: error.message });
+            res.status(400).json({ success: false, error, message: error.message });
         }
 
     }
