@@ -123,7 +123,8 @@ class RequestService {
                 throw new Error(" request has already been accepted");
             if (req.body.buster)
                 request.acceptedBy = req.body.buster;
-            if (!req.body.buster && req.user.designation !== "buster") {
+            if (!req.body.buster && req.user.designation !== "admin") {
+                console.log(req.user.designation);
                 throw new Error(`you're not allowed to perform this operation`);
             }
             else {
