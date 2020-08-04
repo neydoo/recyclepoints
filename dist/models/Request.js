@@ -15,11 +15,15 @@ var Status;
 exports.requestSchema = new mongoose_1.Schema({
     requestedBy: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
     acceptedBy: { type: mongoose_1.Schema.Types.ObjectId, ref: "User" },
+    approvedBy: { type: mongoose_1.Schema.Types.ObjectId, ref: "User" },
     type: { type: String, enum: ["recycle", "redemption"], required: true },
     items: { type: mongoose_1.Schema.Types.Mixed },
     redemptionId: { type: String },
     deliveryType: { type: String, enum: ["home", "pickup"] },
-    redemptionItems: { type: mongoose_1.Schema.Types.Array },
+    redemptionItems: [{
+            id: { type: mongoose_1.Schema.Types.ObjectId, ref: "RedemptionItem" },
+            quantity: { type: String }
+        }],
     status: {
         type: String,
         enum: [

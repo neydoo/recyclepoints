@@ -60,20 +60,39 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                 }
                 const request = yield Request_1.Request.find(criteria)
                     .populate("requestedBy")
-                    .populate("acceptedBy");
+                    .populate("acceptedBy")
+                    .populate("redemptionItems");
+                const data = [];
                 if (request.length) {
                     const requestPromise = request.map((r) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+                        let rData = Object.assign({}, r._doc);
                         if ((r === null || r === void 0 ? void 0 : r.type) === "redemption") {
                             const transaction = yield RecyclePointRecord_1.RecyclePointRecord.findOne({
                                 transactionId: r.id,
                                 type: "deduction",
                             });
-                            r.transaction = transaction;
+                            rData.transaction = transaction;
+                            const rIds = r.redemptionItems.map((r) => r.id);
+                            const redemptionItems = yield RedemptionItem_1.RedemptionItem.find({ _id: rIds });
+                            const items = [];
+                            const formatted = redemptionItems.map((item) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+                                const thisData = Object.assign({}, item._doc);
+                                const stuff = r.redemptionItems.map((i) => {
+                                    console.log(item._id.toString(), i.id.toString());
+                                    if (item._id.toString() == i.id.toString()) {
+                                        thisData.quantity = i.quantity;
+                                    }
+                                });
+                                return items.push(thisData);
+                            }));
+                            yield Promise.all(formatted);
+                            rData.redemptionItems = items;
                         }
+                        data.push(rData);
                     }));
                     yield Promise.all(requestPromise);
                 }
-                res.status(200).send({ success: true, data: request });
+                res.status(200).send({ success: true, data });
             }
             catch (error) {
                 res.status(400).json({ success: false, error, message: error.message });
@@ -437,9 +456,7 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                     }
                 }));
                 yield Promise.all(recycleGraph);
-                res
-                    .status(200)
-                    .send({
+                res.status(200).send({
                     success: true,
                     message: "retrieved dashboard data",
                     data: weeklyRecycle,
