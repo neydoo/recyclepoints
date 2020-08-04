@@ -117,21 +117,26 @@ export class UserService {
     }
 
     const { oldPassword, newPassword, confirmPassword } = req.body;
-    let user = await User.findOne({ _id: req.user.id }).select("+password");
 
     // if (!oldPassword || !newPassword) throw new Error("missing parameters");
-    if (user) {
-      if (oldPassword) {
+    if (oldPassword) {
+      let user = await User.findOne({ _id: req.user.id }).select("+password");
+      if (user) {
         if (confirmPassword && confirmPassword !== newPassword)
           throw new Error("passwords do not match");
         if (!user.comparePassword(oldPassword))
           throw new Error("invalid old password");
 
         user.password = bcrypt.hashSync(newPassword);
+        await user.save();
       }
+    } else {
       const existingUser = await this.repository.findById(req.params.userId);
       if (existingUser?.firstTimeLogin) userPayload.firstTimeLogin = false;
-      user = await this.repository.updateData(req.params.userId, userPayload);
+      const user = await this.repository.updateData(
+        req.params.userId,
+        userPayload
+      );
 
       user
         ? (user.profileImage = req.body.profileImage
@@ -139,7 +144,9 @@ export class UserService {
             : user?.profileImage)
         : null;
       await user?.save();
+      return user;
     }
+
     // this.core.Email(
     //   user,
     //   "Profile Updated",
@@ -147,8 +154,6 @@ export class UserService {
     //     `<p style="color: #000">Hello ${user.firstName} ${user.lastName}, \n\r Your profile has been updated successfully. </p>`
     //   )
     // );
-
-    return user;
   }
 
   public async resetPassword(req: any) {
