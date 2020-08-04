@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SortingController = void 0;
+exports.BaleController = void 0;
 const tslib_1 = require("tslib");
 const moment = require("moment");
 const core_1 = require("@overnightjs/core");
@@ -8,7 +8,7 @@ const auth_1 = require("../middleware/auth");
 const Bale_1 = require("../models/Bale");
 const User_1 = require("../models/User");
 const PdfService_1 = require("../service/PdfService");
-let SortingController = class SortingController {
+let BaleController = class BaleController {
     index(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
@@ -197,40 +197,40 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
-], SortingController.prototype, "index", null);
+], BaleController.prototype, "index", null);
 tslib_1.__decorate([
     core_1.Post("new"),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
-], SortingController.prototype, "create", null);
+], BaleController.prototype, "create", null);
 tslib_1.__decorate([
     core_1.Get("user/:id"),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
-], SortingController.prototype, "getBalings", null);
+], BaleController.prototype, "getBalings", null);
 tslib_1.__decorate([
     core_1.Post("remove/:id"),
     core_1.Middleware([auth_1.isDev]),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
-], SortingController.prototype, "enable", null);
+], BaleController.prototype, "enable", null);
 tslib_1.__decorate([
     core_1.Get("data"),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
-], SortingController.prototype, "getData", null);
+], BaleController.prototype, "getData", null);
 tslib_1.__decorate([
     core_1.Post("data/pdf"),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
-], SortingController.prototype, "downloadPdf", null);
-SortingController = tslib_1.__decorate([
+], BaleController.prototype, "downloadPdf", null);
+BaleController = tslib_1.__decorate([
     core_1.Controller("api/bale"),
     core_1.ClassMiddleware([auth_1.checkJwt])
-], SortingController);
-exports.SortingController = SortingController;
+], BaleController);
+exports.BaleController = BaleController;

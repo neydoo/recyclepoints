@@ -13,3 +13,4 @@ tslib_1.__exportStar(require("./AdminController"), exports);
 tslib_1.__exportStar(require("./UserNotificationController"), exports);
 tslib_1.__exportStar(require("./VerificationController"), exports);
 tslib_1.__exportStar(require("./FaqController"), exports);
+tslib_1.__exportStar(require("./BaleController"), exports);

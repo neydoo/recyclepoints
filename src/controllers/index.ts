@@ -10,3 +10,4 @@ export * from "./AdminController";
 export * from "./UserNotificationController";
 export * from "./VerificationController";
 export * from "./FaqController";
+export * from "./BaleController";
