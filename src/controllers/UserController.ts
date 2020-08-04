@@ -44,12 +44,10 @@ export class UserController extends AbstractController {
         criteria.designation = designation;
       }
       if (startDate) {
-        criteria.createdAt = { ">=": startDate };
-
-        if (endDate) {
-          criteria.createdAt = { "<=": endDate };
-        }
-        criteria.createdAt = { "<=": Date.now() };
+        criteria.createdAt = {
+          $gte: startDate,
+          $lte: endDate ? endDate : moment(),
+        };
       }
 
       if (status) {
@@ -164,7 +162,7 @@ export class UserController extends AbstractController {
       const user: any = await this.repository.findById(req.params.userId);
       // let data: any = user;
       // console.log(user);
-      const meta = { activity: 0, recycles: 0, redemptions: 0 };
+      const meta = { activity: 0, recycles: 0, redemptions: 0, points: 0 };
       let data = Object.assign({}, user._doc);
 
       if (user.designation === Designation.Staff) {
@@ -186,7 +184,12 @@ export class UserController extends AbstractController {
           acceptedBy: user.id,
           isDeleted: false,
           type: "recycle",
-          status: { $ne: Status.Pending },
+          $and: [
+            {
+              status: { $ne: Status.Pending },
+            },
+            { status: { $ne: Status.Cancelled } },
+          ],
         });
 
         meta.redemptions = await ItemRequest.count({
@@ -195,6 +198,11 @@ export class UserController extends AbstractController {
           type: "redemption",
           status: { $ne: Status.Pending },
         });
+
+        const points = await RecyclePoint.findOne({
+          user: user.id,
+        });
+        meta.points = points?.balance || 0;
       }
       if (user.designation === Designation.Sorter) {
         meta.activity = await DailySorting.count({

@@ -34,11 +34,10 @@ let UserController = class UserController extends AbstractController_1.AbstractC
                     criteria.designation = designation;
                 }
                 if (startDate) {
-                    criteria.createdAt = { ">=": startDate };
-                    if (endDate) {
-                        criteria.createdAt = { "<=": endDate };
-                    }
-                    criteria.createdAt = { "<=": Date.now() };
+                    criteria.createdAt = {
+                        $gte: startDate,
+                        $lte: endDate ? endDate : moment(),
+                    };
                 }
                 if (status) {
                     criteria.status = status;
@@ -143,7 +142,7 @@ let UserController = class UserController extends AbstractController_1.AbstractC
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 const user = yield this.repository.findById(req.params.userId);
-                const meta = { activity: 0, recycles: 0, redemptions: 0 };
+                const meta = { activity: 0, recycles: 0, redemptions: 0, points: 0 };
                 let data = Object.assign({}, user._doc);
                 if (user.designation === User_1.Designation.Staff) {
                     meta.activity = yield Verification_1.Verification.count({
@@ -163,7 +162,12 @@ let UserController = class UserController extends AbstractController_1.AbstractC
                         acceptedBy: user.id,
                         isDeleted: false,
                         type: "recycle",
-                        status: { $ne: Request_1.Status.Pending },
+                        $and: [
+                            {
+                                status: { $ne: Request_1.Status.Pending },
+                            },
+                            { status: { $ne: Request_1.Status.Cancelled } },
+                        ],
                     });
                     meta.redemptions = yield Request_1.Request.count({
                         acceptedBy: user.id,
@@ -171,6 +175,10 @@ let UserController = class UserController extends AbstractController_1.AbstractC
                         type: "redemption",
                         status: { $ne: Request_1.Status.Pending },
                     });
+                    const points = yield RecyclePoint_1.RecyclePoint.findOne({
+                        user: user.id,
+                    });
+                    meta.points = (points === null || points === void 0 ? void 0 : points.balance) || 0;
                 }
                 if (user.designation === User_1.Designation.Sorter) {
                     meta.activity = yield DailySorting_1.DailySorting.count({
