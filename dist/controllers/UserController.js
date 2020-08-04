@@ -9,7 +9,6 @@ const core_1 = require("@overnightjs/core");
 const AbstractController_1 = require("./AbstractController");
 const UserRepository_1 = require("../abstract/UserRepository");
 const auth_1 = require("../middleware/auth");
-const multer_1 = require("../middleware/multer");
 const User_1 = require("../models/User");
 const Request_1 = require("../models/Request");
 const UserService_1 = require("../service/UserService");
@@ -277,7 +276,6 @@ tslib_1.__decorate([
 ], UserController.prototype, "index", null);
 tslib_1.__decorate([
     core_1.Post("register"),
-    core_1.Middleware([multer_1.upload]),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)

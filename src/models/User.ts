@@ -27,12 +27,12 @@ export interface IUserM extends Document {
   landmark?: string;
   ageRange?: string;
   lga?: string;
+  otp: string;
   firstTimeLogin: boolean;
   unverified: boolean;
   active: boolean;
   isDeleted: boolean;
   notificationTokens?: string[];
-  otp?: string;
   fullName(): string;
   comparePassword(candidatePassword: string): boolean;
   compareOtp(candidatePassword: string): boolean;

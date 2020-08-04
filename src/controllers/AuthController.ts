@@ -4,8 +4,9 @@ import * as jwt from "jsonwebtoken";
 import * as passport from "passport";
 import { config } from "../config/app";
 import { UserService } from "../service/UserService";
-import { IUserM } from "../models/User";
+import { IUserM, User } from "../models/User";
 import { UserRepository as Repository } from "../abstract/UserRepository";
+import { UtilService } from '../service/UtilService';
 
 @Controller("api/auth")
 export class AuthController {
@@ -93,8 +94,9 @@ export class AuthController {
   @Post("verify-token/:phone")
   public async verifyOTP(req: Request, res: Response): Promise<any> {
     try {
-      const { phone } = req.params;
-      const user = await this.repository.find({ phone });
+      let { phone } = req.params;
+      phone = UtilService.formatPhone(phone);
+      const user = await User.findOne({ phone });
       if (!user) throw new Error("invalid phone number");
       if (user.otp !== req.body.otp) throw new Error("invalid otp");
       res.status(200).json({ success: true, data: user });

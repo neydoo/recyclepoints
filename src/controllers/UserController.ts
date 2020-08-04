@@ -14,7 +14,6 @@ import {
 import { AbstractController } from "./AbstractController";
 import { UserRepository as Repository } from "../abstract/UserRepository";
 import { checkJwt } from "../middleware/auth";
-import { upload } from "../middleware/multer";
 import { IUserM, User, Designation } from "../models/User";
 import { Request as ItemRequest, Status } from "../models/Request";
 import { UserService } from "../service/UserService";
@@ -114,7 +113,6 @@ export class UserController extends AbstractController {
   }
 
   @Post("register")
-  @Middleware([upload])
   public async registerUser(req: Request, res: Response): Promise<void> {
     try {
       const user: IUserM = await this.user.create(req);

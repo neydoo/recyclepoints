@@ -7,7 +7,9 @@ const jwt = require("jsonwebtoken");
 const passport = require("passport");
 const app_1 = require("../config/app");
 const UserService_1 = require("../service/UserService");
+const User_1 = require("../models/User");
 const UserRepository_1 = require("../abstract/UserRepository");
+const UtilService_1 = require("../service/UtilService");
 let AuthController = class AuthController {
     constructor() {
         this.repository = new UserRepository_1.UserRepository();
@@ -85,8 +87,9 @@ let AuthController = class AuthController {
     verifyOTP(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const { phone } = req.params;
-                const user = yield this.repository.find({ phone });
+                let { phone } = req.params;
+                phone = UtilService_1.UtilService.formatPhone(phone);
+                const user = yield User_1.User.findOne({ phone });
                 if (!user)
                     throw new Error("invalid phone number");
                 if (user.otp !== req.body.otp)
