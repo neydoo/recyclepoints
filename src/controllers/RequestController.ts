@@ -72,8 +72,7 @@ export class RequestController extends AbstractController {
       const request: any = await ItemRequest.find(criteria)
         .populate("requestedBy")
         .populate("acceptedBy")
-        .populate("approvedBy")
-        .populate("declinedBy");
+        .populate("resolvedBy");
       const data: any[] = [];
       // const requests: any[] = [];
       if (request.length) {
@@ -244,7 +243,7 @@ export class RequestController extends AbstractController {
       }).populate("requestedBy");
 
       request.status = Status.Declined;
-      request.declinedBy = req.user.id;
+      request.resolvedBy = req.user.id;
       const details = "redemption declined";
       await this.request.addPoints(
         request.points,
@@ -274,7 +273,7 @@ export class RequestController extends AbstractController {
         status: Status.Pending,
       });
       request.status = Status.Approved;
-      request.approvedBy = req.user.id;
+      request.resolvedBy = req.user.id;
 
       request.save();
 
@@ -338,24 +337,91 @@ export class RequestController extends AbstractController {
     }
   }
 
-  // @Get("list/user/redemption")
-  // public async getUserRedemptionRequests(
-  //   req: any,
-  //   res: Response
-  // ): Promise<void> {
-  //   try {
-  //     console.log(req.user.id);
-  //     const request = await ItemRequest.find({
-  //       requestedBy: req.user.id,
-  //       isDeleted: false,
-  //       type: "redemption",
-  //     });
+  @Get("list/non-pending")
+  public async getnonPendingRequests(req: any, res: Response): Promise<void> {
+    try {
+      const { startDate, endDate, status, type, search } = req.query;
+      const criteria: any = {
+        $and: [{ status: "pending" }, { status: "cancelled" }],
+        isDeleted: false,
+      };
+      const searchCriteria: any = {
+        isDeleted: false,
+      };
+      if (type) {
+        criteria.type = type;
+      }
+      if (startDate) {
+        criteria.createdAt = {
+          $gte: startDate,
+          $lte: endDate ? endDate : moment(),
+        };
+      }
 
-  //     res.status(200).json({ success: true, request });
-  //   } catch (error) {
-  //     res.status(400).json({ success: false, error, message: error.message });
-  //   }
-  // }
+      if (status) {
+        criteria.status = status;
+      }
+      let users: any = [];
+      if (search) {
+        searchCriteria.$or = [
+          { firstName: { $regex: search, $options: "i" } },
+          { lastName: { $regex: search, $options: "i" } },
+          { address: { $regex: search, $options: "i" } },
+          { phone: { $regex: search, $options: "i" } },
+        ];
+        users = await User.find(searchCriteria);
+      }
+
+      if (users?.length) {
+        const userIds = users.map((u: any) => u.id);
+        criteria.requestedBy = userIds;
+      } else if (!users.length && search) {
+        criteria.requestedBy = null;
+      }
+
+      const request: any = await ItemRequest.find(criteria)
+        .populate("requestedBy")
+        .populate("acceptedBy")
+        .populate("resolvedBy");
+      const data: any[] = [];
+      // const requests: any[] = [];
+      if (request.length) {
+        const requestPromise = request.map(async (r: any) => {
+          let rData = Object.assign({}, r._doc);
+          if (r?.type === "redemption") {
+            const transaction = await RecyclePointRecord.findOne({
+              transactionId: r.id,
+              type: "deduction",
+            });
+            rData.transaction = transaction;
+            const rIds = r.redemptionItems.map((r: any) => r.id);
+            const redemptionItems = await RedemptionItem.find({ _id: rIds });
+            const items: any[] = [];
+            // console.log(r.redemptionItems, rIds);
+            const formatted = redemptionItems.map(async (item: any) => {
+              const thisData = Object.assign({}, item._doc);
+              // console.log(item);
+              const stuff = r.redemptionItems.map((i: any) => {
+                console.log(item._id.toString(), i.id.toString());
+                if (item._id.toString() == i.id.toString()) {
+                  thisData.quantity = i.quantity;
+                }
+              });
+              return items.push(thisData);
+            });
+            await Promise.all(formatted);
+            rData.redemptionItems = items;
+          }
+          data.push(rData);
+        });
+        await Promise.all(requestPromise);
+      }
+
+      res.status(200).send({ success: true, data });
+    } catch (error) {
+      res.status(400).json({ success: false, error, message: error.message });
+    }
+  }
 
   @Get("buster/accepted")
   public async fetchAcceptedRequests(req: any, res: Response): Promise<void> {
@@ -480,58 +546,27 @@ export class RequestController extends AbstractController {
   @Get("graph/user/:id")
   public async getGraph(req: any, res: Response): Promise<void> {
     try {
-      const weeklyRecycle = {
-        mon: 0,
-        tue: 0,
-        wed: 0,
-        thur: 0,
-        fri: 0,
-        sat: 0,
-        sun: 0,
-      };
+      const weeklyRecycle: any = {};
 
       let allRecycles = await ItemRequest.find({
         isDeleted: false,
         type: "recycle",
         requestedBy: req.params.id,
       });
-      const monStart = moment().startOf("week");
-      const monEnd = monStart.endOf("day");
 
-      const tueStart = monStart.add(1, "day");
-      const tueEnd = tueStart.endOf("day");
+      const { month } = req.params;
+      const numberOfWeeks = moment(month).daysInMonth() / 7;
+      const firstWeek = moment(month).startOf("month");
+      const endFirstWeek = moment(month).startOf("month");
 
-      const wedStart = tueStart.add(1, "day");
-      const wedEnd = wedStart.endOf("day");
-
-      const thurStart = wedStart.add(1, "day");
-      const thurEnd = thurStart.endOf("day");
-
-      const friStart = thurStart.add(1, "day");
-      const friEnd = friStart.endOf("day");
-
-      const satStart = friStart.add(1, "day");
-      const satEnd = satStart.endOf("day");
-
-      const sunStart = satStart.add(1, "day");
-      const sunEnd = sunStart.endOf("day");
-
-      const recycleGraph = allRecycles.map(async (recycle) => {
-        if (recycle?.createdAt) {
-          if (recycle?.createdAt >= monStart && recycle?.createdAt <= monEnd)
-            weeklyRecycle.mon += 1;
-          if (recycle?.createdAt >= tueStart && recycle?.createdAt <= tueEnd)
-            weeklyRecycle.tue += 1;
-          if (recycle?.createdAt >= wedStart && recycle?.createdAt <= wedEnd)
-            weeklyRecycle.wed += 1;
-          if (recycle?.createdAt >= thurStart && recycle?.createdAt <= thurEnd)
-            weeklyRecycle.thur += 1;
-          if (recycle?.createdAt >= friStart && recycle?.createdAt <= friEnd)
-            weeklyRecycle.fri += 1;
-          if (recycle?.createdAt >= satStart && recycle?.createdAt <= satEnd)
-            weeklyRecycle.sat += 1;
-          if (recycle?.createdAt >= sunStart && recycle?.createdAt <= sunEnd)
-            weeklyRecycle.sun += 1;
+      const recycleGraph = allRecycles.map(async (recycle: any) => {
+        for (let i = 0; i < numberOfWeeks; i++) {
+          if (
+            recycle?.createdAt >= firstWeek.add(i, "week") &&
+            recycle?.createdAt <= endFirstWeek.add(i, "week")
+          ) {
+            weeklyRecycle[`week${i + 1}`] += 1;
+          }
         }
       });
 
