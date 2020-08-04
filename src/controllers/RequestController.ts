@@ -72,7 +72,8 @@ export class RequestController extends AbstractController {
       const request: any = await ItemRequest.find(criteria)
         .populate("requestedBy")
         .populate("acceptedBy")
-        .populate("redemptionItems");
+        .populate("approvedBy")
+        .populate("declinedBy");
       const data: any[] = [];
       // const requests: any[] = [];
       if (request.length) {
@@ -234,7 +235,7 @@ export class RequestController extends AbstractController {
   }
 
   @Post("decline/:requestId")
-  public async declineRequest(req: Request, res: Response): Promise<void> {
+  public async declineRequest(req: any, res: Response): Promise<void> {
     try {
       const notification = new NotificationsService();
       const request: any = await ItemRequest.findOne({
@@ -243,6 +244,7 @@ export class RequestController extends AbstractController {
       }).populate("requestedBy");
 
       request.status = Status.Declined;
+      request.declinedBy = req.user.id;
       const details = "redemption declined";
       await this.request.addPoints(
         request.points,
@@ -265,13 +267,14 @@ export class RequestController extends AbstractController {
   }
 
   @Post("approve/:requestId")
-  public async approveRequest(req: Request, res: Response): Promise<void> {
+  public async approveRequest(req: any, res: Response): Promise<void> {
     try {
       const request: any = await ItemRequest.findOne({
         _id: req.params.requestId,
         status: Status.Pending,
       });
       request.status = Status.Approved;
+      request.approvedBy = req.user.id;
 
       request.save();
 

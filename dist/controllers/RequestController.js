@@ -61,7 +61,8 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                 const request = yield Request_1.Request.find(criteria)
                     .populate("requestedBy")
                     .populate("acceptedBy")
-                    .populate("redemptionItems");
+                    .populate("approvedBy")
+                    .populate("declinedBy");
                 const data = [];
                 if (request.length) {
                     const requestPromise = request.map((r) => tslib_1.__awaiter(this, void 0, void 0, function* () {
@@ -220,6 +221,7 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                     status: Request_1.Status.Pending,
                 }).populate("requestedBy");
                 request.status = Request_1.Status.Declined;
+                request.declinedBy = req.user.id;
                 const details = "redemption declined";
                 yield this.request.addPoints(request.points, request.id, request.requestedBy, details);
                 request.save();
@@ -243,6 +245,7 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                     status: Request_1.Status.Pending,
                 });
                 request.status = Request_1.Status.Approved;
+                request.approvedBy = req.user.id;
                 request.save();
                 yield UserNotification_1.UserNotification.create({
                     title: "Request approved",

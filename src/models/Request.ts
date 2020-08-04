@@ -12,6 +12,7 @@ export enum Status {
 export interface RequestM extends Document {
   requestedBy: string;
   acceptedBy?: string;
+  declinedBy?: string;
   approvedBy?: string;
   type: string;
   deliveryType: string;
@@ -39,6 +40,7 @@ export const requestSchema: Schema = new Schema(
     requestedBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
     acceptedBy: { type: Schema.Types.ObjectId, ref: "User" },
     approvedBy: { type: Schema.Types.ObjectId, ref: "User" },
+    declinedBy: { type: Schema.Types.ObjectId, ref: "User" },
     type: { type: String, enum: ["recycle", "redemption"], required: true },
     items: { type: Schema.Types.Mixed },
     redemptionId: { type: String },
