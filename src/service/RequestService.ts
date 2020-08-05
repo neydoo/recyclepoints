@@ -156,10 +156,11 @@ export class RequestService {
     if (!request) throw new Error("invalid request");
     if (request.status !== "pending")
       throw new Error(" request has already been accepted");
-    if (req.body.buster) request.acceptedBy = req.body.buster;
 
-    if (!req.body.buster && req.user.designation !== "admin") {
-      console.log(req.user.designation)
+    if (req.body.buster && req.user.designation === "admin") {
+      request.acceptedBy = req.body.buster;
+    } else if (!req.body.buster && req.user.designation !== "admin") {
+      console.log(req.user.id);
       throw new Error(`you're not allowed to perform this operation`);
     } else {
       request.acceptedBy = req.user.id;
