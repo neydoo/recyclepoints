@@ -476,7 +476,7 @@ let RequestController = class RequestController extends AbstractController_1.Abs
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 const userId = req.params.userId ? req.params.userId : req.user.id;
-                const request = Request_1.Request.findOne({
+                const request = yield Request_1.Request.findOne({
                     isDeleted: false,
                     requestedBy: userId,
                     type: "recycle",

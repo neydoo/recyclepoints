@@ -111,6 +111,7 @@ let AuthController = class AuthController {
                     yield notification.sendForgetSMS(user.phone, password);
                     res.status(200).send({ success: true, message: "code sent" });
                 }
+                res.status(400).send({ success: false, message: "invalid user" });
             }
             catch (error) {
                 res.status(400).json({ success: false, error, message: error.message });

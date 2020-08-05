@@ -7,8 +7,8 @@ import { config } from "../config/app";
 import { UserService } from "../service/UserService";
 import { IUserM, User } from "../models/User";
 import { UserRepository as Repository } from "../abstract/UserRepository";
-import { UtilService } from '../service/UtilService';
-import NotificationsService from '../service/NotificationsService';
+import { UtilService } from "../service/UtilService";
+import NotificationsService from "../service/NotificationsService";
 
 @Controller("api/auth")
 export class AuthController {
@@ -93,7 +93,6 @@ export class AuthController {
     }
   }
 
-
   @Post("reset-token")
   public async resetToken(req: any, res: Response) {
     try {
@@ -120,11 +119,11 @@ export class AuthController {
 
         res.status(200).send({ success: true, message: "code sent" });
       }
+      res.status(400).send({ success: false, message: "invalid user" });
     } catch (error) {
       res.status(400).json({ success: false, error, message: error.message });
     }
   }
-
 
   @Post("verify-token/:phone")
   public async verifyOTP(req: Request, res: Response): Promise<any> {

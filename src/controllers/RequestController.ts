@@ -531,7 +531,7 @@ export class RequestController extends AbstractController {
     try {
       const userId = req.params.userId ? req.params.userId : req.user.id;
 
-      const request = ItemRequest.findOne({
+      const request = await ItemRequest.findOne({
         isDeleted: false,
         requestedBy: userId,
         type: "recycle",
