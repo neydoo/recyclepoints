@@ -97,7 +97,20 @@ export class AuthController {
   @Post("reset-token")
   public async resetToken(req: any, res: Response) {
     try {
-      const user = await User.findOne({ phone: req.body.phone });
+      const phone = UtilService.formatPhone(req.body.phone);
+      const criteria = [
+        {
+          phone,
+        },
+        {
+          phone: `0${phone.slice(3)}`,
+        },
+        {
+          phone: `+${phone}`,
+        },
+      ];
+      console.log(criteria);
+      const user = await User.findOne({ $or: criteria });
       if (user) {
         const password = UtilService.generate(5);
         user.password = bcrypt.hashSync(password);

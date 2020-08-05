@@ -89,7 +89,20 @@ let AuthController = class AuthController {
     resetToken(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const user = yield User_1.User.findOne({ phone: req.body.phone });
+                const phone = UtilService_1.UtilService.formatPhone(req.body.phone);
+                const criteria = [
+                    {
+                        phone,
+                    },
+                    {
+                        phone: `0${phone.slice(3)}`,
+                    },
+                    {
+                        phone: `+${phone}`,
+                    },
+                ];
+                console.log(criteria);
+                const user = yield User_1.User.findOne({ $or: criteria });
                 if (user) {
                     const password = UtilService_1.UtilService.generate(5);
                     user.password = bcrypt.hashSync(password);
