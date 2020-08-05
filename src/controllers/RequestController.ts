@@ -342,7 +342,10 @@ export class RequestController extends AbstractController {
     try {
       const { startDate, endDate, status, type, search } = req.query;
       const criteria: any = {
-        $and: [{ status: "pending" }, { status: "cancelled" }],
+        $and: [
+          { status: { $ne: "pending" } },
+          { status: { $ne: "cancelled" } },
+        ],
         isDeleted: false,
       };
       const searchCriteria: any = {
