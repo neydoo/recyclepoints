@@ -5,11 +5,13 @@ const tslib_1 = require("tslib");
 const core_1 = require("@overnightjs/core");
 const jwt = require("jsonwebtoken");
 const passport = require("passport");
+const bcrypt = require("bcrypt-nodejs");
 const app_1 = require("../config/app");
 const UserService_1 = require("../service/UserService");
 const User_1 = require("../models/User");
 const UserRepository_1 = require("../abstract/UserRepository");
 const UtilService_1 = require("../service/UtilService");
+const NotificationsService_1 = require("../service/NotificationsService");
 let AuthController = class AuthController {
     constructor() {
         this.repository = new UserRepository_1.UserRepository();
@@ -84,6 +86,24 @@ let AuthController = class AuthController {
             res.status(400).json({ success: false, err });
         }
     }
+    resetToken(req, res) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            try {
+                const user = yield User_1.User.findOne({ phone: req.body.phone });
+                if (user) {
+                    const password = UtilService_1.UtilService.generate(5);
+                    user.password = bcrypt.hashSync(password);
+                    const notification = new NotificationsService_1.default();
+                    yield user.save();
+                    yield notification.sendForgetSMS(user.phone, password);
+                    res.status(200).send({ success: true, message: "code sent" });
+                }
+            }
+            catch (error) {
+                res.status(400).json({ success: false, error, message: error.message });
+            }
+        });
+    }
     verifyOTP(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
@@ -126,6 +146,12 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:paramtypes", [Object, Object, Function]),
     tslib_1.__metadata("design:returntype", void 0)
 ], AuthController.prototype, "authenticateUser", null);
+tslib_1.__decorate([
+    core_1.Post("reset-token"),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object, Object]),
+    tslib_1.__metadata("design:returntype", Promise)
+], AuthController.prototype, "resetToken", null);
 tslib_1.__decorate([
     core_1.Post("verify-token/:phone"),
     tslib_1.__metadata("design:type", Function),

@@ -236,7 +236,7 @@ let UserController = class UserController extends AbstractController_1.AbstractC
                     user.otp = bcrypt.hashSync(password);
                     const notification = new NotificationsService_1.default();
                     yield user.save();
-                    yield notification.sendForgetSMS(user.phone, password);
+                    yield notification.sendRegistrationSMS(user.phone, password);
                     res.status(200).send({ success: true, message: "code sent" });
                 }
             }

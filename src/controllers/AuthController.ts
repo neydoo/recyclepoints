@@ -2,11 +2,13 @@ import { NextFunction, Request, Response } from "express";
 import { Controller, Put, Post } from "@overnightjs/core";
 import * as jwt from "jsonwebtoken";
 import * as passport from "passport";
+import * as bcrypt from "bcrypt-nodejs";
 import { config } from "../config/app";
 import { UserService } from "../service/UserService";
 import { IUserM, User } from "../models/User";
 import { UserRepository as Repository } from "../abstract/UserRepository";
 import { UtilService } from '../service/UtilService';
+import NotificationsService from '../service/NotificationsService';
 
 @Controller("api/auth")
 export class AuthController {
@@ -90,6 +92,26 @@ export class AuthController {
       res.status(400).json({ success: false, err });
     }
   }
+
+
+  @Post("reset-token")
+  public async resetToken(req: any, res: Response) {
+    try {
+      const user = await User.findOne({ phone: req.body.phone });
+      if (user) {
+        const password = UtilService.generate(5);
+        user.password = bcrypt.hashSync(password);
+        const notification = new NotificationsService();
+        await user.save();
+        await notification.sendForgetSMS(user.phone, password);
+
+        res.status(200).send({ success: true, message: "code sent" });
+      }
+    } catch (error) {
+      res.status(400).json({ success: false, error, message: error.message });
+    }
+  }
+
 
   @Post("verify-token/:phone")
   public async verifyOTP(req: Request, res: Response): Promise<any> {
