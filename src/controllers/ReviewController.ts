@@ -24,7 +24,7 @@ export class ReviewController extends AbstractController {
   @Get("")
   public async index(req: Request, res: Response): Promise<void> {
     try {
-      const review: ReviewM = await this.repository.findAll();
+      const review: ReviewM[] = await Review.find({});
       res.status(200).send({ success: true, data: review });
     } catch (error) {
       res.status(400).json({ success: false, error, message: error.message });
@@ -36,13 +36,11 @@ export class ReviewController extends AbstractController {
     try {
       const review: ReviewM = await this.review.create(req);
 
-      res
-        .status(200)
-        .json({
-          success: true,
-          review,
-          message: "review created successfully!",
-        });
+      res.status(200).json({
+        success: true,
+        review,
+        message: "review created successfully!",
+      });
     } catch (error) {
       res.status(400).json({ success: false, error, message: error.message });
     }
@@ -53,13 +51,11 @@ export class ReviewController extends AbstractController {
     try {
       const review: ReviewM = await this.repository.update(req);
 
-      res
-        .status(200)
-        .json({
-          success: true,
-          review,
-          message: "review updated successfully",
-        });
+      res.status(200).json({
+        success: true,
+        review,
+        message: "review updated successfully",
+      });
     } catch (error) {
       res.status(400).json({ success: false, error, message: error.message });
     }
@@ -68,9 +64,7 @@ export class ReviewController extends AbstractController {
   @Get(":reviewId")
   public async findRequest(req: Request, res: Response): Promise<void> {
     try {
-      const review = await Review.findById(
-        req.params.reviewId
-      );
+      const review = await Review.findById(req.params.reviewId);
 
       res.status(200).json({ success: true, data: review });
     } catch (error) {

@@ -160,7 +160,7 @@ export class RequestService {
     return request;
   }
 
-  public async accept(req: any): Promise<void> {
+  public async accept(req: any): Promise<any> {
     const request = (await ItemRequest.findById(req.params.id)) as any;
     if (!request) throw new Error("invalid request");
     if (request.status !== "pending")
@@ -176,11 +176,11 @@ export class RequestService {
 
     await request.save();
 
-    const user = (await User.findById(req.user.id)) as any;
+    const data = await ItemRequest.findById(req.params.id).populate(
+      "acceptedBy"
+    );
 
-    this.core.activityLog(req, user.id, "Update request");
-
-    return request;
+    return data;
   }
 
   public async deductPoints(

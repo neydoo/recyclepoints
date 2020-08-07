@@ -197,15 +197,32 @@ export class UserService {
 
   public async cloudinaryUploader(image: any) {
     try {
-      console.log(image);
       cloudinary.config(clodConfig);
 
-      const formattedImage = `data:image/png;base64,${image}`;
+      const formattedImage = this.checkbase64(image)
+        ? image
+        : `data:image/png;base64,${image}`;
       const url = await cloudinary.uploader.upload(formattedImage);
-      console.log(url);
+
       return url.secure_url;
     } catch (error) {
       console.log(error);
+    }
+  }
+
+  public checkbase64(str: string) {
+    var base64Matcher = new RegExp(
+      "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})$"
+    );
+
+    // ...
+
+    if (base64Matcher.test(str)) {
+      // It's likely base64 encoded.
+      return true;
+    } else {
+      // It's definitely not base64 encoded.
+      return false;
     }
   }
 }
