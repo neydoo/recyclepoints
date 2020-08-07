@@ -215,7 +215,7 @@ export class RequestController extends AbstractController {
   @Get(":requestId")
   public async findRequest(req: Request, res: Response): Promise<void> {
     try {
-      const request: any = await ItemRequest.find({ id: req.params.requestId })
+      const request: any = await ItemRequest.find({ _id: req.params.requestId })
         .populate("requestedBy")
         .populate("acceptedBy")
         .populate("resolvedBy");
@@ -246,15 +246,15 @@ export class RequestController extends AbstractController {
               return items.push(thisData);
             });
             await Promise.all(formatted);
+            console.log("here");
             rData.redemptionItems = items;
           }
-
           data.push(rData);
         });
         await Promise.all(requestPromise);
       }
 
-      res.status(200).json({ success: true, data: [data] });
+      res.status(200).json({ success: true, data: data[0] });
     } catch (error) {
       res.status(400).json({ success: false, error, message: error.message });
     }

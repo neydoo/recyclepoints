@@ -53,6 +53,8 @@ class RequestService {
                     throw new Error("you need more recycle points to complete this request");
                 payload.points = recyclePoints;
                 payload.redemptionId = `RE${UtilService_1.UtilService.generate(6)}`;
+                payload.meta.address = payload.deliveryAddress;
+                payload.meta.phone = payload.deliveryPhoneNumber;
             }
             console.log(`get user details`);
             console.log(`gotten user details`);

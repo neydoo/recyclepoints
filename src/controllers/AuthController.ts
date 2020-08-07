@@ -113,6 +113,7 @@ export class AuthController {
       if (user) {
         const password = UtilService.generate(5);
         user.password = bcrypt.hashSync(password);
+        user.otp = password;
         const notification = new NotificationsService();
         await user.save();
         await notification.sendForgetSMS(user.phone, password);

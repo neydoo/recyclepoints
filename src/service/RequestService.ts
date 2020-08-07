@@ -26,7 +26,12 @@ export class RequestService {
     if (!req.user.id) throw new Error("invalid user");
     payload.requestedBy = req.user.id;
     const user = await User.findById(req.user.id);
-    if (!user?.address) throw new Error("please add address information");
+    if (!user?.address && payload.deliveryAddress)
+      if (user) {
+        user.address = payload.deliveryAddress;
+        await user.save();
+      }
+
     console.log("start create request");
     if (!payload.type) {
       throw new Error("invalid request type");
@@ -43,7 +48,7 @@ export class RequestService {
       // ({ recyclePoints } = (await RedemptionItem.findById(
       //   payload.redemptionItem
       // )) as any);
-      const itemIds = payload.redemptionItems?.map((item:any) => item.id);
+      const itemIds = payload.redemptionItems?.map((item: any) => item.id);
       const requestedItems: any[] = await RedemptionItem.find({ _id: itemIds });
 
       recyclePoints = requestedItems.reduce((curr, item, i) => {
