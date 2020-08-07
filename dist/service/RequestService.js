@@ -26,6 +26,9 @@ class RequestService {
             if (!req.user.id)
                 throw new Error("invalid user");
             payload.requestedBy = req.user.id;
+            const user = yield User_1.User.findById(req.user.id);
+            if (!(user === null || user === void 0 ? void 0 : user.address))
+                throw new Error("please add address information");
             console.log("start create request");
             if (!payload.type) {
                 throw new Error("invalid request type");
@@ -52,14 +55,14 @@ class RequestService {
                 payload.redemptionId = `RE${UtilService_1.UtilService.generate(6)}`;
             }
             console.log(`get user details`);
-            const user = (yield User_1.User.findById(req.user.id));
             console.log(`gotten user details`);
             console.log(`creating request`);
             const request = yield this.repository.createNew(payload);
             console.log(`created request`);
             if (request.type === "redemption") {
                 const details = "redemption request";
-                yield this.deductPoints(recyclePoints, request.id, user, details);
+                if (user)
+                    yield this.deductPoints(recyclePoints, request.id, user, details);
             }
             if (request.type === "recycle") {
                 const admins = yield User_1.User.find({
@@ -73,7 +76,7 @@ class RequestService {
                     yield UserNotification_1.UserNotification.create({
                         title: "New recycle request",
                         userId: admin.id,
-                        body: `${user.fullName} just made a recycle request`,
+                        body: `${user === null || user === void 0 ? void 0 : user.fullName} just made a recycle request`,
                     });
                 }));
             }
@@ -86,7 +89,7 @@ class RequestService {
                     yield UserNotification_1.UserNotification.create({
                         title: "New redemption request",
                         userId: admin.id,
-                        body: `${user.fullName} just made a recycle request`,
+                        body: `${user === null || user === void 0 ? void 0 : user.fullName} just made a recycle request`,
                     });
                 }));
             }

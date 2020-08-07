@@ -22,9 +22,11 @@ export class RequestService {
   }
 
   public async create(req: any): Promise<void> {
-    const payload: RequestM = req.body;
+    const payload: any = req.body;
     if (!req.user.id) throw new Error("invalid user");
     payload.requestedBy = req.user.id;
+    const user = await User.findById(req.user.id);
+    if (!user?.address) throw new Error("please add address information");
     console.log("start create request");
     if (!payload.type) {
       throw new Error("invalid request type");
@@ -41,12 +43,12 @@ export class RequestService {
       // ({ recyclePoints } = (await RedemptionItem.findById(
       //   payload.redemptionItem
       // )) as any);
-      const itemIds = payload.redemptionItems?.map((item) => item.id);
+      const itemIds = payload.redemptionItems?.map((item:any) => item.id);
       const requestedItems: any[] = await RedemptionItem.find({ _id: itemIds });
 
       recyclePoints = requestedItems.reduce((curr, item, i) => {
         const { quantity } = payload.redemptionItems?.find(
-          (i) => i.id === item.id
+          (i: any) => i.id === item.id
         );
         return (curr += item.recyclePoints * quantity);
       }, 0);
@@ -62,11 +64,12 @@ export class RequestService {
       payload.points = recyclePoints;
 
       payload.redemptionId = `RE${UtilService.generate(6)}`;
-      // payload.meta = payload;
+      payload.meta.address = payload.deliveryAddress;
+      payload.meta.phone = payload.deliveryPhoneNumber;
     }
     console.log(`get user details`);
 
-    const user = (await User.findById(req.user.id)) as IUserM;
+    // const user = (await User.findById(req.user.id)) as IUserM;
     console.log(`gotten user details`);
     console.log(`creating request`);
     const request: any = await this.repository.createNew(payload);
@@ -74,7 +77,8 @@ export class RequestService {
 
     if (request.type === "redemption") {
       const details = "redemption request";
-      await this.deductPoints(recyclePoints, request.id, user, details);
+      if (user)
+        await this.deductPoints(recyclePoints, request.id, user, details);
     }
 
     if (request.type === "recycle") {
@@ -90,7 +94,7 @@ export class RequestService {
         await UserNotification.create({
           title: "New recycle request",
           userId: admin.id,
-          body: `${user.fullName} just made a recycle request`,
+          body: `${user?.fullName} just made a recycle request`,
         });
       });
     }
@@ -104,7 +108,7 @@ export class RequestService {
         await UserNotification.create({
           title: "New redemption request",
           userId: admin.id,
-          body: `${user.fullName} just made a recycle request`,
+          body: `${user?.fullName} just made a recycle request`,
         });
       });
     }
