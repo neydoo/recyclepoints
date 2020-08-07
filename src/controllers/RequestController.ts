@@ -535,6 +535,7 @@ export class RequestController extends AbstractController {
         isDeleted: false,
         requestedBy: userId,
         type: "recycle",
+        status: { $ne: Status.Completed },
       })
         .populate("acceptedBy")
         .sort("asc");
