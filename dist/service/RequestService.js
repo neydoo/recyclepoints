@@ -124,10 +124,6 @@ class RequestService {
             if (req.body.buster && req.user.designation === "admin") {
                 request.acceptedBy = req.body.buster;
             }
-            else if (!req.body.buster && req.user.designation !== "admin") {
-                console.log(req.user.id);
-                throw new Error(`you're not allowed to perform this operation`);
-            }
             else {
                 request.acceptedBy = req.user.id;
             }

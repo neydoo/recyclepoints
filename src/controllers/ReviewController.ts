@@ -10,7 +10,7 @@ import {
 import { AbstractController } from "./AbstractController";
 import { RequestRepository as Repository } from "../abstract/RequestRepository";
 import { checkJwt } from "../middleware/auth";
-import { ReviewM } from "../models/Review";
+import { ReviewM, Review } from "../models/Review";
 import { ReviewService } from "../service/ReviewService";
 
 @Controller("api/review")
@@ -68,7 +68,7 @@ export class ReviewController extends AbstractController {
   @Get(":reviewId")
   public async findRequest(req: Request, res: Response): Promise<void> {
     try {
-      const review: ReviewM = await this.repository.findById(
+      const review = await Review.findById(
         req.params.reviewId
       );
 

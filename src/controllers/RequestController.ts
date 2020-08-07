@@ -215,19 +215,46 @@ export class RequestController extends AbstractController {
   @Get(":requestId")
   public async findRequest(req: Request, res: Response): Promise<void> {
     try {
-      const request: any = await ItemRequest.findById(req.params.requestId)
+      const request: any = await ItemRequest.find({ id: req.params.requestId })
         .populate("requestedBy")
-        .populate("acceptedBy");
+        .populate("acceptedBy")
+        .populate("resolvedBy");
+      const data: any[] = [];
+      // const requests: any[] = [];
+      if (request.length) {
+        const requestPromise = request.map(async (r: any) => {
+          let rData = Object.assign({}, r._doc);
+          if (r?.type === "redemption") {
+            const transaction = await RecyclePointRecord.findOne({
+              transactionId: r.id,
+              type: "deduction",
+            });
+            rData.transaction = transaction;
+            const rIds = r.redemptionItems.map((r: any) => r.id);
+            const redemptionItems = await RedemptionItem.find({ _id: rIds });
+            const items: any[] = [];
+            // console.log(r.redemptionItems, rIds);
+            const formatted = redemptionItems.map(async (item: any) => {
+              const thisData = Object.assign({}, item._doc);
+              // console.log(item);
+              const stuff = r.redemptionItems.map((i: any) => {
+                console.log(item._id.toString(), i.id.toString());
+                if (item._id.toString() == i.id.toString()) {
+                  thisData.quantity = i.quantity;
+                }
+              });
+              return items.push(thisData);
+            });
+            await Promise.all(formatted);
+            rData.redemptionItems = items;
+          }
 
-      if (request?.type === "redemption") {
-        const transaction = await RecyclePointRecord.findOne({
-          transactionId: request.id,
-          type: "deduction",
+          data.push(rData);
         });
-        request.transaction = transaction;
+        await Promise.all(requestPromise);
       }
 
-      res.status(200).json({ success: true, data: request });
+      res.status(200).json({ success: true, data: [data] });
     } catch (error) {
       res.status(400).json({ success: false, error, message: error.message });
     }
@@ -301,37 +328,56 @@ export class RequestController extends AbstractController {
       if (type) {
         criteria.type = type;
       }
-
       if (startDate) {
         criteria.createdAt = {
-          $lte: endDate ? endDate : moment(),
           $gte: startDate,
+          $lte: endDate ? endDate : moment(),
         };
       }
 
       if (status) {
         criteria.status = status;
       }
-      const data = await ItemRequest.find(criteria)
+
+      const request: any = await ItemRequest.find(criteria)
+        .populate("requestedBy")
         .populate("acceptedBy")
-        .populate("requestedBy");
-
-      await Promise.all(
-        data.map(async (datum) => {
-          if (datum.type === "redemption") {
-            const datumIds = datum.redemptionItems?.map((i) => i.id);
-            datum.redemptionItems = await RedemptionItem.find({
-              _id: datumIds,
+        .populate("resolvedBy");
+      const data: any[] = [];
+      // const requests: any[] = [];
+      if (request.length) {
+        const requestPromise = request.map(async (r: any) => {
+          let rData = Object.assign({}, r._doc);
+          if (r?.type === "redemption") {
+            const transaction = await RecyclePointRecord.findOne({
+              transactionId: r.id,
+              type: "deduction",
             });
+            rData.transaction = transaction;
+            const rIds = r.redemptionItems.map((r: any) => r.id);
+            const redemptionItems = await RedemptionItem.find({ _id: rIds });
+            const items: any[] = [];
+            // console.log(r.redemptionItems, rIds);
+            const formatted = redemptionItems.map(async (item: any) => {
+              const thisData = Object.assign({}, item._doc);
+              // console.log(item);
+              const stuff = r.redemptionItems.map((i: any) => {
+                console.log(item._id.toString(), i.id.toString());
+                if (item._id.toString() == i.id.toString()) {
+                  thisData.quantity = i.quantity;
+                }
+              });
+              return items.push(thisData);
+            });
+            await Promise.all(formatted);
+            rData.redemptionItems = items;
           }
-        })
-      );
+          data.push(rData);
+        });
+        await Promise.all(requestPromise);
+      }
 
-      // const pagination = new PaginationService();
-
-      // pagination.paginate(ItemRequest,res,1,2,criteria)
-
-      res.status(200).json({ success: true, data });
+      res.status(200).send({ success: true, data });
     } catch (error) {
       res.status(400).json({ success: false, error, message: error.message });
     }
@@ -529,13 +575,16 @@ export class RequestController extends AbstractController {
   @Get("ongoing/user")
   public async getOngoing(req: any, res: Response): Promise<void> {
     try {
-      const userId = req.params.userId ? req.params.userId : req.user.id;
-
+      const userId = req.query.userId ? req.query.userId : req.user.id;
+      console.log(userId);
       const request = await ItemRequest.findOne({
         isDeleted: false,
         requestedBy: userId,
         type: "recycle",
-        status: { $ne: Status.Completed },
+        $and: [
+          { status: { $ne: Status.Completed } },
+          { status: { $ne: Status.Cancelled } },
+        ],
       })
         .populate("acceptedBy")
         .sort("asc");

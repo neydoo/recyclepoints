@@ -194,17 +194,41 @@ let RequestController = class RequestController extends AbstractController_1.Abs
     findRequest(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const request = yield Request_1.Request.findById(req.params.requestId)
+                const request = yield Request_1.Request.find({ id: req.params.requestId })
                     .populate("requestedBy")
-                    .populate("acceptedBy");
-                if ((request === null || request === void 0 ? void 0 : request.type) === "redemption") {
-                    const transaction = yield RecyclePointRecord_1.RecyclePointRecord.findOne({
-                        transactionId: request.id,
-                        type: "deduction",
-                    });
-                    request.transaction = transaction;
+                    .populate("acceptedBy")
+                    .populate("resolvedBy");
+                const data = [];
+                if (request.length) {
+                    const requestPromise = request.map((r) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+                        let rData = Object.assign({}, r._doc);
+                        if ((r === null || r === void 0 ? void 0 : r.type) === "redemption") {
+                            const transaction = yield RecyclePointRecord_1.RecyclePointRecord.findOne({
+                                transactionId: r.id,
+                                type: "deduction",
+                            });
+                            rData.transaction = transaction;
+                            const rIds = r.redemptionItems.map((r) => r.id);
+                            const redemptionItems = yield RedemptionItem_1.RedemptionItem.find({ _id: rIds });
+                            const items = [];
+                            const formatted = redemptionItems.map((item) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+                                const thisData = Object.assign({}, item._doc);
+                                const stuff = r.redemptionItems.map((i) => {
+                                    console.log(item._id.toString(), i.id.toString());
+                                    if (item._id.toString() == i.id.toString()) {
+                                        thisData.quantity = i.quantity;
+                                    }
+                                });
+                                return items.push(thisData);
+                            }));
+                            yield Promise.all(formatted);
+                            rData.redemptionItems = items;
+                        }
+                        data.push(rData);
+                    }));
+                    yield Promise.all(requestPromise);
                 }
-                res.status(200).json({ success: true, data: request });
+                res.status(200).json({ success: true, data: [data] });
             }
             catch (error) {
                 res.status(400).json({ success: false, error, message: error.message });
@@ -272,26 +296,48 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                 }
                 if (startDate) {
                     criteria.createdAt = {
-                        $lte: endDate ? endDate : moment(),
                         $gte: startDate,
+                        $lte: endDate ? endDate : moment(),
                     };
                 }
                 if (status) {
                     criteria.status = status;
                 }
-                const data = yield Request_1.Request.find(criteria)
+                const request = yield Request_1.Request.find(criteria)
+                    .populate("requestedBy")
                     .populate("acceptedBy")
-                    .populate("requestedBy");
-                yield Promise.all(data.map((datum) => tslib_1.__awaiter(this, void 0, void 0, function* () {
-                    var _a;
-                    if (datum.type === "redemption") {
-                        const datumIds = (_a = datum.redemptionItems) === null || _a === void 0 ? void 0 : _a.map((i) => i.id);
-                        datum.redemptionItems = yield RedemptionItem_1.RedemptionItem.find({
-                            _id: datumIds,
-                        });
-                    }
-                })));
-                res.status(200).json({ success: true, data });
+                    .populate("resolvedBy");
+                const data = [];
+                if (request.length) {
+                    const requestPromise = request.map((r) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+                        let rData = Object.assign({}, r._doc);
+                        if ((r === null || r === void 0 ? void 0 : r.type) === "redemption") {
+                            const transaction = yield RecyclePointRecord_1.RecyclePointRecord.findOne({
+                                transactionId: r.id,
+                                type: "deduction",
+                            });
+                            rData.transaction = transaction;
+                            const rIds = r.redemptionItems.map((r) => r.id);
+                            const redemptionItems = yield RedemptionItem_1.RedemptionItem.find({ _id: rIds });
+                            const items = [];
+                            const formatted = redemptionItems.map((item) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+                                const thisData = Object.assign({}, item._doc);
+                                const stuff = r.redemptionItems.map((i) => {
+                                    console.log(item._id.toString(), i.id.toString());
+                                    if (item._id.toString() == i.id.toString()) {
+                                        thisData.quantity = i.quantity;
+                                    }
+                                });
+                                return items.push(thisData);
+                            }));
+                            yield Promise.all(formatted);
+                            rData.redemptionItems = items;
+                        }
+                        data.push(rData);
+                    }));
+                    yield Promise.all(requestPromise);
+                }
+                res.status(200).send({ success: true, data });
             }
             catch (error) {
                 res.status(400).json({ success: false, error, message: error.message });
@@ -475,12 +521,16 @@ let RequestController = class RequestController extends AbstractController_1.Abs
     getOngoing(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const userId = req.params.userId ? req.params.userId : req.user.id;
+                const userId = req.query.userId ? req.query.userId : req.user.id;
+                console.log(userId);
                 const request = yield Request_1.Request.findOne({
                     isDeleted: false,
                     requestedBy: userId,
                     type: "recycle",
-                    status: { $ne: Request_1.Status.Completed },
+                    $and: [
+                        { status: { $ne: Request_1.Status.Completed } },
+                        { status: { $ne: Request_1.Status.Cancelled } },
+                    ],
                 })
                     .populate("acceptedBy")
                     .sort("asc");
