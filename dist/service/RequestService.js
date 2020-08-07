@@ -137,9 +137,8 @@ class RequestService {
             }
             request.status = Request_1.Status.Accepted;
             yield request.save();
-            const user = (yield User_1.User.findById(req.user.id));
-            this.core.activityLog(req, user.id, "Update request");
-            return request;
+            const data = yield Request_1.Request.findById(req.params.id).populate("acceptedBy");
+            return data;
         });
     }
     deductPoints(points, requestId, user, details) {

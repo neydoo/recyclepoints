@@ -140,17 +140,26 @@ class UserService {
     cloudinaryUploader(image) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                console.log(image);
                 cloudinary_1.v2.config(clodConfig);
-                const formattedImage = `data:image/png;base64,${image}`;
+                const formattedImage = this.checkbase64(image)
+                    ? image
+                    : `data:image/png;base64,${image}`;
                 const url = yield cloudinary_1.v2.uploader.upload(formattedImage);
-                console.log(url);
                 return url.secure_url;
             }
             catch (error) {
                 console.log(error);
             }
         });
+    }
+    checkbase64(str) {
+        var base64Matcher = new RegExp("^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})$");
+        if (base64Matcher.test(str)) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 }
 exports.UserService = UserService;

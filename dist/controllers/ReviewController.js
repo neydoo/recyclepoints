@@ -16,7 +16,7 @@ let ReviewController = class ReviewController extends AbstractController_1.Abstr
     index(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const review = yield this.repository.findAll();
+                const review = yield Review_1.Review.find({});
                 res.status(200).send({ success: true, data: review });
             }
             catch (error) {
@@ -28,9 +28,7 @@ let ReviewController = class ReviewController extends AbstractController_1.Abstr
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 const review = yield this.review.create(req);
-                res
-                    .status(200)
-                    .json({
+                res.status(200).json({
                     success: true,
                     review,
                     message: "review created successfully!",
@@ -45,9 +43,7 @@ let ReviewController = class ReviewController extends AbstractController_1.Abstr
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 const review = yield this.repository.update(req);
-                res
-                    .status(200)
-                    .json({
+                res.status(200).json({
                     success: true,
                     review,
                     message: "review updated successfully",
