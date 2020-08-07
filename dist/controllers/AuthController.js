@@ -106,6 +106,7 @@ let AuthController = class AuthController {
                 if (user) {
                     const password = UtilService_1.UtilService.generate(5);
                     user.password = bcrypt.hashSync(password);
+                    user.otp = password;
                     const notification = new NotificationsService_1.default();
                     yield user.save();
                     yield notification.sendForgetSMS(user.phone, password);

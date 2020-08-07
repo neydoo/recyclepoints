@@ -194,7 +194,7 @@ let RequestController = class RequestController extends AbstractController_1.Abs
     findRequest(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const request = yield Request_1.Request.find({ id: req.params.requestId })
+                const request = yield Request_1.Request.find({ _id: req.params.requestId })
                     .populate("requestedBy")
                     .populate("acceptedBy")
                     .populate("resolvedBy");
@@ -222,13 +222,14 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                                 return items.push(thisData);
                             }));
                             yield Promise.all(formatted);
+                            console.log("here");
                             rData.redemptionItems = items;
                         }
                         data.push(rData);
                     }));
                     yield Promise.all(requestPromise);
                 }
-                res.status(200).json({ success: true, data: [data] });
+                res.status(200).json({ success: true, data: data[0] });
             }
             catch (error) {
                 res.status(400).json({ success: false, error, message: error.message });

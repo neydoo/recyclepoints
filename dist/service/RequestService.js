@@ -27,8 +27,11 @@ class RequestService {
                 throw new Error("invalid user");
             payload.requestedBy = req.user.id;
             const user = yield User_1.User.findById(req.user.id);
-            if (!(user === null || user === void 0 ? void 0 : user.address))
-                throw new Error("please add address information");
+            if (!(user === null || user === void 0 ? void 0 : user.address) && payload.deliveryAddress)
+                if (user) {
+                    user.address = payload.deliveryAddress;
+                    yield user.save();
+                }
             console.log("start create request");
             if (!payload.type) {
                 throw new Error("invalid request type");
