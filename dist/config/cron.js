@@ -67,9 +67,9 @@ cron.schedule("01 30 07 * * *", () => tslib_1.__awaiter(void 0, void 0, void 0, 
     scheduled: true,
     timezone: "Europe/Zagreb",
 });
-cron.schedule("30 05 06 * * *", () => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+cron.schedule("30 36 10 * * *", () => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
     const today = moment().startOf("day");
-    console.log(`mark inactive users`);
+    console.log(`mark inactive users ${today}`);
     const users = yield User_1.User.find({ isDeleted: false });
     const promise = users.map((user) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
         try {

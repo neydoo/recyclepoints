@@ -613,7 +613,7 @@ export class RequestController extends AbstractController {
       const { month } = req.params;
       const numberOfWeeks = moment(month).daysInMonth() / 7;
       const firstWeek = moment(month).startOf("month");
-      const endFirstWeek = moment(month).startOf("month");
+      const endFirstWeek = moment(firstWeek).endOf("week");
 
       const recycleGraph = allRecycles.map(async (recycle: any) => {
         for (let i = 0; i < numberOfWeeks; i++) {

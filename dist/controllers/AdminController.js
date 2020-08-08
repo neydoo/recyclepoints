@@ -24,6 +24,7 @@ let AdminController = class AdminController extends AbstractController_1.Abstrac
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 console.log("here");
+                const today = moment();
                 const data = {
                     recycler: { total: 0, active: 0 },
                     buster: { total: 0, active: 0 },
@@ -99,35 +100,31 @@ let AdminController = class AdminController extends AbstractController_1.Abstrac
                     isDeleted: false,
                     type: "recycle",
                 });
-                const janStart = moment().startOf("year");
-                const janEnd = janStart.endOf("month");
-                const febStart = janStart.add(1, "month");
-                const febEnd = febStart.endOf("month");
-                const marchStart = febStart.add(1, "month");
-                const marchEnd = marchStart.endOf("month");
-                const aprStart = marchStart.add(1, "month");
-                const aprEnd = aprStart.endOf("month");
-                const mayStart = aprStart.add(1, "month");
-                const mayEnd = mayStart.endOf("month");
-                const junStart = mayStart.add(1, "month");
-                const junEnd = junStart.endOf("month");
-                const julStart = junStart.add(1, "month");
-                const julEnd = julStart.endOf("month");
-                const augStart = julStart.add(1, "month");
-                const augEnd = augStart.endOf("month");
-                const sepStart = augStart.add(1, "month");
-                const sepEnd = sepStart.endOf("month");
-                const octStart = sepStart.add(1, "month");
-                const octEnd = octStart.endOf("month");
-                const novStart = sepStart.add(1, "month");
-                const novEnd = novStart.endOf("month");
-                const decStart = novStart.add(1, "month");
-                const decEnd = decStart.endOf("month");
-                console.log(allRecycles.length);
-                console.log(janStart, janEnd);
+                const janStart = moment(today).startOf("year").toDate();
+                const janEnd = moment(janStart).endOf("month");
+                const febStart = moment(janStart).add(1, "month");
+                const febEnd = moment(febStart).endOf("month");
+                const marchStart = moment(febStart).add(1, "month");
+                const marchEnd = moment(marchStart).endOf("month");
+                const aprStart = moment(marchStart).add(1, "month");
+                const aprEnd = moment(aprStart).endOf("month");
+                const mayStart = moment(aprStart).add(1, "month");
+                const mayEnd = moment(mayStart).endOf("month");
+                const junStart = moment(mayStart).add(1, "month");
+                const junEnd = moment(junStart).endOf("month");
+                const julStart = moment(junStart).add(1, "month");
+                const julEnd = moment(julStart).endOf("month");
+                const augStart = moment(julStart).add(1, "month");
+                const augEnd = moment(augStart).endOf("month");
+                const sepStart = moment(augStart).add(1, "month");
+                const sepEnd = moment(sepStart).endOf("month");
+                const octStart = moment(sepStart).add(1, "month");
+                const octEnd = moment(octStart).endOf("month");
+                const novStart = moment(sepStart).add(1, "month");
+                const novEnd = moment(novStart).endOf("month");
+                const decStart = moment(novStart).add(1, "month");
+                const decEnd = moment(decStart).endOf("month");
                 const recycleGraph = allRecycles.map((recycle) => tslib_1.__awaiter(this, void 0, void 0, function* () {
-                    if (recycle.status == "completed")
-                        console.log(recycle);
                     if (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) {
                         if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= janStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= janEnd)
                             data.monthlyRecycle.jan += 1;
@@ -144,10 +141,8 @@ let AdminController = class AdminController extends AbstractController_1.Abstrac
                             data.monthlyRecycle.jun += 1;
                         if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= julStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= julEnd)
                             data.monthlyRecycle.jul += 1;
-                        if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= augStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= augEnd) {
-                            console.log("here");
+                        if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= augStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= augEnd)
                             data.monthlyRecycle.aug += 1;
-                        }
                         if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= sepStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= sepEnd)
                             data.monthlyRecycle.sep += 1;
                         if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= octStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= octEnd)

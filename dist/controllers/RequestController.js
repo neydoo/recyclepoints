@@ -559,7 +559,7 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                 const { month } = req.params;
                 const numberOfWeeks = moment(month).daysInMonth() / 7;
                 const firstWeek = moment(month).startOf("month");
-                const endFirstWeek = moment(month).startOf("month");
+                const endFirstWeek = moment(firstWeek).endOf("week");
                 const recycleGraph = allRecycles.map((recycle) => tslib_1.__awaiter(this, void 0, void 0, function* () {
                     for (let i = 0; i < numberOfWeeks; i++) {
                         if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= firstWeek.add(i, "week") &&
