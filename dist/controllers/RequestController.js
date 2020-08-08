@@ -550,21 +550,37 @@ let RequestController = class RequestController extends AbstractController_1.Abs
     getGraph(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const weeklyRecycle = {};
+                const weeklyRecycle = {
+                    week1: 0,
+                    week2: 0,
+                    week3: 0,
+                    week4: 0,
+                    week5: 0,
+                };
+                const { month } = req.query;
+                const monthStart = moment(month).startOf("month");
+                const monthEnd = moment(month).endOf("month");
                 let allRecycles = yield Request_1.Request.find({
                     isDeleted: false,
                     type: "recycle",
                     requestedBy: req.params.id,
+                    createdAt: {
+                        $gte: monthStart,
+                        $lte: monthEnd,
+                    },
                 });
-                const { month } = req.params;
                 const numberOfWeeks = moment(month).daysInMonth() / 7;
                 const firstWeek = moment(month).startOf("month");
-                const endFirstWeek = moment(firstWeek).endOf("week");
+                const endFirstWeek = moment(firstWeek).add(7, "days");
+                console.log("hi", allRecycles);
                 const recycleGraph = allRecycles.map((recycle) => tslib_1.__awaiter(this, void 0, void 0, function* () {
                     for (let i = 0; i < numberOfWeeks; i++) {
-                        if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= firstWeek.add(i, "week") &&
-                            (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= endFirstWeek.add(i, "week")) {
+                        console.log("hi", moment(firstWeek).add(i, "week"));
+                        console.log("hi2", moment(endFirstWeek).add(i, "week"));
+                        if (moment(recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= moment(firstWeek).add(i, "week") &&
+                            moment(recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= moment(endFirstWeek).add(i, "week")) {
                             weeklyRecycle[`week${i + 1}`] += 1;
+                            console.log(i, weeklyRecycle);
                         }
                     }
                 }));

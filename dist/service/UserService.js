@@ -123,12 +123,13 @@ class UserService {
     update(req) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const userPayload = req.body;
+            const userToUpdate = yield User_1.User.findById(req.params.id);
             if (userPayload.password) {
                 userPayload.password = bcrypt.hashSync(req.body.password);
             }
             if (userPayload.phone) {
                 const existingPhone = yield User_1.User.findOne({ phone: userPayload.phone });
-                if (existingPhone)
+                if (existingPhone && existingPhone.id !== (userToUpdate === null || userToUpdate === void 0 ? void 0 : userToUpdate.id))
                     throw new Error("user with phonenumber already exists");
             }
             const { oldPassword, newPassword, confirmPassword } = req.body;
@@ -161,12 +162,13 @@ class UserService {
     updateWeb(req) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const userPayload = req.body;
+            const userToUpdate = yield User_1.User.findById(req.params.id);
             if (userPayload.password) {
                 userPayload.password = bcrypt.hashSync(req.body.password);
             }
             if (userPayload.phone) {
                 const existingPhone = yield User_1.User.findOne({ phone: userPayload.phone });
-                if (existingPhone)
+                if (existingPhone && existingPhone.id !== (userToUpdate === null || userToUpdate === void 0 ? void 0 : userToUpdate.id))
                     throw new Error("user with phonenumber already exists");
             }
             const { oldPassword, newPassword, confirmPassword } = req.body;

@@ -165,6 +165,7 @@ let UserController = class UserController extends AbstractController_1.AbstractC
                     redemptions: 0,
                     points: 0,
                     rating: 0,
+                    uniqueRecyclers: 0
                 };
                 let data = Object.assign({}, user._doc);
                 if (user.designation === User_1.Designation.Staff) {
@@ -174,6 +175,23 @@ let UserController = class UserController extends AbstractController_1.AbstractC
                     });
                 }
                 if (user.designation === User_1.Designation.Buster) {
+                    const allBusts = yield Request_1.Request.find({
+                        acceptedBy: user.id,
+                        isDeleted: false,
+                        type: "recycle",
+                        $and: [
+                            {
+                                status: { $ne: Request_1.Status.Pending },
+                            },
+                            { status: { $ne: Request_1.Status.Cancelled } },
+                        ],
+                    });
+                    const uniqByProp_map = (prop) => (arr) => Array.from(arr
+                        .reduce((acc, item) => (item && item[prop] && acc.set(item[prop], item), acc), new Map())
+                        .values());
+                    const uniqueById = uniqByProp_map("id");
+                    const unifiedArray = uniqueById(allBusts);
+                    meta.uniqueRecyclers = unifiedArray.length;
                     meta.activity = yield Request_1.Request.count({
                         acceptedBy: user.id,
                         isDeleted: false,

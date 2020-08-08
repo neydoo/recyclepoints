@@ -93,6 +93,7 @@ let VerificationController = class VerificationController extends AbstractContro
                     itemrequest.points = points;
                 }
                 itemrequest.status = Request_1.Status.Completed;
+                itemrequest.resolvedBy = req.user.id;
                 itemrequest.items = items;
                 yield itemrequest.save();
                 yield UserNotification_1.UserNotification.create({
@@ -135,7 +136,7 @@ let VerificationController = class VerificationController extends AbstractContro
     getData(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const { PET, UBC, ONP, BCC, GBS, PWS, name, arrivalTime, startDate, endDate, pay, userId } = req.query;
+                const { PET, UBC, ONP, BCC, GBS, PWS, name, arrivalTime, startDate, endDate, pay, userId, } = req.query;
                 const criteria = {};
                 const subCriteria = {};
                 let users = [];
@@ -168,7 +169,7 @@ let VerificationController = class VerificationController extends AbstractContro
                         $lte: endDate ? endDate : moment(),
                     };
                 }
-                const sorting = yield Verification_1.Verification.find(criteria).populate("user");
+                const sorting = yield Verification_1.Verification.find(criteria).populate('user');
                 const sortingPromise = sorting.map((sort) => {
                     const item = {};
                     if (UBC) {

@@ -176,13 +176,14 @@ export class UserService {
 
   public async update(req: any): Promise<any> {
     const userPayload: IUserM = req.body;
+    const userToUpdate = await User.findById(req.params.id);
 
     if (userPayload.password) {
       userPayload.password = bcrypt.hashSync(req.body.password);
     }
     if (userPayload.phone) {
       const existingPhone = await User.findOne({ phone: userPayload.phone });
-      if (existingPhone)
+      if (existingPhone && existingPhone.id !== userToUpdate?.id)
         throw new Error("user with phonenumber already exists");
     }
 
@@ -227,13 +228,14 @@ export class UserService {
   }
   public async updateWeb(req: any): Promise<any> {
     const userPayload: IUserM = req.body;
+    const userToUpdate = await User.findById(req.params.id);
 
     if (userPayload.password) {
       userPayload.password = bcrypt.hashSync(req.body.password);
     }
     if (userPayload.phone) {
       const existingPhone = await User.findOne({ phone: userPayload.phone });
-      if (existingPhone)
+      if (existingPhone && existingPhone.id !== userToUpdate?.id)
         throw new Error("user with phonenumber already exists");
     }
 

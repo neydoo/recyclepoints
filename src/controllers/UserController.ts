@@ -192,6 +192,7 @@ export class UserController extends AbstractController {
         redemptions: 0,
         points: 0,
         rating: 0,
+        uniqueRecyclers: 0
       };
       let data = Object.assign({}, user._doc);
 
@@ -202,6 +203,36 @@ export class UserController extends AbstractController {
         });
       }
       if (user.designation === Designation.Buster) {
+        const allBusts = await ItemRequest.find({
+          acceptedBy: user.id,
+          isDeleted: false,
+          type: "recycle",
+          $and: [
+            {
+              status: { $ne: Status.Pending },
+            },
+            { status: { $ne: Status.Cancelled } },
+          ],
+        });
+        const uniqByProp_map = (prop: any) => (arr: any[]) =>
+          Array.from(
+            arr
+              .reduce(
+                (acc, item) => (
+                  item && item[prop] && acc.set(item[prop], item), acc
+                ), // using map (preserves ordering)
+                new Map()
+              )
+              .values()
+          );
+
+        // usage (still the same):
+
+        const uniqueById = uniqByProp_map("id");
+
+        const unifiedArray = uniqueById(allBusts);
+        meta.uniqueRecyclers = unifiedArray.length
+
         meta.activity = await ItemRequest.count({
           acceptedBy: user.id,
           isDeleted: false,

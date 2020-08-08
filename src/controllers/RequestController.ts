@@ -602,26 +602,44 @@ export class RequestController extends AbstractController {
   @Get("graph/user/:id")
   public async getGraph(req: any, res: Response): Promise<void> {
     try {
-      const weeklyRecycle: any = {};
+      const weeklyRecycle: any = {
+        week1: 0,
+        week2: 0,
+        week3: 0,
+        week4: 0,
+        week5: 0,
+      };
+      const { month } = req.query;
+
+      const monthStart = moment(month).startOf("month");
+      const monthEnd = moment(month).endOf("month");
 
       let allRecycles = await ItemRequest.find({
         isDeleted: false,
         type: "recycle",
         requestedBy: req.params.id,
+        createdAt: {
+          $gte: monthStart,
+          $lte: monthEnd,
+        },
       });
 
-      const { month } = req.params;
       const numberOfWeeks = moment(month).daysInMonth() / 7;
       const firstWeek = moment(month).startOf("month");
-      const endFirstWeek = moment(firstWeek).endOf("week");
+      const endFirstWeek = moment(firstWeek).add(7, "days");
 
+      console.log("hi", allRecycles);
       const recycleGraph = allRecycles.map(async (recycle: any) => {
         for (let i = 0; i < numberOfWeeks; i++) {
+          console.log("hi", moment(firstWeek).add(i, "week"));
+          console.log("hi2", moment(endFirstWeek).add(i, "week"));
+          // console.log(i, weeklyRecycle);
           if (
-            recycle?.createdAt >= firstWeek.add(i, "week") &&
-            recycle?.createdAt <= endFirstWeek.add(i, "week")
+            moment(recycle?.createdAt) >= moment(firstWeek).add(i, "week") &&
+            moment(recycle?.createdAt) <= moment(endFirstWeek).add(i, "week")
           ) {
             weeklyRecycle[`week${i + 1}`] += 1;
+            console.log(i, weeklyRecycle);
           }
         }
       });
