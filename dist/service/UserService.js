@@ -111,6 +111,44 @@ class UserService {
             }
         });
     }
+    updateWeb(req) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const userPayload = req.body;
+            if (userPayload.password) {
+                userPayload.password = bcrypt.hashSync(req.body.password);
+            }
+            if (userPayload.phone) {
+                const existingPhone = yield User_1.User.findOne({ phone: userPayload.phone });
+                if (existingPhone)
+                    throw new Error("user with phonenumber already exists");
+            }
+            const { oldPassword, newPassword, confirmPassword } = req.body;
+            if (oldPassword) {
+                let user = yield User_1.User.findOne({ _id: req.user.id }).select("+password");
+                if (user) {
+                    if (confirmPassword && confirmPassword !== newPassword)
+                        throw new Error("passwords do not match");
+                    if (!user.comparePassword(oldPassword))
+                        throw new Error("invalid old password");
+                    user.password = bcrypt.hashSync(newPassword);
+                    yield user.save();
+                }
+            }
+            else {
+                const existingUser = yield this.repository.findById(req.params.userId);
+                if (existingUser === null || existingUser === void 0 ? void 0 : existingUser.firstTimeLogin)
+                    userPayload.firstTimeLogin = false;
+                const user = yield this.repository.updateData(req.params.userId, userPayload);
+                user
+                    ? (user.profileImage = req.body.profileImage
+                        ? yield this.base64Uploader(req.body.profileImage)
+                        : user === null || user === void 0 ? void 0 : user.profileImage)
+                    : null;
+                yield (user === null || user === void 0 ? void 0 : user.save());
+                return user;
+            }
+        });
+    }
     resetPassword(req) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const user = yield this.repository.findOne({
@@ -141,9 +179,7 @@ class UserService {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 cloudinary_1.v2.config(clodConfig);
-                const formattedImage = this.checkbase64(image)
-                    ? image
-                    : `data:image/png;base64,${image}`;
+                const formattedImage = `data:image/png;base64,${image}`;
                 const url = yield cloudinary_1.v2.uploader.upload(formattedImage);
                 return url.secure_url;
             }
@@ -152,14 +188,17 @@ class UserService {
             }
         });
     }
-    checkbase64(str) {
-        var base64Matcher = new RegExp("^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})$");
-        if (base64Matcher.test(str)) {
-            return true;
-        }
-        else {
-            return false;
-        }
+    base64Uploader(image) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            try {
+                cloudinary_1.v2.config(clodConfig);
+                const url = yield cloudinary_1.v2.uploader.upload(image);
+                return url.secure_url;
+            }
+            catch (error) {
+                console.log(error);
+            }
+        });
     }
 }
 exports.UserService = UserService;

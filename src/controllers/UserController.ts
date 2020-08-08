@@ -140,6 +140,22 @@ export class UserController extends AbstractController {
       res.status(400).json({ success: false, error, message: error.message });
     }
   }
+
+  @Put("update-user/:userId")
+  public async updateUserWeb(req: Request, res: Response): Promise<void> {
+    try {
+      const user: IUserM = await this.user.updateWeb(req);
+
+      res.status(200).json({
+        success: true,
+        data: user,
+        message: "user updated successfully",
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(400).json({ success: false, error, message: error.message });
+    }
+  }
   @Get("points")
   public async getUserPoints(req: any, res: Response) {
     try {

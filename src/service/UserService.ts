@@ -155,6 +155,57 @@ export class UserService {
     //   )
     // );
   }
+  public async updateWeb(req: any): Promise<any> {
+    const userPayload: IUserM = req.body;
+
+    if (userPayload.password) {
+      userPayload.password = bcrypt.hashSync(req.body.password);
+    }
+    if (userPayload.phone) {
+      const existingPhone = await User.findOne({ phone: userPayload.phone });
+      if (existingPhone)
+        throw new Error("user with phonenumber already exists");
+    }
+
+    const { oldPassword, newPassword, confirmPassword } = req.body;
+
+    // if (!oldPassword || !newPassword) throw new Error("missing parameters");
+    if (oldPassword) {
+      let user = await User.findOne({ _id: req.user.id }).select("+password");
+      if (user) {
+        if (confirmPassword && confirmPassword !== newPassword)
+          throw new Error("passwords do not match");
+        if (!user.comparePassword(oldPassword))
+          throw new Error("invalid old password");
+
+        user.password = bcrypt.hashSync(newPassword);
+        await user.save();
+      }
+    } else {
+      const existingUser = await this.repository.findById(req.params.userId);
+      if (existingUser?.firstTimeLogin) userPayload.firstTimeLogin = false;
+      const user = await this.repository.updateData(
+        req.params.userId,
+        userPayload
+      );
+
+      user
+        ? (user.profileImage = req.body.profileImage
+            ? await this.base64Uploader(req.body.profileImage)
+            : user?.profileImage)
+        : null;
+      await user?.save();
+      return user;
+    }
+
+    // this.core.Email(
+    //   user,
+    //   "Profile Updated",
+    //   this.core.html(
+    //     `<p style="color: #000">Hello ${user.firstName} ${user.lastName}, \n\r Your profile has been updated successfully. </p>`
+    //   )
+    // );
+  }
 
   public async resetPassword(req: any) {
     const user = await this.repository.findOne({
@@ -199,9 +250,7 @@ export class UserService {
     try {
       cloudinary.config(clodConfig);
 
-      const formattedImage = this.checkbase64(image)
-        ? image
-        : `data:image/png;base64,${image}`;
+      const formattedImage = `data:image/png;base64,${image}`;
       const url = await cloudinary.uploader.upload(formattedImage);
 
       return url.secure_url;
@@ -210,19 +259,15 @@ export class UserService {
     }
   }
 
-  public checkbase64(str: string) {
-    var base64Matcher = new RegExp(
-      "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})$"
-    );
+  public async base64Uploader(image: any) {
+    try {
+      cloudinary.config(clodConfig);
 
-    // ...
+      const url = await cloudinary.uploader.upload(image);
 
-    if (base64Matcher.test(str)) {
-      // It's likely base64 encoded.
-      return true;
-    } else {
-      // It's definitely not base64 encoded.
-      return false;
+      return url.secure_url;
+    } catch (error) {
+      console.log(error);
     }
   }
 }

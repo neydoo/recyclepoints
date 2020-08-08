@@ -122,6 +122,22 @@ let UserController = class UserController extends AbstractController_1.AbstractC
             }
         });
     }
+    updateUserWeb(req, res) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            try {
+                const user = yield this.user.updateWeb(req);
+                res.status(200).json({
+                    success: true,
+                    data: user,
+                    message: "user updated successfully",
+                });
+            }
+            catch (error) {
+                console.log(error);
+                res.status(400).json({ success: false, error, message: error.message });
+            }
+        });
+    }
     getUserPoints(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
@@ -304,6 +320,12 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
 ], UserController.prototype, "updateUser", null);
+tslib_1.__decorate([
+    core_1.Put("update-user/:userId"),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object, Object]),
+    tslib_1.__metadata("design:returntype", Promise)
+], UserController.prototype, "updateUserWeb", null);
 tslib_1.__decorate([
     core_1.Get("points"),
     tslib_1.__metadata("design:type", Function),
