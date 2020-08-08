@@ -444,7 +444,9 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                         $lte: endDate ? endDate : moment(),
                     };
                 }
-                const request = yield Request_1.Request.find(criteria);
+                const request = yield Request_1.Request.find(criteria)
+                    .populate("acceptedBy")
+                    .populate("requestdBy");
                 res.status(200).json({ success: true, data: request });
             }
             catch (error) {

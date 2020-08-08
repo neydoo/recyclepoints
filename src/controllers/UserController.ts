@@ -23,6 +23,7 @@ import { DailySorting } from "../models/DailySorting";
 import { Bale } from "../models/Bale";
 import { Verification } from "../models/Verification";
 import { RecyclePoint } from "../models/RecyclePoint";
+import { Review } from "../models/Review";
 
 @Controller("api/users")
 @ClassMiddleware([checkJwt])
@@ -162,7 +163,13 @@ export class UserController extends AbstractController {
       const user: any = await this.repository.findById(req.params.userId);
       // let data: any = user;
       // console.log(user);
-      const meta = { activity: 0, recycles: 0, redemptions: 0, points: 0 };
+      const meta = {
+        activity: 0,
+        recycles: 0,
+        redemptions: 0,
+        points: 0,
+        rating: 0,
+      };
       let data = Object.assign({}, user._doc);
 
       if (user.designation === Designation.Staff) {
@@ -177,6 +184,14 @@ export class UserController extends AbstractController {
           isDeleted: false,
           status: Status.Collected,
         });
+
+        const reviews = await Review.find({ buster: user.id });
+        const ratings = reviews.reduce(
+          (curr, review) => curr + review.rating,
+          0
+        );
+
+        meta.rating = ratings / reviews.length;
       }
 
       if (user.designation === Designation.Client) {

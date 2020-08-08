@@ -78,7 +78,7 @@ export class ReviewController extends AbstractController {
     res: Response
   ): Promise<void> {
     try {
-      const review: ReviewM = await this.repository.findAll({
+      const review: ReviewM[] = await Review.find({
         buster: req.params.id,
       });
 

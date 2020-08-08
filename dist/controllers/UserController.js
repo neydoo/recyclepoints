@@ -18,6 +18,7 @@ const DailySorting_1 = require("../models/DailySorting");
 const Bale_1 = require("../models/Bale");
 const Verification_1 = require("../models/Verification");
 const RecyclePoint_1 = require("../models/RecyclePoint");
+const Review_1 = require("../models/Review");
 let UserController = class UserController extends AbstractController_1.AbstractController {
     constructor() {
         super(new UserRepository_1.UserRepository());
@@ -142,7 +143,13 @@ let UserController = class UserController extends AbstractController_1.AbstractC
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 const user = yield this.repository.findById(req.params.userId);
-                const meta = { activity: 0, recycles: 0, redemptions: 0, points: 0 };
+                const meta = {
+                    activity: 0,
+                    recycles: 0,
+                    redemptions: 0,
+                    points: 0,
+                    rating: 0,
+                };
                 let data = Object.assign({}, user._doc);
                 if (user.designation === User_1.Designation.Staff) {
                     meta.activity = yield Verification_1.Verification.count({
@@ -156,6 +163,9 @@ let UserController = class UserController extends AbstractController_1.AbstractC
                         isDeleted: false,
                         status: Request_1.Status.Collected,
                     });
+                    const reviews = yield Review_1.Review.find({ buster: user.id });
+                    const ratings = reviews.reduce((curr, review) => curr + review.rating, 0);
+                    meta.rating = ratings / reviews.length;
                 }
                 if (user.designation === User_1.Designation.Client) {
                     meta.recycles = yield Request_1.Request.count({

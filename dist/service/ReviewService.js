@@ -4,6 +4,7 @@ exports.ReviewService = void 0;
 const tslib_1 = require("tslib");
 const CoreService_1 = require("./CoreService");
 const NotificationsService_1 = require("./NotificationsService");
+const Request_1 = require("../models/Request");
 const Review_1 = require("../models/Review");
 const ReviewRepository_1 = require("../abstract/ReviewRepository");
 const User_1 = require("../models/User");
@@ -17,6 +18,8 @@ class ReviewService {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const payload = req.body;
             const user = yield User_1.User.findById(req.user.id);
+            const request = yield Request_1.Request.findById(req.params.id);
+            payload.buster = request.acceptedBy;
             const existingReview = yield Review_1.Review.findOne({ recycle: req.params.id });
             let review;
             if (existingReview) {

@@ -491,7 +491,9 @@ export class RequestController extends AbstractController {
         };
       }
 
-      const request = await ItemRequest.find(criteria);
+      const request = await ItemRequest.find(criteria)
+        .populate("acceptedBy")
+        .populate("requestdBy");
 
       res.status(200).json({ success: true, data: request });
     } catch (error) {

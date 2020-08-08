@@ -1,5 +1,6 @@
 import Core from "./CoreService";
 import Notification from "./NotificationsService";
+import { RequestM, Request as ItemRequest, Status } from "../models/Request";
 import { ReviewM, Review } from "../models/Review";
 import { ReviewRepository as Repository } from "../abstract/ReviewRepository";
 import { User } from "../models/User";
@@ -18,6 +19,9 @@ export class ReviewService {
   public async create(req: any): Promise<any> {
     const payload: ReviewM = req.body;
     const user = await User.findById(req.user.id);
+    const request: any = await ItemRequest.findById(req.params.id);
+
+    payload.buster = request.acceptedBy;
     const existingReview = await Review.findOne({ recycle: req.params.id });
     let review;
     if (existingReview) {

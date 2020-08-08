@@ -68,7 +68,7 @@ let ReviewController = class ReviewController extends AbstractController_1.Abstr
     fetchAcceptedRequests(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const review = yield this.repository.findAll({
+                const review = yield Review_1.Review.find({
                     buster: req.params.id,
                 });
                 res.status(200).json({ success: true, data: review });
