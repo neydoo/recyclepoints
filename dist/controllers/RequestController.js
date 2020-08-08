@@ -22,7 +22,7 @@ let RequestController = class RequestController extends AbstractController_1.Abs
     index(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const { startDate, endDate, status, type, search } = req.query;
+                const { startDate, endDate, status, type, search, sort } = req.query;
                 const criteria = {
                     isDeleted: false,
                 };
@@ -61,7 +61,8 @@ let RequestController = class RequestController extends AbstractController_1.Abs
                 const request = yield Request_1.Request.find(criteria)
                     .populate("requestedBy")
                     .populate("acceptedBy")
-                    .populate("resolvedBy");
+                    .populate("resolvedBy")
+                    .sort(sort);
                 const data = [];
                 if (request.length) {
                     const requestPromise = request.map((r) => tslib_1.__awaiter(this, void 0, void 0, function* () {

@@ -36,7 +36,14 @@ export class UserController extends AbstractController {
   @Get("")
   public async index(req: Request, res: Response): Promise<void> {
     try {
-      const { startDate, endDate, status, designation, search } = req.query;
+      const {
+        startDate,
+        endDate,
+        status,
+        designation,
+        search,
+        sort,
+      } = req.query;
       const criteria: any = {
         isDeleted: false,
       };
@@ -71,7 +78,7 @@ export class UserController extends AbstractController {
           const lastOperation = await DailySorting.findOne({
             isDeleted: false,
             user: user.id,
-          }).sort("desc");
+          }).sort(sort);
 
           if (lastOperation && moment(user?.createdAt).diff("days") >= 30)
             user.active =
@@ -83,7 +90,7 @@ export class UserController extends AbstractController {
           const lastOperation = await Bale.findOne({
             isDeleted: false,
             user: user.id,
-          }).sort("desc");
+          }).sort(sort);
 
           if (lastOperation && moment(user?.createdAt).diff("days") >= 30)
             user.active =
@@ -95,7 +102,7 @@ export class UserController extends AbstractController {
           const lastVerification = await Verification.findOne({
             isDeleted: false,
             user: user.id,
-          }).sort("desc");
+          }).sort(sort);
 
           if (lastVerification && moment(user?.createdAt).diff("days") >= 30)
             user.active =

@@ -73,6 +73,53 @@ class UserService {
             return user;
         });
     }
+    createStaff(req) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const userPayload = req.body;
+            let { firstName, lastName, phone, designation } = userPayload;
+            if (!firstName || !lastName || !phone || !designation)
+                throw new Error("incomplete parameters");
+            phone = UtilService_1.UtilService.formatPhone(phone);
+            const existingPhone = yield User_1.User.findOne({ phone });
+            if (existingPhone)
+                throw new Error("user with phonenumber already exists");
+            if (!userPayload.password) {
+                if (userPayload.designation === "client") {
+                    const otp = UtilService_1.UtilService.generate(5);
+                    userPayload.otp = otp;
+                    userPayload.password = otp;
+                    userPayload.unverified = true;
+                }
+                else {
+                    userPayload.password = "123456";
+                }
+            }
+            userPayload.password = bcrypt.hashSync(userPayload.password);
+            const createdUser = yield this.repository.createNew(userPayload);
+            if (userPayload.designation === User_1.Designation.Client)
+                yield this.notification.sendRegistrationSMS(userPayload.phone, userPayload.otp);
+            const user = yield this.repository.findById(createdUser.id);
+            if (createdUser.designation === "client")
+                yield RecyclePoint_1.RecyclePoint.create({ user: createdUser.id });
+            user.profileImage = req.body.profileImage
+                ? yield this.base64Uploader(req.body.profileImage)
+                : null;
+            user.save();
+            this.core.Email(user, "New Registration", this.core.html('<p style="color: #000">Hello ' +
+                user.firstName +
+                " " +
+                user.lastName +
+                ", Thank you for registering at Recycle Points.<br> Please click the link below to complete registration https://fashioncastapi.herokuapp.com/api/activate/" +
+                user.temporarytoken +
+                "</p>"));
+            this.core.activityLog(req, user.id, "Registered");
+            this.notification.triggerNotification("notifications", "users", {
+                user,
+                message: { message: user.lastName + " Just created a new account." },
+            }, req, user.id);
+            return user;
+        });
+    }
     update(req) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const userPayload = req.body;

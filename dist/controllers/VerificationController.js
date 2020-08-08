@@ -9,7 +9,6 @@ const RequestRepository_1 = require("../abstract/RequestRepository");
 const auth_1 = require("../middleware/auth");
 const Verification_1 = require("../models/Verification");
 const RequestService_1 = require("../service/RequestService");
-const NotificationsService_1 = require("../service/NotificationsService");
 const Request_1 = require("../models/Request");
 const PdfService_1 = require("../service/PdfService");
 const UserNotification_1 = require("../models/UserNotification");
@@ -76,7 +75,6 @@ let VerificationController = class VerificationController extends AbstractContro
                 const { weight, arrivalTime } = req.body;
                 if (!weight || !arrivalTime)
                     throw new Error("missing values");
-                const notification = new NotificationsService_1.default();
                 const itemrequest = (yield Request_1.Request.findById(req.params.id).populate("requestedBy"));
                 let items;
                 let points;
@@ -220,7 +218,7 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", Promise)
 ], VerificationController.prototype, "index", null);
 tslib_1.__decorate([
-    core_1.Post("new"),
+    core_1.Post("new/:id"),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)

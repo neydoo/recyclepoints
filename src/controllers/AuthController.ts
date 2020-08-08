@@ -18,6 +18,20 @@ export class AuthController {
     this.auth = new UserService();
   }
 
+  @Post("register-staff")
+  public async registerStaff(req: Request, res: Response): Promise<void> {
+    try {
+      const user: IUserM = await this.auth.createStaff(req);
+      const token = jwt.sign(
+        { designation: user.designation, email: user.email, userId: user.id },
+        config.app.JWT_SECRET
+      );
+      res.status(200).json({ success: true, data: { user, token } });
+    } catch (error) {
+      res.status(401).json({ success: false, error, message: error.message });
+    }
+  }
+
   @Post("register")
   public async registerUser(req: Request, res: Response): Promise<void> {
     try {

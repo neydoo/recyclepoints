@@ -23,6 +23,7 @@ let AdminController = class AdminController extends AbstractController_1.Abstrac
     dashboardInfo(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
+                console.log("here");
                 const data = {
                     recycler: { total: 0, active: 0 },
                     buster: { total: 0, active: 0 },
@@ -122,7 +123,11 @@ let AdminController = class AdminController extends AbstractController_1.Abstrac
                 const novEnd = novStart.endOf("month");
                 const decStart = novStart.add(1, "month");
                 const decEnd = decStart.endOf("month");
+                console.log(allRecycles.length);
+                console.log(janStart, janEnd);
                 const recycleGraph = allRecycles.map((recycle) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+                    if (recycle.status == "completed")
+                        console.log(recycle);
                     if (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) {
                         if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= janStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= janEnd)
                             data.monthlyRecycle.jan += 1;
@@ -139,8 +144,10 @@ let AdminController = class AdminController extends AbstractController_1.Abstrac
                             data.monthlyRecycle.jun += 1;
                         if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= julStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= julEnd)
                             data.monthlyRecycle.jul += 1;
-                        if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= augStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= augEnd)
+                        if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= augStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= augEnd) {
+                            console.log("here");
                             data.monthlyRecycle.aug += 1;
+                        }
                         if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= sepStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= sepEnd)
                             data.monthlyRecycle.sep += 1;
                         if ((recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) >= octStart && (recycle === null || recycle === void 0 ? void 0 : recycle.createdAt) <= octEnd)

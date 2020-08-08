@@ -104,6 +104,76 @@ export class UserService {
     return user;
   }
 
+  public async createStaff(req: any): Promise<void> {
+    const userPayload: IUserM = req.body;
+    let { firstName, lastName, phone, designation } = userPayload;
+    if (!firstName || !lastName || !phone || !designation)
+      throw new Error("incomplete parameters");
+    phone = UtilService.formatPhone(phone);
+
+    const existingPhone = await User.findOne({ phone });
+    if (existingPhone) throw new Error("user with phonenumber already exists");
+
+    if (!userPayload.password) {
+      if (userPayload.designation === "client") {
+        const otp = UtilService.generate(5);
+        userPayload.otp = otp;
+        userPayload.password = otp;
+        userPayload.unverified = true;
+      } else {
+        userPayload.password = "123456";
+      }
+    }
+    userPayload.password = bcrypt.hashSync(userPayload.password as string);
+
+    // return console.log(userPayload);
+
+    const createdUser = await this.repository.createNew(userPayload);
+    if (userPayload.designation === Designation.Client)
+      await this.notification.sendRegistrationSMS(
+        userPayload.phone,
+        userPayload.otp
+      );
+
+    const user = await this.repository.findById(createdUser.id);
+    if (createdUser.designation === "client")
+      await RecyclePoint.create({ user: createdUser.id });
+
+    user.profileImage = req.body.profileImage
+      ? await this.base64Uploader(req.body.profileImage)
+      : null;
+    user.save();
+
+    this.core.Email(
+      user,
+      "New Registration",
+      this.core.html(
+        '<p style="color: #000">Hello ' +
+          user.firstName +
+          " " +
+          user.lastName +
+          ", Thank you for registering at Recycle Points.<br> Please click the link below to complete registration https://fashioncastapi.herokuapp.com/api/activate/" +
+          user.temporarytoken +
+          "</p>"
+      )
+    );
+
+    this.core.activityLog(req, user.id, "Registered");
+
+    this.notification.triggerNotification(
+      "notifications",
+      "users",
+      {
+        user,
+        message: { message: user.lastName + " Just created a new account." },
+      },
+      req,
+      user.id
+    );
+
+    return user;
+  }
+
   public async update(req: any): Promise<any> {
     const userPayload: IUserM = req.body;
 

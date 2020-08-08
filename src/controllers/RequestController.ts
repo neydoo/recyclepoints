@@ -31,7 +31,7 @@ export class RequestController extends AbstractController {
   @Get("")
   public async index(req: Request, res: Response): Promise<void> {
     try {
-      const { startDate, endDate, status, type, search } = req.query;
+      const { startDate, endDate, status, type, search, sort } = req.query;
       const criteria: any = {
         isDeleted: false,
       };
@@ -72,7 +72,8 @@ export class RequestController extends AbstractController {
       const request: any = await ItemRequest.find(criteria)
         .populate("requestedBy")
         .populate("acceptedBy")
-        .populate("resolvedBy");
+        .populate("resolvedBy")
+        .sort(sort);
       const data: any[] = [];
       // const requests: any[] = [];
       if (request.length) {

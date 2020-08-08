@@ -17,6 +17,18 @@ let AuthController = class AuthController {
         this.repository = new UserRepository_1.UserRepository();
         this.auth = new UserService_1.UserService();
     }
+    registerStaff(req, res) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            try {
+                const user = yield this.auth.createStaff(req);
+                const token = jwt.sign({ designation: user.designation, email: user.email, userId: user.id }, app_1.config.app.JWT_SECRET);
+                res.status(200).json({ success: true, data: { user, token } });
+            }
+            catch (error) {
+                res.status(401).json({ success: false, error, message: error.message });
+            }
+        });
+    }
     registerUser(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
@@ -137,6 +149,12 @@ let AuthController = class AuthController {
         });
     }
 };
+tslib_1.__decorate([
+    core_1.Post("register-staff"),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object, Object]),
+    tslib_1.__metadata("design:returntype", Promise)
+], AuthController.prototype, "registerStaff", null);
 tslib_1.__decorate([
     core_1.Post("register"),
     tslib_1.__metadata("design:type", Function),
