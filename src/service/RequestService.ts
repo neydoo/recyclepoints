@@ -94,58 +94,47 @@ export class RequestService {
           { desgnation: Designation.Buster },
         ],
       });
-
-      admins.forEach(async (admin) => {
-        await UserNotification.create({
-          title: "New recycle request",
-          userId: admin.id,
-          body: `${user?.fullName} just made a recycle request`,
+      try {
+        admins.forEach(async (admin) => {
+          await UserNotification.create({
+            title: "New recycle request",
+            userId: admin.id,
+            body: `${user?.fullName} just made a recycle request`,
+          });
         });
-      });
-    }
-    if (request.type === "redemption") {
-      const admins = await User.find({
-        isDeleted: false,
-        designation: Designation.Admin,
-      });
-
-      admins.forEach(async (admin) => {
-        await UserNotification.create({
-          title: "New redemption request",
-          userId: admin.id,
-          body: `${user?.fullName} just made a recycle request`,
+      } catch (e) {
+        console.log(e);
+      }
+      if (request.type === "redemption") {
+        const admins = await User.find({
+          isDeleted: false,
+          designation: Designation.Admin,
         });
-      });
+
+        admins.forEach(async (admin) => {
+          await UserNotification.create({
+            title: "New redemption request",
+            userId: admin.id,
+            body: `${user?.fullName} just made a recycle request`,
+          });
+        });
+      }
+      this.core.activityLog(req, user!.id, "Reqeusted");
+
+      this.notification.triggerNotification(
+        "notifications",
+        "reqeust",
+        {
+          user,
+          message: { message: user!.lastName + " Just created a new request." },
+        },
+        req,
+        user!.id
+      );
+
+      return request;
     }
-    this.core.Email(
-      user,
-      "New Request",
-      this.core.html(
-        `<p style="color: #000">Hello
-          ${user!.firstName} ${user!.lastName},
-          </p>
-          <p style="color: #000">
-          Your ${payload.type} request has been placed successfully.
-          </p>`
-      )
-    );
-
-    this.core.activityLog(req, user!.id, "Reqeusted");
-
-    this.notification.triggerNotification(
-      "notifications",
-      "reqeust",
-      {
-        user,
-        message: { message: user!.lastName + " Just created a new request." },
-      },
-      req,
-      user!.id
-    );
-
-    return request;
   }
-
   public async update(req: any): Promise<any> {
     const payload: any = req.body;
 

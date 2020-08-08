@@ -77,39 +77,38 @@ class RequestService {
                         { desgnation: User_1.Designation.Buster },
                     ],
                 });
-                admins.forEach((admin) => tslib_1.__awaiter(this, void 0, void 0, function* () {
-                    yield UserNotification_1.UserNotification.create({
-                        title: "New recycle request",
-                        userId: admin.id,
-                        body: `${user === null || user === void 0 ? void 0 : user.fullName} just made a recycle request`,
+                try {
+                    admins.forEach((admin) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+                        yield UserNotification_1.UserNotification.create({
+                            title: "New recycle request",
+                            userId: admin.id,
+                            body: `${user === null || user === void 0 ? void 0 : user.fullName} just made a recycle request`,
+                        });
+                    }));
+                }
+                catch (e) {
+                    console.log(e);
+                }
+                if (request.type === "redemption") {
+                    const admins = yield User_1.User.find({
+                        isDeleted: false,
+                        designation: User_1.Designation.Admin,
                     });
-                }));
+                    admins.forEach((admin) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+                        yield UserNotification_1.UserNotification.create({
+                            title: "New redemption request",
+                            userId: admin.id,
+                            body: `${user === null || user === void 0 ? void 0 : user.fullName} just made a recycle request`,
+                        });
+                    }));
+                }
+                this.core.activityLog(req, user.id, "Reqeusted");
+                this.notification.triggerNotification("notifications", "reqeust", {
+                    user,
+                    message: { message: user.lastName + " Just created a new request." },
+                }, req, user.id);
+                return request;
             }
-            if (request.type === "redemption") {
-                const admins = yield User_1.User.find({
-                    isDeleted: false,
-                    designation: User_1.Designation.Admin,
-                });
-                admins.forEach((admin) => tslib_1.__awaiter(this, void 0, void 0, function* () {
-                    yield UserNotification_1.UserNotification.create({
-                        title: "New redemption request",
-                        userId: admin.id,
-                        body: `${user === null || user === void 0 ? void 0 : user.fullName} just made a recycle request`,
-                    });
-                }));
-            }
-            this.core.Email(user, "New Request", this.core.html(`<p style="color: #000">Hello
-          ${user.firstName} ${user.lastName},
-          </p>
-          <p style="color: #000">
-          Your ${payload.type} request has been placed successfully.
-          </p>`));
-            this.core.activityLog(req, user.id, "Reqeusted");
-            this.notification.triggerNotification("notifications", "reqeust", {
-                user,
-                message: { message: user.lastName + " Just created a new request." },
-            }, req, user.id);
-            return request;
         });
     }
     update(req) {
