@@ -50,6 +50,7 @@ export class UserService {
         userPayload.otp = otp;
         userPayload.password = otp;
         userPayload.unverified = true;
+        userPayload.regNo = phone;
       } else {
         userPayload.password = "123456";
       }
@@ -181,6 +182,10 @@ export class UserService {
     if (userPayload.password) {
       userPayload.password = bcrypt.hashSync(req.body.password);
     }
+
+    if (userPayload.regNo) {
+      delete userPayload.regNo
+    }
     if (userPayload.phone) {
       const existingPhone = await User.findOne({ phone: userPayload.phone });
       if (existingPhone && existingPhone.id !== userToUpdate?.id)
@@ -239,6 +244,9 @@ export class UserService {
         throw new Error("user with phonenumber already exists");
     }
 
+    if (userPayload.regNo) {
+      delete userPayload.regNo
+    }
     const { oldPassword, newPassword, confirmPassword } = req.body;
 
     // if (!oldPassword || !newPassword) throw new Error("missing parameters");

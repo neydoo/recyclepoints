@@ -28,6 +28,7 @@ export interface IUserM extends Document {
   ageRange?: string;
   lga?: string;
   otp: string;
+  regNo: string;
   firstTimeLogin: boolean;
   disabled: boolean;
   unverified: boolean;
@@ -47,6 +48,7 @@ export const userSchema: Schema = new Schema(
     otp: { type: String, select: false },
     phone: { type: String, unique: true },
     password: { type: String, select: false },
+    regNo: { type: String},
     notificationTokens: [
       {
         type: String,

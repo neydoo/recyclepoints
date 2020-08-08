@@ -42,6 +42,7 @@ class UserService {
                     userPayload.otp = otp;
                     userPayload.password = otp;
                     userPayload.unverified = true;
+                    userPayload.regNo = phone;
                 }
                 else {
                     userPayload.password = "123456";
@@ -127,6 +128,9 @@ class UserService {
             if (userPayload.password) {
                 userPayload.password = bcrypt.hashSync(req.body.password);
             }
+            if (userPayload.regNo) {
+                delete userPayload.regNo;
+            }
             if (userPayload.phone) {
                 const existingPhone = yield User_1.User.findOne({ phone: userPayload.phone });
                 if (existingPhone && existingPhone.id !== (userToUpdate === null || userToUpdate === void 0 ? void 0 : userToUpdate.id))
@@ -170,6 +174,9 @@ class UserService {
                 const existingPhone = yield User_1.User.findOne({ phone: userPayload.phone });
                 if (existingPhone && existingPhone.id !== (userToUpdate === null || userToUpdate === void 0 ? void 0 : userToUpdate.id))
                     throw new Error("user with phonenumber already exists");
+            }
+            if (userPayload.regNo) {
+                delete userPayload.regNo;
             }
             const { oldPassword, newPassword, confirmPassword } = req.body;
             if (oldPassword) {

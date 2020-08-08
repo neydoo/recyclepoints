@@ -22,6 +22,7 @@ exports.userSchema = new mongoose_1.Schema({
     otp: { type: String, select: false },
     phone: { type: String, unique: true },
     password: { type: String, select: false },
+    regNo: { type: String },
     notificationTokens: [
         {
             type: String,
