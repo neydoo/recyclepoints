@@ -39,7 +39,7 @@ export class RedemptionItemController {
       const { image, name, recyclePoints } = data;
       if (!name || !recyclePoints) throw new Error(" incomplete data");
 
-      data.image = req.file.profileImage ? req.file.profileImage : null;
+      data.image = await UserService.prototype.base64Uploader(image);
 
       const newData = await RedemptionItem.create(data);
 
@@ -57,14 +57,15 @@ export class RedemptionItemController {
   @Middleware([isAdmin])
   public async remove(req: Request, res: Response): Promise<void> {
     try {
-      await RedemptionItem.updateOne(
-        { id: req.params.id },
+      const recycle = await RedemptionItem.updateOne(
+        { _id: req.params.id },
         { isDeleted: true }
       );
 
       res.status(200).send({
         success: true,
         message: "item deleted successfully!",
+        recycle
       });
     } catch (error) {
       res.status(400).json({ success: false, error, message: error.message });
@@ -76,7 +77,7 @@ export class RedemptionItemController {
   public async enable(req: Request, res: Response): Promise<void> {
     try {
       await RedemptionItem.updateOne(
-        { id: req.params.id },
+        { _id: req.params.id },
         { isDeleted: false }
       );
 
