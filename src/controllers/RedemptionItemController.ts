@@ -32,7 +32,7 @@ export class RedemptionItemController {
   }
 
   @Post("new")
-  @Middleware([isDev])
+  @Middleware([isAdmin])
   public async create(req: any, res: Response): Promise<void> {
     try {
       const data: RedemptionItemM = req.body;

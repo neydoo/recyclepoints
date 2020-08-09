@@ -82,7 +82,7 @@ tslib_1.__decorate([
 ], RedemptionItemController.prototype, "index", null);
 tslib_1.__decorate([
     core_1.Post("new"),
-    core_1.Middleware([auth_1.isDev]),
+    core_1.Middleware([auth_1.isAdmin]),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
