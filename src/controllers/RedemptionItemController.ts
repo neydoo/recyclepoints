@@ -38,8 +38,8 @@ export class RedemptionItemController {
       const data: RedemptionItemM = req.body;
       const { image, name, recyclePoints } = data;
       if (!name || !recyclePoints) throw new Error(" incomplete data");
-
-      data.image = await UserService.prototype.base64Uploader(image);
+      const userService = new UserService();
+      data.image = await userService.base64Uploader(image);
 
       const newData = await RedemptionItem.create(data);
 
