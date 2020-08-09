@@ -167,13 +167,15 @@ let AdminController = class AdminController extends AbstractController_1.Abstrac
     topBusters(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const { startMonth = moment().startOf("month"), endMonth = moment().endOf("month"), } = req.query;
+                let { startMonth, endMonth } = req.query;
                 const ratings = [];
                 const allBusters = yield User_1.User.find({
                     isDeleted: false,
                     designation: User_1.Designation.Buster,
                 });
-                const reviewPromise = yield allBusters.map((user) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+                startMonth = startMonth ? startMonth : moment().startOf("month");
+                endMonth = endMonth ? endMonth : moment().endOf("month");
+                const reviewPromise = allBusters.map((user, i) => tslib_1.__awaiter(this, void 0, void 0, function* () {
                     let averageRating = 0;
                     const reviews = yield Review_1.Review.find({
                         buster: user.id,
@@ -183,28 +185,28 @@ let AdminController = class AdminController extends AbstractController_1.Abstrac
                     const totalRating = reviews.reduce((acc, review) => {
                         const { rating } = review;
                         return acc + rating;
-                    });
-                    averageRating = totalRating / reviews.length;
+                    }, 0);
+                    averageRating = Number(totalRating / reviews.length) || 0;
                     ratings.push({ user, averageRating });
-                    yield Promise.all(reviewPromise);
-                    function sortRatings(a, b) {
-                        const ratingOne = a.averageRating;
-                        const ratingTwo = b.averageRating;
-                        let comparison = 0;
-                        if (ratingOne > ratingTwo) {
-                            comparison = 1;
-                        }
-                        else if (ratingOne < ratingTwo) {
-                            comparison = -1;
-                        }
-                        return comparison;
-                    }
-                    yield ratings.sort(sortRatings);
                 }));
-                const data = ratings.splice(0, 5);
+                yield Promise.all(reviewPromise);
+                function sortRatings(a, b) {
+                    const ratingOne = a.averageRating;
+                    const ratingTwo = b.averageRating;
+                    let comparison = 0;
+                    if (ratingOne > ratingTwo) {
+                        comparison = -1;
+                    }
+                    else if (ratingOne < ratingTwo) {
+                        comparison = 1;
+                    }
+                    return comparison;
+                }
+                yield ratings.sort(sortRatings);
+                ratings.splice(5, ratings.length - 5);
                 res.status(200).json({
                     success: true,
-                    data,
+                    data: ratings,
                     message: "data retrieved",
                 });
             }

@@ -72,7 +72,9 @@ let ReviewController = class ReviewController extends AbstractController_1.Abstr
             try {
                 const review = yield Review_1.Review.find({
                     buster: req.params.id,
-                });
+                })
+                    .populate("reviewer")
+                    .populate("buster");
                 res.status(200).json({ success: true, data: review });
             }
             catch (error) {

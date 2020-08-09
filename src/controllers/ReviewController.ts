@@ -82,7 +82,9 @@ export class ReviewController extends AbstractController {
     try {
       const review: ReviewM[] = await Review.find({
         buster: req.params.id,
-      });
+      })
+      .populate("reviewer")
+      .populate("buster");
 
       res.status(200).json({ success: true, data: review });
     } catch (error) {
