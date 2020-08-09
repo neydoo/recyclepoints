@@ -20,6 +20,7 @@ class ReviewService {
             const user = yield User_1.User.findById(req.user.id);
             const request = yield Request_1.Request.findById(req.params.id);
             payload.buster = request.acceptedBy;
+            payload.reviewer = req.user.id;
             const existingReview = yield Review_1.Review.findOne({ recycle: req.params.id });
             let review;
             if (existingReview) {

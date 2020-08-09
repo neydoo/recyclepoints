@@ -184,7 +184,7 @@ export class UserService {
     }
 
     if (userPayload.regNo) {
-      delete userPayload.regNo
+      delete userPayload.regNo;
     }
     if (userPayload.phone) {
       const existingPhone = await User.findOne({ phone: userPayload.phone });
@@ -238,14 +238,9 @@ export class UserService {
     if (userPayload.password) {
       userPayload.password = bcrypt.hashSync(req.body.password);
     }
-    if (userPayload.phone) {
-      const existingPhone = await User.findOne({ phone: userPayload.phone });
-      if (existingPhone && existingPhone.id !== userToUpdate?.id)
-        throw new Error("user with phonenumber already exists");
-    }
 
     if (userPayload.regNo) {
-      delete userPayload.regNo
+      delete userPayload.regNo;
     }
     const { oldPassword, newPassword, confirmPassword } = req.body;
 

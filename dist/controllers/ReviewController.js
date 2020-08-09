@@ -57,7 +57,7 @@ let ReviewController = class ReviewController extends AbstractController_1.Abstr
     findRequest(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const review = yield Review_1.Review.findById(req.params.reviewId);
+                const review = yield Review_1.Review.findById(req.params.reviewId).populate('reviewer');
                 res.status(200).json({ success: true, data: review });
             }
             catch (error) {

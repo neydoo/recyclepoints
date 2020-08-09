@@ -22,6 +22,7 @@ export class ReviewService {
     const request: any = await ItemRequest.findById(req.params.id);
 
     payload.buster = request.acceptedBy;
+    payload.reviewer = req.user.id;
     const existingReview = await Review.findOne({ recycle: req.params.id });
     let review;
     if (existingReview) {

@@ -5,12 +5,14 @@ export interface ReviewM extends Document {
   buster: string;
   rating: number;
   message: string;
+  reviewer: string;
 }
 
 export const reviewSchema: Schema = new Schema(
   {
     recycle: { type: Schema.Types.ObjectId, ref: "Request" },
     buster: { type: Schema.Types.ObjectId, ref: "User" },
+    reviewer: { type: Schema.Types.ObjectId, ref: "User" },
     rating: { type: Number, enum: [1, 2, 3, 4, 5] },
     message: {
       type: String,

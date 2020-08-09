@@ -5,6 +5,7 @@ const mongoose_1 = require("mongoose");
 exports.reviewSchema = new mongoose_1.Schema({
     recycle: { type: mongoose_1.Schema.Types.ObjectId, ref: "Request" },
     buster: { type: mongoose_1.Schema.Types.ObjectId, ref: "User" },
+    reviewer: { type: mongoose_1.Schema.Types.ObjectId, ref: "User" },
     rating: { type: Number, enum: [1, 2, 3, 4, 5] },
     message: {
         type: String,

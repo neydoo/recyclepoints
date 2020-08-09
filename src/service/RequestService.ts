@@ -23,14 +23,11 @@ export class RequestService {
 
   public async create(req: any): Promise<void> {
     const payload: any = req.body;
+    let rData = Object.assign({}, payload);
+
     if (!req.user.id) throw new Error("invalid user");
-    payload.requestedBy = req.user.id;
+    rData.requestedBy = req.user.id;
     const user = await User.findById(req.user.id);
-    if (!user?.address && payload.deliveryAddress)
-      if (user) {
-        user.address = payload.deliveryAddress;
-        await user.save();
-      }
 
     console.log("start create request");
     if (!payload.type) {
@@ -66,18 +63,21 @@ export class RequestService {
           "you need more recycle points to complete this request"
         );
 
-      payload.points = recyclePoints;
+      rData.points = recyclePoints;
 
-      payload.redemptionId = `RE${UtilService.generate(6)}`;
-      payload.meta.address = payload.deliveryAddress;
-      payload.meta.phone = payload.deliveryPhoneNumber;
+      rData.redemptionId = `RE${UtilService.generate(6)}`;
+      rData.meta = {
+        address: payload.deliveryAddress,
+        phone: payload.deliveryPhoneNumber,
+      };
+
     }
     console.log(`get user details`);
 
     // const user = (await User.findById(req.user.id)) as IUserM;
     console.log(`gotten user details`);
     console.log(`creating request`);
-    const request: any = await this.repository.createNew(payload);
+    const request: any = await this.repository.createNew(rData);
     console.log(`created request`);
 
     if (request.type === "redemption") {

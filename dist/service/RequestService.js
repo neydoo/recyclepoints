@@ -23,15 +23,11 @@ class RequestService {
         var _a, _b;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const payload = req.body;
+            let rData = Object.assign({}, payload);
             if (!req.user.id)
                 throw new Error("invalid user");
-            payload.requestedBy = req.user.id;
+            rData.requestedBy = req.user.id;
             const user = yield User_1.User.findById(req.user.id);
-            if (!(user === null || user === void 0 ? void 0 : user.address) && payload.deliveryAddress)
-                if (user) {
-                    user.address = payload.deliveryAddress;
-                    yield user.save();
-                }
             console.log("start create request");
             if (!payload.type) {
                 throw new Error("invalid request type");
@@ -54,15 +50,17 @@ class RequestService {
                 console.log(`${balance} of user${req.user.id} with recyclepoints ${recyclePoints}`);
                 if (balance < recyclePoints)
                     throw new Error("you need more recycle points to complete this request");
-                payload.points = recyclePoints;
-                payload.redemptionId = `RE${UtilService_1.UtilService.generate(6)}`;
-                payload.meta.address = payload.deliveryAddress;
-                payload.meta.phone = payload.deliveryPhoneNumber;
+                rData.points = recyclePoints;
+                rData.redemptionId = `RE${UtilService_1.UtilService.generate(6)}`;
+                rData.meta = {
+                    address: payload.deliveryAddress,
+                    phone: payload.deliveryPhoneNumber,
+                };
             }
             console.log(`get user details`);
             console.log(`gotten user details`);
             console.log(`creating request`);
-            const request = yield this.repository.createNew(payload);
+            const request = yield this.repository.createNew(rData);
             console.log(`created request`);
             if (request.type === "redemption") {
                 const details = "redemption request";

@@ -170,11 +170,6 @@ class UserService {
             if (userPayload.password) {
                 userPayload.password = bcrypt.hashSync(req.body.password);
             }
-            if (userPayload.phone) {
-                const existingPhone = yield User_1.User.findOne({ phone: userPayload.phone });
-                if (existingPhone && existingPhone.id !== (userToUpdate === null || userToUpdate === void 0 ? void 0 : userToUpdate.id))
-                    throw new Error("user with phonenumber already exists");
-            }
             if (userPayload.regNo) {
                 delete userPayload.regNo;
             }

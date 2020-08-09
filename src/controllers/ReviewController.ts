@@ -64,7 +64,7 @@ export class ReviewController extends AbstractController {
   @Get(":reviewId")
   public async findRequest(req: Request, res: Response): Promise<void> {
     try {
-      const review = await Review.findById(req.params.reviewId);
+      const review = await Review.findById(req.params.reviewId).populate('reviewer');
 
       res.status(200).json({ success: true, data: review });
     } catch (error) {
