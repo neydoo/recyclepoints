@@ -39,7 +39,7 @@ export class RedemptionItemController {
       const { image, name, recyclePoints } = data;
       if (!name || !recyclePoints) throw new Error(" incomplete data");
       const userService = new UserService();
-      data.image = await userService.base64Uploader(image);
+      data.image = await userService.cloudinaryUploader(image);
 
       const newData = await RedemptionItem.create(data);
 
