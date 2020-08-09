@@ -54,7 +54,7 @@ export class RedemptionItemController {
   }
 
   @Post("remove/:id")
-  @Middleware([isDev])
+  @Middleware([isAdmin])
   public async remove(req: Request, res: Response): Promise<void> {
     try {
       await RedemptionItem.updateOne(
@@ -72,7 +72,7 @@ export class RedemptionItemController {
   }
 
   @Post("enable/:id")
-  @Middleware([isDev])
+  @Middleware([isAdmin])
   public async enable(req: Request, res: Response): Promise<void> {
     try {
       await RedemptionItem.updateOne(

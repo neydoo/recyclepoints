@@ -89,14 +89,14 @@ tslib_1.__decorate([
 ], RedemptionItemController.prototype, "create", null);
 tslib_1.__decorate([
     core_1.Post("remove/:id"),
-    core_1.Middleware([auth_1.isDev]),
+    core_1.Middleware([auth_1.isAdmin]),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
 ], RedemptionItemController.prototype, "remove", null);
 tslib_1.__decorate([
     core_1.Post("enable/:id"),
-    core_1.Middleware([auth_1.isDev]),
+    core_1.Middleware([auth_1.isAdmin]),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
