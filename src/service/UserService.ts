@@ -1,5 +1,6 @@
-import Core from "./CoreService";
 import { v2 as cloudinary } from "cloudinary";
+const moment = require("moment");
+import Core from "./CoreService";
 // const cloudinary = require("cloudinary");
 
 const cloudinaryStorage = require("multer-storage-cloudinary");
@@ -50,7 +51,19 @@ export class UserService {
         userPayload.otp = otp;
         userPayload.password = otp;
         userPayload.unverified = true;
-        userPayload.regNo = phone;
+        const thisMonth = moment().startOf("month");
+        const registrationsThisMonth = await User.count({
+          designation: Designation.Client,
+          createdAt: { $gte: thisMonth },
+        });
+        let count = '0';
+
+        if(registrationsThisMonth < 1000) count = '0' + registrationsThisMonth
+        if(registrationsThisMonth < 100) count = '00' + registrationsThisMonth
+        if(registrationsThisMonth < 10) count = '000' + registrationsThisMonth
+
+        const regNo = moment().format("YYYYMM");
+        userPayload.regNo = `${regNo}${count}`;
       } else {
         userPayload.password = "123456";
       }

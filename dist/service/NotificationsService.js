@@ -37,7 +37,7 @@ class NotificationsService {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const coreService = new CoreService_1.default();
             number = UtilService_1.UtilService.formatPhone(number);
-            const message = "You forgot your password? Here's your code: " + otp;
+            const message = "You forgot your Recycle Points login pin? Here's your code: " + otp;
             yield coreService.sendSms(message, number);
         });
     }

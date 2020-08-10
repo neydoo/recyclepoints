@@ -71,7 +71,7 @@ export default class NotificationsService {
     const coreService = new Core();
 
     number = UtilService.formatPhone(number);
-    const message = "You forgot your password? Here's your code: " + otp;
+    const message = "You forgot your Recycle Points login pin? Here's your code: " + otp;
     await coreService.sendSms(message, number);
   }
 

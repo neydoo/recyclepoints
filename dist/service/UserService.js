@@ -2,8 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserService = void 0;
 const tslib_1 = require("tslib");
-const CoreService_1 = require("./CoreService");
 const cloudinary_1 = require("cloudinary");
+const moment = require("moment");
+const CoreService_1 = require("./CoreService");
 const cloudinaryStorage = require("multer-storage-cloudinary");
 const multer = require("multer");
 const bcrypt = require("bcrypt-nodejs");
@@ -42,7 +43,20 @@ class UserService {
                     userPayload.otp = otp;
                     userPayload.password = otp;
                     userPayload.unverified = true;
-                    userPayload.regNo = phone;
+                    const thisMonth = moment().startOf("month");
+                    const registrationsThisMonth = yield User_1.User.count({
+                        designation: User_1.Designation.Client,
+                        createdAt: { $gte: thisMonth },
+                    });
+                    let count = '0';
+                    if (registrationsThisMonth < 1000)
+                        count = '0' + registrationsThisMonth;
+                    if (registrationsThisMonth < 100)
+                        count = '00' + registrationsThisMonth;
+                    if (registrationsThisMonth < 10)
+                        count = '000' + registrationsThisMonth;
+                    const regNo = moment().format("YYYYMM");
+                    userPayload.regNo = `${regNo}${count}`;
                 }
                 else {
                     userPayload.password = "123456";
