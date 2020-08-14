@@ -111,7 +111,7 @@ export default class NotificationsService {
           });
         }
       }
-      await expo.chunkPushNotifications(notifications);
+      expo.chunkPushNotifications(notifications);
     } catch (error) {
       console.log(error);
     }

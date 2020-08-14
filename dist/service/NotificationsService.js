@@ -70,7 +70,7 @@ class NotificationsService {
                         });
                     }
                 }
-                yield expo.chunkPushNotifications(notifications);
+                expo.chunkPushNotifications(notifications);
             }
             catch (error) {
                 console.log(error);
