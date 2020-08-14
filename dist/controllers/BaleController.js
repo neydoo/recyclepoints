@@ -65,9 +65,19 @@ let BaleController = class BaleController {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 const user = req.user.id;
-                const { arrivalTime, items, amount, weight, type } = req.body;
-                if (!arrivalTime || !items || !amount || !weight || !type)
+                const { arrivalTime, activityType, amount, weight, type } = req.body;
+                if (!arrivalTime || !activityType || !weight || !type)
                     throw new Error("incomplete items");
+                if (type == "crush") {
+                    const crushActivityTypes = ["flakes", "regrind"];
+                    if (!crushActivityTypes.includes(activityType))
+                        throw new Error("invalid crush type");
+                }
+                if (type == "bale") {
+                    const crushActivityTypes = ["sorted", "unsorted"];
+                    if (!crushActivityTypes.includes(activityType))
+                        throw new Error("invalid bale type");
+                }
                 const newData = req.body;
                 newData.user = user;
                 yield Bale_1.Bale.create(newData);
@@ -149,7 +159,9 @@ let BaleController = class BaleController {
                     };
                 }
                 const sorting = yield Bale_1.Bale.find(criteria).populate("user");
-                res.status(200).json({ success: true, message: "data retrieved", data: sorting });
+                res
+                    .status(200)
+                    .json({ success: true, message: "data retrieved", data: sorting });
             }
             catch (error) {
                 res.status(400).json({ success: false, error, message: error.message });
