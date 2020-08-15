@@ -118,6 +118,35 @@ let SortingController = class SortingController {
             }
         });
     }
+    dashboardData(req, res) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            try {
+                const sortings = yield DailySorting_1.DailySorting.find({ user: req.params.id });
+                const today = moment().startOfDay();
+                const yesterday = moment().startOfDay().subtract(1, "day");
+                const data = {
+                    yesterday: 0,
+                    today: 0,
+                    allTime: sortings.length,
+                };
+                const sortingsPromise = sortings.map((sort) => {
+                    if (sort.createdAt >= today)
+                        data.today += 1;
+                    if (sort.createdAt >= yesterday)
+                        data.yesterday += 1;
+                });
+                yield Promise.all(sortingsPromise);
+                res.status(200).send({
+                    success: true,
+                    message: "dashboard info retrieved",
+                    data,
+                });
+            }
+            catch (error) {
+                res.status(400).json({ success: false, error, message: error.message });
+            }
+        });
+    }
     enable(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
@@ -213,6 +242,12 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:paramtypes", [Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
 ], SortingController.prototype, "update", null);
+tslib_1.__decorate([
+    core_1.Get("dashboard/:id"),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object, Object]),
+    tslib_1.__metadata("design:returntype", Promise)
+], SortingController.prototype, "dashboardData", null);
 tslib_1.__decorate([
     core_1.Post("remove/:id"),
     core_1.Middleware([auth_1.isDev]),

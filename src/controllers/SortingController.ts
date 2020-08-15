@@ -105,13 +105,6 @@ export class SortingController {
   @Post("new")
   public async create(req: any, res: Response): Promise<void> {
     try {
-      //     weight: number;
-      // points: number;
-      // arrivalTime: any;
-      // items: RecycleItems;
-      // user: string;
-      // isDeleted?: boolean;
-      // createdAt?: any;
       const { weight, points, arrivalTime, items } = req.body;
 
       if (!weight || !points || !arrivalTime || !items)
@@ -141,6 +134,32 @@ export class SortingController {
       res.status(200).send({
         success: true,
         message: "item updated successfully!",
+      });
+    } catch (error) {
+      res.status(400).json({ success: false, error, message: error.message });
+    }
+  }
+
+  @Get("dashboard/:id")
+  public async dashboardData(req: Request, res: Response): Promise<void> {
+    try {
+      const sortings = await DailySorting.find({ user: req.params.id });
+      const today = moment().startOfDay();
+      const yesterday = moment().startOfDay().subtract(1, "day");
+      const data = {
+        yesterday: 0,
+        today: 0,
+        allTime: sortings.length,
+      };
+      const sortingsPromise = sortings.map((sort) => {
+        if (sort.createdAt >= today) data.today += 1;
+        if (sort.createdAt >= yesterday) data.yesterday += 1;
+      });
+      await Promise.all(sortingsPromise);
+      res.status(200).send({
+        success: true,
+        message: "dashboard info retrieved",
+        data,
       });
     } catch (error) {
       res.status(400).json({ success: false, error, message: error.message });
@@ -200,10 +219,9 @@ export class SortingController {
         criteria.user = userIds;
       } else if (!users.length && name) {
         criteria.user = null;
-      } else if(userId){
+      } else if (userId) {
         criteria.user = userId;
       }
-
 
       if (arrivalTime) criteria.arrivalTime = arrivalTime;
       if (startDate) {
