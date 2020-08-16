@@ -124,8 +124,8 @@ let BaleController = class BaleController {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 const bales = yield Bale_1.Bale.find({ user: req.params.id });
-                const today = moment().startOfDay();
-                const yesterday = moment().startOfDay().subtract(1, "day");
+                const today = moment().startOf("day");
+                const yesterday = moment().startOf("day").subtract(1, "day");
                 const data = {
                     yesterday: 0,
                     today: 0,
@@ -134,7 +134,7 @@ let BaleController = class BaleController {
                 const balesPromise = bales.map((sort) => {
                     if (sort.createdAt >= today)
                         data.today += 1;
-                    if (sort.createdAt >= yesterday)
+                    if (sort.createdAt >= yesterday && sort.createdAt <= today)
                         data.yesterday += 1;
                 });
                 yield Promise.all(balesPromise);

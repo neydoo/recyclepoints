@@ -122,8 +122,8 @@ let SortingController = class SortingController {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 const sortings = yield DailySorting_1.DailySorting.find({ user: req.params.id });
-                const today = moment().startOfDay();
-                const yesterday = moment().startOfDay().subtract(1, "day");
+                const today = moment().startOf("day");
+                const yesterday = moment().startOf("day").subtract(1, "day");
                 const data = {
                     yesterday: 0,
                     today: 0,
@@ -132,7 +132,7 @@ let SortingController = class SortingController {
                 const sortingsPromise = sortings.map((sort) => {
                     if (sort.createdAt >= today)
                         data.today += 1;
-                    if (sort.createdAt >= yesterday)
+                    if (sort.createdAt >= yesterday && sort.createdAt <= today)
                         data.yesterday += 1;
                 });
                 yield Promise.all(sortingsPromise);
@@ -143,6 +143,7 @@ let SortingController = class SortingController {
                 });
             }
             catch (error) {
+                console.log(error);
                 res.status(400).json({ success: false, error, message: error.message });
             }
         });

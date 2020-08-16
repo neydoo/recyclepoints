@@ -144,8 +144,8 @@ export class SortingController {
   public async dashboardData(req: Request, res: Response): Promise<void> {
     try {
       const sortings = await DailySorting.find({ user: req.params.id });
-      const today = moment().startOfDay();
-      const yesterday = moment().startOfDay().subtract(1, "day");
+      const today = moment().startOf("day");
+      const yesterday = moment().startOf("day").subtract(1, "day");
       const data = {
         yesterday: 0,
         today: 0,
@@ -153,7 +153,8 @@ export class SortingController {
       };
       const sortingsPromise = sortings.map((sort) => {
         if (sort.createdAt >= today) data.today += 1;
-        if (sort.createdAt >= yesterday) data.yesterday += 1;
+        if (sort.createdAt >= yesterday && sort.createdAt <= today)
+          data.yesterday += 1;
       });
       await Promise.all(sortingsPromise);
       res.status(200).send({
@@ -162,6 +163,7 @@ export class SortingController {
         data,
       });
     } catch (error) {
+      console.log(error);
       res.status(400).json({ success: false, error, message: error.message });
     }
   }
