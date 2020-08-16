@@ -26,6 +26,7 @@ export class SortingController {
         pay,
         type,
         product,
+        userId,
         arrivalTime,
       } = req.query;
 
@@ -42,13 +43,19 @@ export class SortingController {
       if (pay) {
         searchCriteria.pay = pay;
       }
+
       if (type) {
         criteria.type = type;
+      }
+
+      if (userId) {
+        searchCriteria._id = userId;
       }
 
       if (product) {
         criteria.item = product;
       }
+
       if (arrivalTime) {
         criteria.arrivalTime = arrivalTime;
       }
@@ -93,7 +100,7 @@ export class SortingController {
         };
       }
 
-      const data: DailySortingM[] = await DailySorting.find({ criteria });
+      const data: DailySortingM[] = await DailySorting.find(criteria);
       res
         .status(200)
         .send({ success: true, message: "data retrieved successfully!", data });

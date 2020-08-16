@@ -12,7 +12,7 @@ let SortingController = class SortingController {
     index(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const { startDate, endDate, search, pay, type, product, arrivalTime, } = req.query;
+                const { startDate, endDate, search, pay, type, product, userId, arrivalTime, } = req.query;
                 const criteria = { isDeleted: false };
                 const searchCriteria = { designation: "sorter" };
                 let users = [];
@@ -27,6 +27,9 @@ let SortingController = class SortingController {
                 }
                 if (type) {
                     criteria.type = type;
+                }
+                if (userId) {
+                    searchCriteria._id = userId;
                 }
                 if (product) {
                     criteria.item = product;
@@ -72,7 +75,7 @@ let SortingController = class SortingController {
                         $gte: startDate,
                     };
                 }
-                const data = yield DailySorting_1.DailySorting.find({ criteria });
+                const data = yield DailySorting_1.DailySorting.find(criteria);
                 res
                     .status(200)
                     .send({ success: true, message: "data retrieved successfully!", data });

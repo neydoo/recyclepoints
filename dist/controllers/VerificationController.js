@@ -21,7 +21,7 @@ let VerificationController = class VerificationController extends AbstractContro
     index(req, res) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const { startDate, endDate, search, pay, type, product, arrivalTime, } = req.query;
+                const { startDate, endDate, search, pay, type, product, arrivalTime, userId, } = req.query;
                 const criteria = { isDeleted: false };
                 const searchCriteria = { designation: "verification-staff" };
                 if (startDate) {
@@ -32,6 +32,9 @@ let VerificationController = class VerificationController extends AbstractContro
                 }
                 if (pay) {
                     searchCriteria.pay = pay;
+                }
+                if (userId) {
+                    searchCriteria._id = userId;
                 }
                 if (type) {
                     criteria.type = type;
@@ -169,7 +172,7 @@ let VerificationController = class VerificationController extends AbstractContro
                         $lte: endDate ? endDate : moment(),
                     };
                 }
-                const sorting = yield Verification_1.Verification.find(criteria).populate('user');
+                const sorting = yield Verification_1.Verification.find(criteria).populate("user");
                 res.status(200).json({ success: true, message: "saved", data: sorting });
             }
             catch (error) {

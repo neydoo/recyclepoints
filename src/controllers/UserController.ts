@@ -186,21 +186,24 @@ export class UserController extends AbstractController {
       const user: any = await this.repository.findById(req.params.userId);
       // let data: any = user;
       // console.log(user);
-      const meta = {
+      const meta: any = {
         activity: 0,
         recycles: 0,
         redemptions: 0,
         points: 0,
         rating: 0,
-        uniqueRecyclers: 0
+        uniqueRecyclers: 0,
+        data: [],
       };
       let data = Object.assign({}, user._doc);
 
       if (user.designation === Designation.Staff) {
-        meta.activity = await Verification.count({
+        const activity = await Verification.find({
           user: user.id,
           isDeleted: false,
         });
+        meta.activity = activity.length
+        meta.data = activity;
       }
       if (user.designation === Designation.Buster) {
         const allBusts = await ItemRequest.find({
@@ -231,7 +234,7 @@ export class UserController extends AbstractController {
         const uniqueById = uniqByProp_map("id");
 
         const unifiedArray = uniqueById(allBusts);
-        meta.uniqueRecyclers = unifiedArray.length
+        meta.uniqueRecyclers = unifiedArray.length;
 
         meta.activity = await ItemRequest.count({
           acceptedBy: user.id,
@@ -246,6 +249,7 @@ export class UserController extends AbstractController {
         );
 
         meta.rating = ratings / reviews.length;
+        meta.data = allBusts;
       }
 
       if (user.designation === Designation.Client) {
@@ -274,16 +278,20 @@ export class UserController extends AbstractController {
         meta.points = points?.balance || 0;
       }
       if (user.designation === Designation.Sorter) {
-        meta.activity = await DailySorting.count({
+        const activity = await DailySorting.find({
           user: user.id,
           isDeleted: false,
         });
+        meta.activity = activity.length;
+        meta.data = activity;
       }
       if (user.designation === Designation.Operator) {
-        meta.activity = await Bale.count({
+        const activity = await Bale.find({
           user: user.id,
           isDeleted: false,
         });
+        meta.activity = activity.length;
+        meta.data = activity;
       }
       data.meta = meta;
 

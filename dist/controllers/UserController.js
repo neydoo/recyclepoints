@@ -165,14 +165,17 @@ let UserController = class UserController extends AbstractController_1.AbstractC
                     redemptions: 0,
                     points: 0,
                     rating: 0,
-                    uniqueRecyclers: 0
+                    uniqueRecyclers: 0,
+                    data: [],
                 };
                 let data = Object.assign({}, user._doc);
                 if (user.designation === User_1.Designation.Staff) {
-                    meta.activity = yield Verification_1.Verification.count({
+                    const activity = yield Verification_1.Verification.find({
                         user: user.id,
                         isDeleted: false,
                     });
+                    meta.activity = activity.length;
+                    meta.data = activity;
                 }
                 if (user.designation === User_1.Designation.Buster) {
                     const allBusts = yield Request_1.Request.find({
@@ -200,6 +203,7 @@ let UserController = class UserController extends AbstractController_1.AbstractC
                     const reviews = yield Review_1.Review.find({ buster: user.id });
                     const ratings = reviews.reduce((curr, review) => curr + review.rating, 0);
                     meta.rating = ratings / reviews.length;
+                    meta.data = allBusts;
                 }
                 if (user.designation === User_1.Designation.Client) {
                     meta.recycles = yield Request_1.Request.count({
@@ -225,16 +229,20 @@ let UserController = class UserController extends AbstractController_1.AbstractC
                     meta.points = (points === null || points === void 0 ? void 0 : points.balance) || 0;
                 }
                 if (user.designation === User_1.Designation.Sorter) {
-                    meta.activity = yield DailySorting_1.DailySorting.count({
+                    const activity = yield DailySorting_1.DailySorting.find({
                         user: user.id,
                         isDeleted: false,
                     });
+                    meta.activity = activity.length;
+                    meta.data = activity;
                 }
                 if (user.designation === User_1.Designation.Operator) {
-                    meta.activity = yield Bale_1.Bale.count({
+                    const activity = yield Bale_1.Bale.find({
                         user: user.id,
                         isDeleted: false,
                     });
+                    meta.activity = activity.length;
+                    meta.data = activity;
                 }
                 data.meta = meta;
                 res.status(200).json({ success: true, data });
